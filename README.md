@@ -204,19 +204,25 @@ squares2To10 =
 ```
 - keep your _function annotations as general as possible_
     
-    Instead of accepting only values where you know the values exact
+Instead of accepting only exact values
+
 ```elm
-rgb : Nat (N red atLeastRed (Is inverseRed To Nat100) y) -> --...
+rgb : Nat (ValueN red (Is redTo100 To Nat100) x) -> --...
 ```
-    accept values that are somewhere in a range.
+accept values that are somewhere in a range.
+
 ```elm
 rgb : Nat (In redMin Nat100 maybeN) -> --...
 ```
-    or instead of
+
+`maybeN` says that it _can_ be exact anyway. Or instead of
+
 ```elm
 charFromCode : Nat (ValueMin min) -> Char
 ```
-    which you should never do, allow `Nat (In min ...)` with any max & `Nat (N ...)` to fit in as well!
+
+which you should also never do, allow `Nat (In min ...)` with any max & `Nat (N ...)` to fit in as well!
+
 ```elm
 charFromCode : Nat (In min max maybeN) -> Char
 ```
