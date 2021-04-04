@@ -2,8 +2,7 @@ module Nat.Bound exposing
     ( In
     , Only
     , N, Is, To
-    , ValueMin, ValueIn, ValueN
-    , ValueOnly
+    , ValueMin, ValueIn, ValueN, ValueOnly
     )
 
 {-|
@@ -23,12 +22,7 @@ module Nat.Bound exposing
 
 ## value / return type
 
-@docs ValueMin, ValueIn, ValueN
-
-`ValueOnly` is useful for [`Arr`](https://package.elm-lang.org/packages/indique/elm-bounded-array/latest/)s,
-but you will never need it in combination with `Nat`s.
-
-@docs ValueOnly
+@docs ValueMin, ValueIn, ValueN, ValueOnly
 
 -}
 
@@ -134,7 +128,7 @@ Only useful as a **value & return** type.
 
 → A given [`Arr`](https://package.elm-lang.org/packages/indique/elm-bounded-array/latest/) must has _exactly `n`_ `element`s.
 
-`Only` is useful for [`Arr`](https://package.elm-lang.org/packages/indique/elm-bounded-array/latest/)s,
+`ValueOnly` is useful for [`Arr`](https://package.elm-lang.org/packages/indique/elm-bounded-array/latest/)s,
 but you will never need it in combination with `Nat`s.
 
 -}
