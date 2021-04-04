@@ -199,7 +199,7 @@ Don't use this as a function argument.
 
 -}
 type alias ValueN n atLeastN asADifference asAnotherDifference =
-    In n atLeastN ( asADifference, asAnotherDifference )
+    In n atLeastN (Internal.Differences asADifference asAnotherDifference)
 
 
 {-| We can't guess the highest possible number.
