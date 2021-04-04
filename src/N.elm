@@ -1,4 +1,4 @@
-module N exposing (Differences, In, Is, Nat(..), S, To, ValueN, Z)
+module N exposing (In, Is, Nat(..), S, To, ValueN, Z)
 
 {-| For performance reasons, supplying the modules [`TypeNats`](TypeNats) & [`NNats`](NNats) from here to make names shorter.
 -}
@@ -29,8 +29,8 @@ type In minimum maximum maybeN
 
 
 type alias ValueN n atLeastN asADifference asAnotherDifference =
-    In n atLeastN (Differences asADifference asAnotherDifference)
+    N n atLeastN asADifference asAnotherDifference
 
 
-type Differences a b
-    = Differences Never
+type alias N n atLeastN asADifference asAnotherDifference =
+    In n atLeastN ( asADifference, asAnotherDifference )
