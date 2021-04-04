@@ -62,3 +62,7 @@ Other changes
 
 - moved `mul`, `div`, `remainderBy`, `toPower`, `maxIs`, `toMin`, `lowerMin` from `MinNat` & `InNat` to `Nat`
 - moved `atLeast` from `MinNat` to `InNat`
+
+## 1.0.1
+
+Updated many old names in the documentations.
