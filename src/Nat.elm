@@ -1,11 +1,11 @@
 module Nat exposing
     ( Nat
     , abs, range, random
+    , intAtLeast, intInRange
+    , isIntInRange, isIntAtLeast
     , toPower, remainderBy, mul, div
     , toInt, bi
     , theGreater, theSmaller
-    , isIntInRange, isIntAtLeast
-    , intAtLeast, intInRange
     , lowerMin, toMin, maxIs
     )
 
@@ -17,6 +17,16 @@ module Nat exposing
 ## create
 
 @docs abs, range, random
+
+
+### clamp
+
+@docs intAtLeast, intInRange
+
+
+### compare
+
+@docs isIntInRange, isIntAtLeast
 
 
 ## modify
@@ -32,12 +42,6 @@ module Nat exposing
 ## compare
 
 @docs theGreater, theSmaller
-@docs isIntInRange, isIntAtLeast
-
-
-### clamp
-
-@docs intAtLeast, intInRange
 
 
 ## drop information
@@ -89,22 +93,22 @@ type alias Nat range =
 
 {-| The absolute value of an `Int`, which is at least `Nat0`.
 
-    MinNat.abs 16 --> Nat 16
+    Nat.abs 16 --> Nat 16
 
-    MinNat.abs -4 --> Nat 4
+    Nat.abs -4 --> Nat 4
 
 Really only use this if you want the absolute value.
 
     badLength list =
-        List.length >> MinNat.abs
+        List.length >> Nat.abs
 
     goodLength =
         List.foldl
             (\_ ->
                 MinNat.addN nat1
-                    >> InNat.lowerMin nat0
+                    >> Nat.lowerMin nat0
             )
-            (nat0 |> NNat.toMin)
+            (nat0 |> Nat.toMin)
 
 If something like this isn't possible, use [`MinNat.intAtLeast`](MinNat#intAtLeast)!
 
@@ -118,13 +122,13 @@ abs int =
 
     from3To10 : List (Nat (ValueIn Nat3 (Nat10Plus a)))
     from3To10 =
-        InNat.range nat3 nat10
+        Nat.range nat3 nat10
 
     from3ToAtLeast10 : List (Nat (ValueMin Nat3))
     from3ToAtLeast10 =
-        InNat.range nat3 atLeast10
+        Nat.range nat3 atLeast10
 
-The resulting `List` is never empty.
+The resulting `List` always has at least 1 element.
 
 -}
 range :
@@ -136,7 +140,7 @@ range first last =
         |> List.map Internal.Nat
 
 
-{-| Generate a random `Nat (In ...)` in a range.
+{-| Generate a random `Nat (ValueIn ...)` in a range.
 -}
 random :
     Nat (In firstMin lastMin firstMaybeN)
@@ -151,7 +155,7 @@ random min max =
 
     nat4 |> Nat.toInt --> 4
     nat4 |> NNat.toIn |> Nat.toInt --> 4
-    nat4 |> NNat.toMin |> Nat.toInt --> 4
+    nat4 |> Nat.toMin |> Nat.toInt --> 4
 
     compare : Nat range -> Nat range -> Order
     compare a b =
@@ -163,10 +167,9 @@ toInt =
     Internal.toInt
 
 
-{-| The greater of 2 `Nat`s. Works just like `Basics.max`.
+{-| The greater of 2 `Nat`s.
 
-    Nat.theGreater atLeast3
-        (atLeast4 |> InNat.lowerMin nat3)
+    Nat.theGreater nat3 (nat4 |> Nat.lowerMin nat3)
     --> Nat 4
 
 -}
@@ -179,10 +182,9 @@ theGreater a b =
         b
 
 
-{-| The smaller of 2 `Nat`s. Works just like `Basics.min`.
+{-| The smaller of 2 `Nat`s.
 
-    Nat.theSmaller atLeast3
-        (atLeast4 |> InNat.lowerMin nat3)
+    Nat.theSmaller nat3 (nat4 |> Nat.lowerMin nat3)
     --> Nat 3
 
 -}
@@ -198,13 +200,13 @@ theSmaller a b =
 {-| An `Int` compared to a range from `first` to `last`.
 
     rejectOrAcceptUserInt =
-        isIntInRange nat1 nat100
+        Nat.isIntInRange nat1 nat100
             { less = Err "must be >= 1"
             , greater = \_-> Err "must be <= 100"
             , inRange = Ok
             }
 
-    rejectOrAcceptUserInt (NNat.toIn nat0)
+    rejectOrAcceptUserInt 0
     --> Err "must be >= 1"
 
 -}
@@ -272,10 +274,10 @@ isIntAtLeast minimum int =
 
 {-| A `Nat (Min ...)` from an `Int`; if the `Int < minimum`, `minimum` is returned.
 
-    9 |> Nat.intAtLeast (nat3 |> NNat.toMin)
+    9 |> Nat.intAtLeast nat3
     --> Nat 9
 
-    0 |> Nat.intAtLeast (nat3 |> NNat.toMin)
+    0 |> Nat.intAtLeast nat3
     --> Nat 3
 
 You can also use this if you know an `Int` must be at least `minimum`.
@@ -286,9 +288,9 @@ But avoid it if you can do better, like
         List.foldl
             (\_ ->
                 MinNat.addN nat1
-                    >> InNat.lowerMin nat0
+                    >> Nat.lowerMin nat0
             )
-            (nat0 |> InNat.toMin)
+            (nat0 |> Nat.toMin)
 
 If you want to handle the case `< minimum` yourself, use [`Nat.isIntAtLeast`](Nat#isIntAtLeast).
 
@@ -299,7 +301,7 @@ intAtLeast :
     -> Nat (ValueMin min)
 intAtLeast minimum =
     isIntAtLeast minimum
-        >> Maybe.withDefault (Internal.toMin minimum)
+        >> Maybe.withDefault (toMin minimum)
 
 
 {-| Use the `Int` values of two `Nat`s to return a result.
@@ -329,10 +331,10 @@ bi op a b =
 {-| Multiply by a `Nat (In ...)` >= 1.
 we know that if `a >= 1`, `x * a >= x`.
 
-    atLeast5  |> MinNat.mul nat2
+    atLeast5  |> Nat.mul nat2
     --> Nat 10 of type Nat (ValueMin Nat5)
 
-    atLeast2 |> MinNat.mul nat5
+    atLeast2 |> Nat.mul nat5
     --> Nat 10 of type Nat (ValueMin Nat2)
 
 The maximum value of both factors can be `Infinity`.
@@ -354,7 +356,7 @@ mul minNatToMultiply =
 
 ```
 atMost7
-    |> InNat.div nat3
+    |> Nat.div nat3
 --> Nat 2 of type Nat (ValueIn Nat0 (Nat7Plus a))
 ```
 
@@ -373,7 +375,7 @@ div minNat =
   - `x % d` is at most `x`
 
 ```
-atMost7 |> InNat.remainderBy nat3
+atMost7 |> Nat.remainderBy nat3
 --> Nat 1 of type Nat (In Nat0 (Nat7Plus a))
 ```
 
@@ -389,10 +391,10 @@ remainderBy minNat =
 {-| The `Nat (ValueMin ...) ^ a Nat (ValueMin ...)`.
 We know that if `a >= 1  →  x ^ a >= x`
 
-    atLeast5 |> MinNat.toPower nat2
+    atLeast5 |> Nat.toPower nat2
     --> Nat 25 of type Nat (ValueMin Nat5)
 
-    atLeast2 |> MinNat.toPower nat5
+    atLeast2 |> Nat.toPower nat5
     --> Nat 25 of type Nat (ValueMin Nat2)
 
 -}
@@ -472,7 +474,7 @@ Elm complains:
 > But all the previous elements in the list are: `Nat (ValueMin Nat3)`
 
     [ atLeast3
-    , atLeast4 |> MinNat.lowerMin nat3
+    , atLeast4 |> MNat.lowerMin nat3
     ]
 
 -}
@@ -486,7 +488,7 @@ lowerMin =
 
 {-| Convert an exact `Nat (In min ...)` to a `Nat (ValueMin min)`.
 
-    in4To10 |> NNat.toMin
+    in4To10 |> Nat.toMin
     --> is of type Nat (ValueMin Nat4)
 
 There is **only 1 situation you should use this.**
@@ -500,7 +502,7 @@ Elm complains:
 > But all the previous elements in the list are: `Nat (ValueMin Nat1)`
 
     [ atLeast1
-    , in1To10 |> InNat.toMin
+    , in1To10 |> Nat.toMin
     ]
 
 -}
@@ -522,7 +524,7 @@ But once you implement `onlyAtMost18`, you might use the value in `onlyAtMost19`
     onlyAtMost18 value =
         -- onlyAtMost19 value --error :(
         onlyAtMost19
-            (value |> InNat.maxIs nat18 {- works :) -})
+            (value |> Nat.maxIs nat18 {- works :) -})
 
 [`lowerMin`](Nat#lowerMin) is also handy in those situations.
 

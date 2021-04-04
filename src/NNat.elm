@@ -15,8 +15,6 @@ module NNat exposing
 
 @docs toIn
 
-Operations, where the maximum doesn't matter are in `MinNat`, as they apply for `Nat (ValueMin ...)`s as well.
-
 -}
 
 import Internal
@@ -32,7 +30,8 @@ import TypeNats exposing (..)
     nat6 |> NNat.add ( nat5, nat5 )
     --> Nat 11 of type
     --> Nat
-    -->     (N Nat11
+    -->     (ValueN Nat11
+    -->         (Nat11Plus a)
     -->         (Is a To Nat11Plus a)
     -->         (Is b To Nat11Plus b)
     -->     )

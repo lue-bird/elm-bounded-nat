@@ -12,7 +12,7 @@ For example for the argument in
 
 you should use `InNat` operations.
 
-In many situations however, the maximum might not be known. Those operations are in `MinNat`, as they apply for `Nat (ValueMin ...)`s as well.
+If the maximum isn't known, use the operations in `MinNat`.
 
 
 ## add information
@@ -52,7 +52,7 @@ import TypeNats exposing (..)
         |> InNat.atMost nat10 { min = nat5 }
     --> InNat 5
 
-    nat15 |> NNat.toIn |> InNat.lowerMin nat5
+    nat15 |> NNat.toIn |> Nat.lowerMin nat5
         |> InNat.atMost nat10 { min = nat5 }
     --> Nat 10
 
@@ -99,7 +99,7 @@ atLeast lowerLimit =
 vote : { age : Nat (In (Nat18Plus orOlder) max) } -> Vote
 
 tryToVote =
-    InNat.lowerMin nat0
+    Nat.lowerMin nat0
         >> InNat.isAtLeast nat18
             { min = nat0 }
             { less = Nothing --😓
@@ -144,7 +144,7 @@ isAtLeast triedLowerLimit min cases =
 goToU18Party : { age : Nat (In min Nat17) } -> List Snack
 
 tryToGoToU18Party =
-    InNat.lowerMin nat0
+    Nat.lowerMin nat0
         >> InNat.isAtMost nat17
             { min = nat0 }
             { equalOrLess = \age -> Just (goToU18Party { age 0 age })
@@ -181,7 +181,7 @@ isAtMost triedUpperLimit min cases =
 `min` ensures that the `Nat (N ...)` is bigger than the minimum.
 
     present =
-        InNat.lowerMin nat0
+        Nat.lowerMin nat0
             >> InNat.is nat18
                 { min = nat0 }
                 { less = \age -> appropriateToy { age = age }
@@ -232,7 +232,7 @@ is tried min cases =
 
 ```
 justIfBetween3And10 =
-    InNat.lowerMin nat0
+    Nat.lowerMin nat0
         >> InNat.isInRange { first = nat3, last = nat10 }
             { min = nat0 }
             { less = \_ -> Nothing

@@ -113,7 +113,7 @@ sub inNatToSubtract maxSubtracted =
 `min` ensures that the `Nat (N ...)` is bigger than the minimum.
 
     present =
-        MinNat.lowerMin nat0
+        MNat.lowerMin nat0
             >> MinNat.is nat18
                 { min = nat0 }
                 { less = \age -> appropriateToy { age = age }
@@ -158,14 +158,14 @@ is tried min cases =
 ```
 factorial : MinNat min -> MinNat Nat1
 factorial =
-    MinNat.lowerMin nat0
+    MNat.lowerMin nat0
         >> MinNat.isAtLeast nat1
             { min = nat0 }
-            { less = \_ -> nat1 |> InNat.toMin
+            { less = \_ -> nat1 |> Nat.toMin
             , equalOrGreater =
                 \atLeast1 ->
                     atLeast1
-                        |> MinNat.mul
+                        |> Nat.mul
                             (factorial
                                 (atLeast1 |> MinNat.subN nat1)
                             )
@@ -201,7 +201,7 @@ isAtLeast triedLowerLimit min cases =
 goToU18Party : { age : Nat (In min Nat17 maybeN) } -> List Snack
 
 tryToGoToU18Party =
-    MinNat.lowerMin nat0
+    MNat.lowerMin nat0
         >> MinNat.isAtMost nat17
             { min = nat0 }
             { equalOrLess = \age -> Just (goToU18Party { age = age })

@@ -152,12 +152,12 @@ factorialHelp =
         { min = nat0 } -- the minimum of the x
         { less =
             -- x < 1 ? → then 1
-            \_ -> nat1 |> InNat.toMin
+            \_ -> nat1 |> Nat.toMin
         , equalOrGreater =
             \atLeast1 ->
                 -- a Nat (ValueMin Nat1)
                 atLeast1
-                    |> MinNat.mul
+                    |> Nat.mul
                         (factorial
                             (atLeast1 |> MinNat.subN nat1)
                             -- so we can safely subtract 1 👍
@@ -167,7 +167,7 @@ factorialHelp =
 As the minimum is allowed to be anything `>= 0`:
 ```elm
 factorial =
-    InNat.lowerMin nat0
+    Nat.lowerMin nat0
         >> factorialHelp
 ```
 
@@ -195,9 +195,9 @@ No extra work.
 ```elm
 squares2To10 =
     -- every Nat is In Nat2 Nat10
-    InNat.range nat2 nat10
+    Nat.range nat2 nat10
         |> List.map
-            (InNat.toPower nat2
+            (Nat.toPower nat2
             -- we can't compute the exact minimum & maximum
             -- but we know its at least Nat2
             )
