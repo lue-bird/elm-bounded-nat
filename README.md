@@ -233,4 +233,4 @@ You get to know that
 - a `Nat (In ...)` is very useful as an index
 - a `Nat.Bound` can describe amounts well
 
-[bounded-array]: https://package.elm-lang.org/packages/indique/elm-bounded-array/latest/
+[bounded-array]: https://package.elm-lang.org/packages/lue-bird/elm-bounded-array/latest/
