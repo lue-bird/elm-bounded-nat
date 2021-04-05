@@ -66,3 +66,7 @@ Other changes
 ## 1.0.1
 
 Updated many old names in the documentation.
+
+## 2.0.0
+
+Fixed a bug in the type of `InNat.isAtMost`, `InNat.isInRange` & `MinNat.isAtMost`. Please upgrade.
