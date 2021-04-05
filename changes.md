@@ -69,4 +69,4 @@ Updated many old names in the documentation.
 
 ## 2.0.0
 
-Fixed a bug in the type of `InNat.isAtMost`, `InNat.isInRange` & `MinNat.isAtMost`. Please upgrade.
+Fixed a bug in the type of `InNat.isAtMost`, `InNat.isInRange` & `MinNat.isAtMost`.
