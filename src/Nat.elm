@@ -69,7 +69,12 @@ import TypeNats exposing (..)
     Nat (ValueIn Nat2 Nat12)
 
     -- = 3, & 3, described as a difference
-    Nat (N Nat3 (Nat3Plus more) (Is a To (Nat3Plus a)) (Is b To (Nat3Plus b)))
+    Nat
+        (ValueN Nat3
+            (Nat3Plus more)
+            (Is a To (Nat3Plus a))
+            (Is b To (Nat3Plus b))
+        )
 
 
 ## function argument types
@@ -77,8 +82,11 @@ import TypeNats exposing (..)
     -- >= 4
     Nat (In (Nat4Plus minMinus4) max maybeN)
 
-    -- 4 <= nat <= 5
+    -- 4 <= nat <= 15
     Nat (In (Nat4Plus minMinus4) Nat15 maybeN)
+
+    -- An exact number nTo15 away from 15
+    Nat (N n (Is nTo15 To Nat15) x)
 
     -- any, just >= 0
     Nat range
@@ -169,7 +177,7 @@ toInt =
 
 {-| The greater of 2 `Nat`s.
 
-    Nat.theGreater nat3 (nat4 |> Nat.lowerMin nat3)
+    Nat.theGreater between1And3 (nat4 |> Nat.lowerMin nat1)
     --> Nat 4
 
 -}
@@ -344,8 +352,8 @@ mul :
     Nat (In (Nat1Plus minMultipliedMinus1) maxMultiplied multipliedMaybeN)
     -> Nat (In min max maybeN)
     -> Nat (ValueMin min)
-mul minNatToMultiply =
-    Internal.map ((*) (toInt minNatToMultiply))
+mul natToMultiply =
+    Internal.map ((*) (toInt natToMultiply))
 
 
 {-| Divide (`//`) by a `Nat (In ...)`.
@@ -365,8 +373,8 @@ div :
     Nat (In (Nat1Plus divMinMinus1) divMax divMaybeN)
     -> Nat (In min max maybeN)
     -> Nat (ValueIn Nat0 max)
-div minNat =
-    Internal.map (\x -> x // toInt minNat)
+div divNat =
+    Internal.map (\x -> x // toInt divNat)
 
 
 {-| The remainder after division.
@@ -384,8 +392,8 @@ remainderBy :
     Nat (In (Nat1Plus divMinMinus1) divMax divMaybeN)
     -> Nat (In min max maybeN)
     -> Nat (ValueIn Nat0 max)
-remainderBy minNat =
-    Internal.map (Basics.remainderBy (minNat |> toInt))
+remainderBy divNat =
+    Internal.map (Basics.remainderBy (divNat |> toInt))
 
 
 {-| The `Nat (ValueMin ...) ^ a Nat (ValueMin ...)`.
@@ -432,8 +440,8 @@ subLossy :
     Nat (In minSubbed min subbedMaybeN)
     -> Nat (In min max maybeN)
     -> Nat (ValueIn Nat0 max)
-subLossy inNatToSubtract =
-    Internal.sub inNatToSubtract
+subLossy natToSubtract =
+    Internal.sub natToSubtract
 
 
 {-| Add a `Nat (In ...)`, but
@@ -457,8 +465,8 @@ addLossy :
     Nat (In addedMin addedMax addedMaybeN)
     -> Nat (In min max maybeN)
     -> Nat (ValueMin min)
-addLossy inNatToAdd =
-    Internal.add inNatToAdd
+addLossy natToAdd =
+    Internal.add natToAdd
 
 
 
@@ -532,6 +540,6 @@ But once you implement `onlyAtMost18`, you might use the value in `onlyAtMost19`
 maxIs :
     Nat (N max (Is a To atLeastMax) x)
     -> Nat (In min max maybeN)
-    -> Nat (ValueIn min atLeastMax)
+    -> Nat (In min atLeastMax maybeN)
 maxIs =
     \_ -> Internal.newRange

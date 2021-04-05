@@ -127,11 +127,11 @@ sub inNatToSubtract maxSubtracted =
 
 -}
 is :
-    Nat (In (Nat1Plus triedMinus1) (Nat1Plus triedMinus1PlusA) triedMaybeN)
+    Nat (In (Nat1Plus triedMinus1) (Nat1Plus atLeastTriedMinus1) triedMaybeN)
     -> { min : Nat (N min (Is minToTriedMinus1 To triedMinus1) x) }
     ->
         { equal : () -> result
-        , less : Nat (ValueIn min triedMinus1PlusA) -> result
+        , less : Nat (In min atLeastTriedMinus1 maybeN) -> result
         , greater : Nat (ValueMin (Nat2Plus triedMinus1)) -> result
         }
     -> Nat (In min max maybeN)
@@ -211,11 +211,11 @@ tryToGoToU18Party =
 
 -}
 isAtMost :
-    Nat (In atMostMin atMostMinPlusA atMostMaybeN)
+    Nat (In atMostMin atLeastAtMostMin atMostMaybeN)
     -> { min : Nat (N min (Is minToAtMostMin To atMostMin) x) }
     ->
-        { equalOrLess : Nat (ValueIn min atMostMinPlusA) -> result
-        , greater : Nat (ValueMin atMostMin) -> result
+        { equalOrLess : Nat (In min atLeastAtMostMin maybeN) -> result
+        , greater : Nat (ValueMin (Nat1Plus atMostMin)) -> result
         }
     -> Nat (In min max maybeN)
     -> result

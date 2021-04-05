@@ -60,10 +60,10 @@ import TypeNats exposing (..)
 
 -}
 atMost :
-    Nat (In minNewMax newMaxPlusA newMaxMaybeN)
+    Nat (In minNewMax atLeastNewMax newMaxMaybeN)
     -> { min : Nat (N min (Is minToMinNewMax To minNewMax) x) }
     -> Nat (In min max maybeN)
-    -> Nat (ValueIn min newMaxPlusA)
+    -> Nat (ValueIn min atLeastNewMax)
 atMost higherLimit min =
     Internal.map (Basics.min (higherLimit |> toInt))
 
@@ -120,8 +120,8 @@ isAtLeast :
             Nat (N min (Is (Nat1Plus lessRange) To tried) x)
         }
     ->
-        { less : Nat (ValueIn min atLeastTriedMinus1) -> result
-        , equalOrGreater : Nat (ValueIn tried max) -> result
+        { less : Nat (In min atLeastTriedMinus1 maybeN) -> result
+        , equalOrGreater : Nat (In tried max maybeN) -> result
         }
     -> Nat (In min max maybeN)
     -> result
@@ -147,7 +147,7 @@ tryToGoToU18Party =
     Nat.lowerMin nat0
         >> InNat.isAtMost nat17
             { min = nat0 }
-            { equalOrLess = \age -> Just (goToU18Party { age 0 age })
+            { equalOrLess = \age -> Just (goToU18Party { age = age })
             , greater = Nothing
             }
 ```
@@ -162,8 +162,8 @@ isAtMost :
         )
     -> { min : Nat (N min (Is minToTried To tried) x) }
     ->
-        { equalOrLess : Nat (ValueIn min atLeastTried) -> result
-        , greater : Nat (ValueIn tried max) -> result
+        { equalOrLess : Nat (In min atLeastTried maybeN) -> result
+        , greater : Nat (In (Nat1Plus tried) max maybeN) -> result
         }
     -> Nat (In min max maybeN)
     -> result
@@ -199,13 +199,13 @@ is :
         (N
             tried
             (Is triedToMax To max)
-            (Is a To (Nat1Plus triedPlusAMinus1))
+            (Is a To (Nat1Plus atLeastTriedMinus1))
         )
     -> { min : Nat (N min (Is minToTried To tried) x) }
     ->
         { equal : () -> result
-        , less : Nat (ValueIn min triedPlusAMinus1) -> result
-        , greater : Nat (ValueIn (Nat2Plus triedMinus1) max) -> result
+        , less : Nat (In min atLeastTriedMinus1 maybeN) -> result
+        , greater : Nat (In (Nat2Plus triedMinus1) max maybeN) -> result
         }
     -> Nat (In min max maybeN)
     -> result
@@ -254,21 +254,21 @@ isInRange :
             (N
                 first
                 (Is firstToLast To last)
-                (Is a To (Nat1Plus firstMinus1PlusA))
+                (Is firstA To (Nat1Plus atLeastFirstMinus1))
             )
     , last :
         Nat
             (N
                 last
                 (Is lastToMax To max)
-                (Is a To lastPlusA)
+                (Is lastA To atLeastLast)
             )
     }
     -> { min : Nat (N min (Is minToFirst To first) x) }
     ->
-        { inRange : Nat (ValueIn first lastPlusA) -> result
-        , less : Nat (ValueIn min firstMinus1PlusA) -> result
-        , greater : Nat (ValueIn (Nat1Plus last) max) -> result
+        { inRange : Nat (In first atLeastLast maybeN) -> result
+        , less : Nat (In min atLeastFirstMinus1 maybeN) -> result
+        , greater : Nat (In (Nat1Plus last) max maybeN) -> result
         }
     -> Nat (In min max maybeN)
     -> result
