@@ -73,4 +73,4 @@ Fixed a bug in the type of `InNat.isAtMost`, `InNat.isInRange` & `MinNat.isAtMos
 
 ## 3.0.0
 
-Improved compiling speed using [indique/n](https://package.elm-lang.org/packages/indique/n/1.0.0/N).
+Improved compiling speed using [indique/n](https://package.elm-lang.org/packages/indique/n/).
