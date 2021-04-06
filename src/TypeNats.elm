@@ -75,7 +75,7 @@ If a type alias is not fully expanded after ~192 tries,
   - the elm-stuff can corrupt
 
 
-## at least
+## plus n
 
 @docs Nat100Plus, Nat101Plus, Nat102Plus, Nat103Plus, Nat104Plus, Nat105Plus
 @docs Nat106Plus, Nat107Plus, Nat108Plus, Nat109Plus, Nat10Plus, Nat110Plus
@@ -135,1153 +135,1153 @@ If a type alias is not fully expanded after ~192 tries,
 import N
 
 
-{-| 1 + some n, which is at least 1.
+{-| 1 + some n.
 -}
 type alias Nat1Plus n =
     N.Nat1Plus n
 
 
-{-| 2 + some n, which is at least 2.
+{-| 2 + some n.
 -}
 type alias Nat2Plus n =
     N.Nat2Plus n
 
 
-{-| 3 + some n, which is at least 3.
+{-| 3 + some n.
 -}
 type alias Nat3Plus n =
     N.Nat3Plus n
 
 
-{-| 4 + some n, which is at least 4.
+{-| 4 + some n.
 -}
 type alias Nat4Plus n =
     N.Nat4Plus n
 
 
-{-| 5 + some n, which is at least 5.
+{-| 5 + some n.
 -}
 type alias Nat5Plus n =
     N.Nat5Plus n
 
 
-{-| 6 + some n, which is at least 6.
+{-| 6 + some n.
 -}
 type alias Nat6Plus n =
     N.Nat6Plus n
 
 
-{-| 7 + some n, which is at least 7.
+{-| 7 + some n.
 -}
 type alias Nat7Plus n =
     N.Nat7Plus n
 
 
-{-| 8 + some n, which is at least 8.
+{-| 8 + some n.
 -}
 type alias Nat8Plus n =
     N.Nat8Plus n
 
 
-{-| 9 + some n, which is at least 9.
+{-| 9 + some n.
 -}
 type alias Nat9Plus n =
     N.Nat9Plus n
 
 
-{-| 10 + some n, which is at least 10.
+{-| 10 + some n.
 -}
 type alias Nat10Plus n =
     N.Nat10Plus n
 
 
-{-| 11 + some n, which is at least 11.
+{-| 11 + some n.
 -}
 type alias Nat11Plus n =
     N.Nat11Plus n
 
 
-{-| 12 + some n, which is at least 12.
+{-| 12 + some n.
 -}
 type alias Nat12Plus n =
     N.Nat12Plus n
 
 
-{-| 13 + some n, which is at least 13.
+{-| 13 + some n.
 -}
 type alias Nat13Plus n =
     N.Nat13Plus n
 
 
-{-| 14 + some n, which is at least 14.
+{-| 14 + some n.
 -}
 type alias Nat14Plus n =
     N.Nat14Plus n
 
 
-{-| 15 + some n, which is at least 15.
+{-| 15 + some n.
 -}
 type alias Nat15Plus n =
     N.Nat15Plus n
 
 
-{-| 16 + some n, which is at least 16.
+{-| 16 + some n.
 -}
 type alias Nat16Plus n =
     N.Nat16Plus n
 
 
-{-| 17 + some n, which is at least 17.
+{-| 17 + some n.
 -}
 type alias Nat17Plus n =
     N.Nat17Plus n
 
 
-{-| 18 + some n, which is at least 18.
+{-| 18 + some n.
 -}
 type alias Nat18Plus n =
     N.Nat18Plus n
 
 
-{-| 19 + some n, which is at least 19.
+{-| 19 + some n.
 -}
 type alias Nat19Plus n =
     N.Nat19Plus n
 
 
-{-| 20 + some n, which is at least 20.
+{-| 20 + some n.
 -}
 type alias Nat20Plus n =
     N.Nat20Plus n
 
 
-{-| 21 + some n, which is at least 21.
+{-| 21 + some n.
 -}
 type alias Nat21Plus n =
     N.Nat21Plus n
 
 
-{-| 22 + some n, which is at least 22.
+{-| 22 + some n.
 -}
 type alias Nat22Plus n =
     N.Nat22Plus n
 
 
-{-| 23 + some n, which is at least 23.
+{-| 23 + some n.
 -}
 type alias Nat23Plus n =
     N.Nat23Plus n
 
 
-{-| 24 + some n, which is at least 24.
+{-| 24 + some n.
 -}
 type alias Nat24Plus n =
     N.Nat24Plus n
 
 
-{-| 25 + some n, which is at least 25.
+{-| 25 + some n.
 -}
 type alias Nat25Plus n =
     N.Nat25Plus n
 
 
-{-| 26 + some n, which is at least 26.
+{-| 26 + some n.
 -}
 type alias Nat26Plus n =
     N.Nat26Plus n
 
 
-{-| 27 + some n, which is at least 27.
+{-| 27 + some n.
 -}
 type alias Nat27Plus n =
     N.Nat27Plus n
 
 
-{-| 28 + some n, which is at least 28.
+{-| 28 + some n.
 -}
 type alias Nat28Plus n =
     N.Nat28Plus n
 
 
-{-| 29 + some n, which is at least 29.
+{-| 29 + some n.
 -}
 type alias Nat29Plus n =
     N.Nat29Plus n
 
 
-{-| 30 + some n, which is at least 30.
+{-| 30 + some n.
 -}
 type alias Nat30Plus n =
     N.Nat30Plus n
 
 
-{-| 31 + some n, which is at least 31.
+{-| 31 + some n.
 -}
 type alias Nat31Plus n =
     N.Nat31Plus n
 
 
-{-| 32 + some n, which is at least 32.
+{-| 32 + some n.
 -}
 type alias Nat32Plus n =
     N.Nat32Plus n
 
 
-{-| 33 + some n, which is at least 33.
+{-| 33 + some n.
 -}
 type alias Nat33Plus n =
     N.Nat33Plus n
 
 
-{-| 34 + some n, which is at least 34.
+{-| 34 + some n.
 -}
 type alias Nat34Plus n =
     N.Nat34Plus n
 
 
-{-| 35 + some n, which is at least 35.
+{-| 35 + some n.
 -}
 type alias Nat35Plus n =
     N.Nat35Plus n
 
 
-{-| 36 + some n, which is at least 36.
+{-| 36 + some n.
 -}
 type alias Nat36Plus n =
     N.Nat36Plus n
 
 
-{-| 37 + some n, which is at least 37.
+{-| 37 + some n.
 -}
 type alias Nat37Plus n =
     N.Nat37Plus n
 
 
-{-| 38 + some n, which is at least 38.
+{-| 38 + some n.
 -}
 type alias Nat38Plus n =
     N.Nat38Plus n
 
 
-{-| 39 + some n, which is at least 39.
+{-| 39 + some n.
 -}
 type alias Nat39Plus n =
     N.Nat39Plus n
 
 
-{-| 40 + some n, which is at least 40.
+{-| 40 + some n.
 -}
 type alias Nat40Plus n =
     N.Nat40Plus n
 
 
-{-| 41 + some n, which is at least 41.
+{-| 41 + some n.
 -}
 type alias Nat41Plus n =
     N.Nat41Plus n
 
 
-{-| 42 + some n, which is at least 42.
+{-| 42 + some n.
 -}
 type alias Nat42Plus n =
     N.Nat42Plus n
 
 
-{-| 43 + some n, which is at least 43.
+{-| 43 + some n.
 -}
 type alias Nat43Plus n =
     N.Nat43Plus n
 
 
-{-| 44 + some n, which is at least 44.
+{-| 44 + some n.
 -}
 type alias Nat44Plus n =
     N.Nat44Plus n
 
 
-{-| 45 + some n, which is at least 45.
+{-| 45 + some n.
 -}
 type alias Nat45Plus n =
     N.Nat45Plus n
 
 
-{-| 46 + some n, which is at least 46.
+{-| 46 + some n.
 -}
 type alias Nat46Plus n =
     N.Nat46Plus n
 
 
-{-| 47 + some n, which is at least 47.
+{-| 47 + some n.
 -}
 type alias Nat47Plus n =
     N.Nat47Plus n
 
 
-{-| 48 + some n, which is at least 48.
+{-| 48 + some n.
 -}
 type alias Nat48Plus n =
     N.Nat48Plus n
 
 
-{-| 49 + some n, which is at least 49.
+{-| 49 + some n.
 -}
 type alias Nat49Plus n =
     N.Nat49Plus n
 
 
-{-| 50 + some n, which is at least 50.
+{-| 50 + some n.
 -}
 type alias Nat50Plus n =
     N.Nat50Plus n
 
 
-{-| 51 + some n, which is at least 51.
+{-| 51 + some n.
 -}
 type alias Nat51Plus n =
     N.Nat51Plus n
 
 
-{-| 52 + some n, which is at least 52.
+{-| 52 + some n.
 -}
 type alias Nat52Plus n =
     N.Nat52Plus n
 
 
-{-| 53 + some n, which is at least 53.
+{-| 53 + some n.
 -}
 type alias Nat53Plus n =
     N.Nat53Plus n
 
 
-{-| 54 + some n, which is at least 54.
+{-| 54 + some n.
 -}
 type alias Nat54Plus n =
     N.Nat54Plus n
 
 
-{-| 55 + some n, which is at least 55.
+{-| 55 + some n.
 -}
 type alias Nat55Plus n =
     N.Nat55Plus n
 
 
-{-| 56 + some n, which is at least 56.
+{-| 56 + some n.
 -}
 type alias Nat56Plus n =
     N.Nat56Plus n
 
 
-{-| 57 + some n, which is at least 57.
+{-| 57 + some n.
 -}
 type alias Nat57Plus n =
     N.Nat57Plus n
 
 
-{-| 58 + some n, which is at least 58.
+{-| 58 + some n.
 -}
 type alias Nat58Plus n =
     N.Nat58Plus n
 
 
-{-| 59 + some n, which is at least 59.
+{-| 59 + some n.
 -}
 type alias Nat59Plus n =
     N.Nat59Plus n
 
 
-{-| 60 + some n, which is at least 60.
+{-| 60 + some n.
 -}
 type alias Nat60Plus n =
     N.Nat60Plus n
 
 
-{-| 61 + some n, which is at least 61.
+{-| 61 + some n.
 -}
 type alias Nat61Plus n =
     N.Nat61Plus n
 
 
-{-| 62 + some n, which is at least 62.
+{-| 62 + some n.
 -}
 type alias Nat62Plus n =
     N.Nat62Plus n
 
 
-{-| 63 + some n, which is at least 63.
+{-| 63 + some n.
 -}
 type alias Nat63Plus n =
     N.Nat63Plus n
 
 
-{-| 64 + some n, which is at least 64.
+{-| 64 + some n.
 -}
 type alias Nat64Plus n =
     N.Nat64Plus n
 
 
-{-| 65 + some n, which is at least 65.
+{-| 65 + some n.
 -}
 type alias Nat65Plus n =
     N.Nat65Plus n
 
 
-{-| 66 + some n, which is at least 66.
+{-| 66 + some n.
 -}
 type alias Nat66Plus n =
     N.Nat66Plus n
 
 
-{-| 67 + some n, which is at least 67.
+{-| 67 + some n.
 -}
 type alias Nat67Plus n =
     N.Nat67Plus n
 
 
-{-| 68 + some n, which is at least 68.
+{-| 68 + some n.
 -}
 type alias Nat68Plus n =
     N.Nat68Plus n
 
 
-{-| 69 + some n, which is at least 69.
+{-| 69 + some n.
 -}
 type alias Nat69Plus n =
     N.Nat69Plus n
 
 
-{-| 70 + some n, which is at least 70.
+{-| 70 + some n.
 -}
 type alias Nat70Plus n =
     N.Nat70Plus n
 
 
-{-| 71 + some n, which is at least 71.
+{-| 71 + some n.
 -}
 type alias Nat71Plus n =
     N.Nat71Plus n
 
 
-{-| 72 + some n, which is at least 72.
+{-| 72 + some n.
 -}
 type alias Nat72Plus n =
     N.Nat72Plus n
 
 
-{-| 73 + some n, which is at least 73.
+{-| 73 + some n.
 -}
 type alias Nat73Plus n =
     N.Nat73Plus n
 
 
-{-| 74 + some n, which is at least 74.
+{-| 74 + some n.
 -}
 type alias Nat74Plus n =
     N.Nat74Plus n
 
 
-{-| 75 + some n, which is at least 75.
+{-| 75 + some n.
 -}
 type alias Nat75Plus n =
     N.Nat75Plus n
 
 
-{-| 76 + some n, which is at least 76.
+{-| 76 + some n.
 -}
 type alias Nat76Plus n =
     N.Nat76Plus n
 
 
-{-| 77 + some n, which is at least 77.
+{-| 77 + some n.
 -}
 type alias Nat77Plus n =
     N.Nat77Plus n
 
 
-{-| 78 + some n, which is at least 78.
+{-| 78 + some n.
 -}
 type alias Nat78Plus n =
     N.Nat78Plus n
 
 
-{-| 79 + some n, which is at least 79.
+{-| 79 + some n.
 -}
 type alias Nat79Plus n =
     N.Nat79Plus n
 
 
-{-| 80 + some n, which is at least 80.
+{-| 80 + some n.
 -}
 type alias Nat80Plus n =
     N.Nat80Plus n
 
 
-{-| 81 + some n, which is at least 81.
+{-| 81 + some n.
 -}
 type alias Nat81Plus n =
     N.Nat81Plus n
 
 
-{-| 82 + some n, which is at least 82.
+{-| 82 + some n.
 -}
 type alias Nat82Plus n =
     N.Nat82Plus n
 
 
-{-| 83 + some n, which is at least 83.
+{-| 83 + some n.
 -}
 type alias Nat83Plus n =
     N.Nat83Plus n
 
 
-{-| 84 + some n, which is at least 84.
+{-| 84 + some n.
 -}
 type alias Nat84Plus n =
     N.Nat84Plus n
 
 
-{-| 85 + some n, which is at least 85.
+{-| 85 + some n.
 -}
 type alias Nat85Plus n =
     N.Nat85Plus n
 
 
-{-| 86 + some n, which is at least 86.
+{-| 86 + some n.
 -}
 type alias Nat86Plus n =
     N.Nat86Plus n
 
 
-{-| 87 + some n, which is at least 87.
+{-| 87 + some n.
 -}
 type alias Nat87Plus n =
     N.Nat87Plus n
 
 
-{-| 88 + some n, which is at least 88.
+{-| 88 + some n.
 -}
 type alias Nat88Plus n =
     N.Nat88Plus n
 
 
-{-| 89 + some n, which is at least 89.
+{-| 89 + some n.
 -}
 type alias Nat89Plus n =
     N.Nat89Plus n
 
 
-{-| 90 + some n, which is at least 90.
+{-| 90 + some n.
 -}
 type alias Nat90Plus n =
     N.Nat90Plus n
 
 
-{-| 91 + some n, which is at least 91.
+{-| 91 + some n.
 -}
 type alias Nat91Plus n =
     N.Nat91Plus n
 
 
-{-| 92 + some n, which is at least 92.
+{-| 92 + some n.
 -}
 type alias Nat92Plus n =
     N.Nat92Plus n
 
 
-{-| 93 + some n, which is at least 93.
+{-| 93 + some n.
 -}
 type alias Nat93Plus n =
     N.Nat93Plus n
 
 
-{-| 94 + some n, which is at least 94.
+{-| 94 + some n.
 -}
 type alias Nat94Plus n =
     N.Nat94Plus n
 
 
-{-| 95 + some n, which is at least 95.
+{-| 95 + some n.
 -}
 type alias Nat95Plus n =
     N.Nat95Plus n
 
 
-{-| 96 + some n, which is at least 96.
+{-| 96 + some n.
 -}
 type alias Nat96Plus n =
     N.Nat96Plus n
 
 
-{-| 97 + some n, which is at least 97.
+{-| 97 + some n.
 -}
 type alias Nat97Plus n =
     N.Nat97Plus n
 
 
-{-| 98 + some n, which is at least 98.
+{-| 98 + some n.
 -}
 type alias Nat98Plus n =
     N.Nat98Plus n
 
 
-{-| 99 + some n, which is at least 99.
+{-| 99 + some n.
 -}
 type alias Nat99Plus n =
     N.Nat99Plus n
 
 
-{-| 100 + some n, which is at least 100.
+{-| 100 + some n.
 -}
 type alias Nat100Plus n =
     N.Nat100Plus n
 
 
-{-| 101 + some n, which is at least 101.
+{-| 101 + some n.
 -}
 type alias Nat101Plus n =
     N.Nat101Plus n
 
 
-{-| 102 + some n, which is at least 102.
+{-| 102 + some n.
 -}
 type alias Nat102Plus n =
     N.Nat102Plus n
 
 
-{-| 103 + some n, which is at least 103.
+{-| 103 + some n.
 -}
 type alias Nat103Plus n =
     N.Nat103Plus n
 
 
-{-| 104 + some n, which is at least 104.
+{-| 104 + some n.
 -}
 type alias Nat104Plus n =
     N.Nat104Plus n
 
 
-{-| 105 + some n, which is at least 105.
+{-| 105 + some n.
 -}
 type alias Nat105Plus n =
     N.Nat105Plus n
 
 
-{-| 106 + some n, which is at least 106.
+{-| 106 + some n.
 -}
 type alias Nat106Plus n =
     N.Nat106Plus n
 
 
-{-| 107 + some n, which is at least 107.
+{-| 107 + some n.
 -}
 type alias Nat107Plus n =
     N.Nat107Plus n
 
 
-{-| 108 + some n, which is at least 108.
+{-| 108 + some n.
 -}
 type alias Nat108Plus n =
     N.Nat108Plus n
 
 
-{-| 109 + some n, which is at least 109.
+{-| 109 + some n.
 -}
 type alias Nat109Plus n =
     N.Nat109Plus n
 
 
-{-| 110 + some n, which is at least 110.
+{-| 110 + some n.
 -}
 type alias Nat110Plus n =
     N.Nat110Plus n
 
 
-{-| 111 + some n, which is at least 111.
+{-| 111 + some n.
 -}
 type alias Nat111Plus n =
     N.Nat111Plus n
 
 
-{-| 112 + some n, which is at least 112.
+{-| 112 + some n.
 -}
 type alias Nat112Plus n =
     N.Nat112Plus n
 
 
-{-| 113 + some n, which is at least 113.
+{-| 113 + some n.
 -}
 type alias Nat113Plus n =
     N.Nat113Plus n
 
 
-{-| 114 + some n, which is at least 114.
+{-| 114 + some n.
 -}
 type alias Nat114Plus n =
     N.Nat114Plus n
 
 
-{-| 115 + some n, which is at least 115.
+{-| 115 + some n.
 -}
 type alias Nat115Plus n =
     N.Nat115Plus n
 
 
-{-| 116 + some n, which is at least 116.
+{-| 116 + some n.
 -}
 type alias Nat116Plus n =
     N.Nat116Plus n
 
 
-{-| 117 + some n, which is at least 117.
+{-| 117 + some n.
 -}
 type alias Nat117Plus n =
     N.Nat117Plus n
 
 
-{-| 118 + some n, which is at least 118.
+{-| 118 + some n.
 -}
 type alias Nat118Plus n =
     N.Nat118Plus n
 
 
-{-| 119 + some n, which is at least 119.
+{-| 119 + some n.
 -}
 type alias Nat119Plus n =
     N.Nat119Plus n
 
 
-{-| 120 + some n, which is at least 120.
+{-| 120 + some n.
 -}
 type alias Nat120Plus n =
     N.Nat120Plus n
 
 
-{-| 121 + some n, which is at least 121.
+{-| 121 + some n.
 -}
 type alias Nat121Plus n =
     N.Nat121Plus n
 
 
-{-| 122 + some n, which is at least 122.
+{-| 122 + some n.
 -}
 type alias Nat122Plus n =
     N.Nat122Plus n
 
 
-{-| 123 + some n, which is at least 123.
+{-| 123 + some n.
 -}
 type alias Nat123Plus n =
     N.Nat123Plus n
 
 
-{-| 124 + some n, which is at least 124.
+{-| 124 + some n.
 -}
 type alias Nat124Plus n =
     N.Nat124Plus n
 
 
-{-| 125 + some n, which is at least 125.
+{-| 125 + some n.
 -}
 type alias Nat125Plus n =
     N.Nat125Plus n
 
 
-{-| 126 + some n, which is at least 126.
+{-| 126 + some n.
 -}
 type alias Nat126Plus n =
     N.Nat126Plus n
 
 
-{-| 127 + some n, which is at least 127.
+{-| 127 + some n.
 -}
 type alias Nat127Plus n =
     N.Nat127Plus n
 
 
-{-| 128 + some n, which is at least 128.
+{-| 128 + some n.
 -}
 type alias Nat128Plus n =
     N.Nat128Plus n
 
 
-{-| 129 + some n, which is at least 129.
+{-| 129 + some n.
 -}
 type alias Nat129Plus n =
     N.Nat129Plus n
 
 
-{-| 130 + some n, which is at least 130.
+{-| 130 + some n.
 -}
 type alias Nat130Plus n =
     N.Nat130Plus n
 
 
-{-| 131 + some n, which is at least 131.
+{-| 131 + some n.
 -}
 type alias Nat131Plus n =
     N.Nat131Plus n
 
 
-{-| 132 + some n, which is at least 132.
+{-| 132 + some n.
 -}
 type alias Nat132Plus n =
     N.Nat132Plus n
 
 
-{-| 133 + some n, which is at least 133.
+{-| 133 + some n.
 -}
 type alias Nat133Plus n =
     N.Nat133Plus n
 
 
-{-| 134 + some n, which is at least 134.
+{-| 134 + some n.
 -}
 type alias Nat134Plus n =
     N.Nat134Plus n
 
 
-{-| 135 + some n, which is at least 135.
+{-| 135 + some n.
 -}
 type alias Nat135Plus n =
     N.Nat135Plus n
 
 
-{-| 136 + some n, which is at least 136.
+{-| 136 + some n.
 -}
 type alias Nat136Plus n =
     N.Nat136Plus n
 
 
-{-| 137 + some n, which is at least 137.
+{-| 137 + some n.
 -}
 type alias Nat137Plus n =
     N.Nat137Plus n
 
 
-{-| 138 + some n, which is at least 138.
+{-| 138 + some n.
 -}
 type alias Nat138Plus n =
     N.Nat138Plus n
 
 
-{-| 139 + some n, which is at least 139.
+{-| 139 + some n.
 -}
 type alias Nat139Plus n =
     N.Nat139Plus n
 
 
-{-| 140 + some n, which is at least 140.
+{-| 140 + some n.
 -}
 type alias Nat140Plus n =
     N.Nat140Plus n
 
 
-{-| 141 + some n, which is at least 141.
+{-| 141 + some n.
 -}
 type alias Nat141Plus n =
     N.Nat141Plus n
 
 
-{-| 142 + some n, which is at least 142.
+{-| 142 + some n.
 -}
 type alias Nat142Plus n =
     N.Nat142Plus n
 
 
-{-| 143 + some n, which is at least 143.
+{-| 143 + some n.
 -}
 type alias Nat143Plus n =
     N.Nat143Plus n
 
 
-{-| 144 + some n, which is at least 144.
+{-| 144 + some n.
 -}
 type alias Nat144Plus n =
     N.Nat144Plus n
 
 
-{-| 145 + some n, which is at least 145.
+{-| 145 + some n.
 -}
 type alias Nat145Plus n =
     N.Nat145Plus n
 
 
-{-| 146 + some n, which is at least 146.
+{-| 146 + some n.
 -}
 type alias Nat146Plus n =
     N.Nat146Plus n
 
 
-{-| 147 + some n, which is at least 147.
+{-| 147 + some n.
 -}
 type alias Nat147Plus n =
     N.Nat147Plus n
 
 
-{-| 148 + some n, which is at least 148.
+{-| 148 + some n.
 -}
 type alias Nat148Plus n =
     N.Nat148Plus n
 
 
-{-| 149 + some n, which is at least 149.
+{-| 149 + some n.
 -}
 type alias Nat149Plus n =
     N.Nat149Plus n
 
 
-{-| 150 + some n, which is at least 150.
+{-| 150 + some n.
 -}
 type alias Nat150Plus n =
     N.Nat150Plus n
 
 
-{-| 151 + some n, which is at least 151.
+{-| 151 + some n.
 -}
 type alias Nat151Plus n =
     N.Nat151Plus n
 
 
-{-| 152 + some n, which is at least 152.
+{-| 152 + some n.
 -}
 type alias Nat152Plus n =
     N.Nat152Plus n
 
 
-{-| 153 + some n, which is at least 153.
+{-| 153 + some n.
 -}
 type alias Nat153Plus n =
     N.Nat153Plus n
 
 
-{-| 154 + some n, which is at least 154.
+{-| 154 + some n.
 -}
 type alias Nat154Plus n =
     N.Nat154Plus n
 
 
-{-| 155 + some n, which is at least 155.
+{-| 155 + some n.
 -}
 type alias Nat155Plus n =
     N.Nat155Plus n
 
 
-{-| 156 + some n, which is at least 156.
+{-| 156 + some n.
 -}
 type alias Nat156Plus n =
     N.Nat156Plus n
 
 
-{-| 157 + some n, which is at least 157.
+{-| 157 + some n.
 -}
 type alias Nat157Plus n =
     N.Nat157Plus n
 
 
-{-| 158 + some n, which is at least 158.
+{-| 158 + some n.
 -}
 type alias Nat158Plus n =
     N.Nat158Plus n
 
 
-{-| 159 + some n, which is at least 159.
+{-| 159 + some n.
 -}
 type alias Nat159Plus n =
     N.Nat159Plus n
 
 
-{-| 160 + some n, which is at least 160.
+{-| 160 + some n.
 -}
 type alias Nat160Plus n =
     N.Nat160Plus n
 
 
-{-| 161 + some n, which is at least 161.
+{-| 161 + some n.
 -}
 type alias Nat161Plus n =
     N.Nat161Plus n
 
 
-{-| 162 + some n, which is at least 162.
+{-| 162 + some n.
 -}
 type alias Nat162Plus n =
     N.Nat162Plus n
 
 
-{-| 163 + some n, which is at least 163.
+{-| 163 + some n.
 -}
 type alias Nat163Plus n =
     N.Nat163Plus n
 
 
-{-| 164 + some n, which is at least 164.
+{-| 164 + some n.
 -}
 type alias Nat164Plus n =
     N.Nat164Plus n
 
 
-{-| 165 + some n, which is at least 165.
+{-| 165 + some n.
 -}
 type alias Nat165Plus n =
     N.Nat165Plus n
 
 
-{-| 166 + some n, which is at least 166.
+{-| 166 + some n.
 -}
 type alias Nat166Plus n =
     N.Nat166Plus n
 
 
-{-| 167 + some n, which is at least 167.
+{-| 167 + some n.
 -}
 type alias Nat167Plus n =
     N.Nat167Plus n
 
 
-{-| 168 + some n, which is at least 168.
+{-| 168 + some n.
 -}
 type alias Nat168Plus n =
     N.Nat168Plus n
 
 
-{-| 169 + some n, which is at least 169.
+{-| 169 + some n.
 -}
 type alias Nat169Plus n =
     N.Nat169Plus n
 
 
-{-| 170 + some n, which is at least 170.
+{-| 170 + some n.
 -}
 type alias Nat170Plus n =
     N.Nat170Plus n
 
 
-{-| 171 + some n, which is at least 171.
+{-| 171 + some n.
 -}
 type alias Nat171Plus n =
     N.Nat171Plus n
 
 
-{-| 172 + some n, which is at least 172.
+{-| 172 + some n.
 -}
 type alias Nat172Plus n =
     N.Nat172Plus n
 
 
-{-| 173 + some n, which is at least 173.
+{-| 173 + some n.
 -}
 type alias Nat173Plus n =
     N.Nat173Plus n
 
 
-{-| 174 + some n, which is at least 174.
+{-| 174 + some n.
 -}
 type alias Nat174Plus n =
     N.Nat174Plus n
 
 
-{-| 175 + some n, which is at least 175.
+{-| 175 + some n.
 -}
 type alias Nat175Plus n =
     N.Nat175Plus n
 
 
-{-| 176 + some n, which is at least 176.
+{-| 176 + some n.
 -}
 type alias Nat176Plus n =
     N.Nat176Plus n
 
 
-{-| 177 + some n, which is at least 177.
+{-| 177 + some n.
 -}
 type alias Nat177Plus n =
     N.Nat177Plus n
 
 
-{-| 178 + some n, which is at least 178.
+{-| 178 + some n.
 -}
 type alias Nat178Plus n =
     N.Nat178Plus n
 
 
-{-| 179 + some n, which is at least 179.
+{-| 179 + some n.
 -}
 type alias Nat179Plus n =
     N.Nat179Plus n
 
 
-{-| 180 + some n, which is at least 180.
+{-| 180 + some n.
 -}
 type alias Nat180Plus n =
     N.Nat180Plus n
 
 
-{-| 181 + some n, which is at least 181.
+{-| 181 + some n.
 -}
 type alias Nat181Plus n =
     N.Nat181Plus n
 
 
-{-| 182 + some n, which is at least 182.
+{-| 182 + some n.
 -}
 type alias Nat182Plus n =
     N.Nat182Plus n
 
 
-{-| 183 + some n, which is at least 183.
+{-| 183 + some n.
 -}
 type alias Nat183Plus n =
     N.Nat183Plus n
 
 
-{-| 184 + some n, which is at least 184.
+{-| 184 + some n.
 -}
 type alias Nat184Plus n =
     N.Nat184Plus n
 
 
-{-| 185 + some n, which is at least 185.
+{-| 185 + some n.
 -}
 type alias Nat185Plus n =
     N.Nat185Plus n
 
 
-{-| 186 + some n, which is at least 186.
+{-| 186 + some n.
 -}
 type alias Nat186Plus n =
     N.Nat186Plus n
 
 
-{-| 187 + some n, which is at least 187.
+{-| 187 + some n.
 -}
 type alias Nat187Plus n =
     N.Nat187Plus n
 
 
-{-| 188 + some n, which is at least 188.
+{-| 188 + some n.
 -}
 type alias Nat188Plus n =
     N.Nat188Plus n
 
 
-{-| 189 + some n, which is at least 189.
+{-| 189 + some n.
 -}
 type alias Nat189Plus n =
     N.Nat189Plus n
 
 
-{-| 190 + some n, which is at least 190.
+{-| 190 + some n.
 -}
 type alias Nat190Plus n =
     N.Nat190Plus n
 
 
-{-| 191 + some n, which is at least 191.
+{-| 191 + some n.
 -}
 type alias Nat191Plus n =
     N.Nat191Plus n
 
 
-{-| 192 + some n, which is at least 192.
+{-| 192 + some n.
 -}
 type alias Nat192Plus n =
     N.Nat192Plus n
