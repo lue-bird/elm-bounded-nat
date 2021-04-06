@@ -1,6 +1,6 @@
 module T exposing (Differences, In, Is, Nat(..), To, ValueN)
 
-{-| For performance reasons, supplying the modules [`TypeNats`](TypeNats) & [`NNats`](NNats) from here to make names shorter.
+{-| For performance reasons, supplying the module [`NNats`](NNats) from here to make names shorter.
 -}
 
 
@@ -28,9 +28,9 @@ type alias N n atLeastN asADifference asAnotherDifference =
     In n atLeastN (Differences asADifference asAnotherDifference)
 
 
-type alias Differences aDifference bDifference =
-    D aDifference bDifference
+type alias Differences a b =
+    D a b
 
 
-type D aDifference bDifference
-    = Differences Never
+type D a b
+    = D Never
