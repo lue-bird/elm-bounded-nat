@@ -3,7 +3,7 @@ module Internal exposing
     , isIntInRange, isIntAtLeast
     , intInRange
     , toIn, toMin
-    , add1, map, newRange, toInt
+    , map, newRange, toInt
     )
 
 {-|
@@ -30,7 +30,7 @@ module Internal exposing
 
 -}
 
-import Nat.Bound exposing (In, Is, To, ValueIn, ValueMin, ValueN)
+import Nat.Bound exposing (In, ValueIn, ValueMin)
 import T exposing (Nat(..))
 import TypeNats exposing (..)
 
@@ -58,20 +58,6 @@ toMin =
 toIn : Nat (In min max maybeN) -> Nat (ValueIn min max)
 toIn =
     newRange
-
-
-add1 :
-    Nat (ValueN n atLeastN (Is a To nPlusA) (Is b To nPlusB))
-    ->
-        Nat
-            (ValueN
-                (Nat1Plus n)
-                (Nat1Plus atLeastN)
-                (Is a To (Nat1Plus nPlusA))
-                (Is b To (Nat1Plus nPlusB))
-            )
-add1 =
-    map ((+) 1)
 
 
 
