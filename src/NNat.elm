@@ -18,9 +18,6 @@ module NNat exposing
 -}
 
 import Internal
-import N exposing (..)
-import NNats exposing (..)
-import Nat
 import Nat.Bound exposing (..)
 import T as Internal exposing (Nat)
 

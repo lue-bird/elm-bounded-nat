@@ -30,9 +30,9 @@ module Internal exposing
 
 -}
 
+import N exposing (Nat1Plus)
 import Nat.Bound exposing (In, ValueIn, ValueMin)
 import T exposing (Nat(..))
-import TypeNats exposing (..)
 
 
 toInt : Nat range -> Int

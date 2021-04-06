@@ -4,7 +4,6 @@ module MinNatTests exposing (factorial, suite)
 -}
 
 import Expect
-import InNat
 import MinNat
 import NNat
 import NNats exposing (..)

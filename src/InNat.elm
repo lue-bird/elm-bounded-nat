@@ -35,8 +35,7 @@ If the maximum isn't known, use the operations in `MinNat`.
 -}
 
 import Internal
-import N exposing (..)
-import NNats exposing (..)
+import N exposing (Nat1Plus, Nat2Plus)
 import Nat exposing (Nat, bi, toInt)
 import Nat.Bound exposing (..)
 

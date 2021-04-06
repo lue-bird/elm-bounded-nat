@@ -7,7 +7,6 @@ import Expect
 import InNat
 import MinNat
 import MinNatTests
-import NNat
 import NNats exposing (..)
 import Nat exposing (Nat)
 import Nat.Bound exposing (..)

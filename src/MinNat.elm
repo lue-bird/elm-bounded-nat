@@ -30,10 +30,10 @@ module MinNat exposing
 
 import InNat
 import Internal
-import NNats exposing (..)
+import N exposing (Nat1Plus, Nat2Plus)
+import NNats exposing (nat0)
 import Nat exposing (Nat, toInt)
 import Nat.Bound exposing (In, Is, N, To, ValueIn, ValueMin)
-import TypeNats exposing (..)
 
 
 

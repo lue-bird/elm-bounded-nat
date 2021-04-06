@@ -51,7 +51,7 @@ module Nat exposing
 -}
 
 import Internal
-import N exposing (..)
+import N exposing (Nat0, Nat1Plus)
 import Nat.Bound exposing (In, Is, N, To, ValueIn, ValueMin)
 import Random
 import T as Internal
