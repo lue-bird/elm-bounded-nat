@@ -18,11 +18,11 @@ module NNat exposing
 -}
 
 import Internal
-import N as Internal
+import N exposing (..)
 import NNats exposing (..)
-import Nat exposing (Nat)
+import Nat
 import Nat.Bound exposing (..)
-import TypeNats exposing (..)
+import T as Internal exposing (Nat)
 
 
 {-| The `Nat (N ...)` plus another `Nat (N ...)`. Give the added value twice as a tuple.

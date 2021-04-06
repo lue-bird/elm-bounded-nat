@@ -2,13 +2,13 @@ module GenerateForElmBoundedNat exposing (main)
 
 {-| Helps you generate the source code of the modules
 - [`NNat`](NNat)
-- [`TypeNats`](NNat-Type)
+- [`TypeNats`](TypeNats)
 
 Thanks to [`the-sett/elm-syntax-dsl`](https://package.elm-lang.org/packages/the-sett/elm-syntax-dsl/latest/)!
 -}
 
 import Browser
---import NNats exposing (..)
+import NNats exposing (..)
 import Bytes.Encode
 import Element as Ui
 import Element.Background as UiBg
@@ -102,7 +102,7 @@ main =
 type alias Model =
     { nNatsModuleShownOrFolded :
         ShownOrFolded (Ui.Element Msg)
-    , natNTypeModuleShownOrFolded :
+    , typeNatsModuleShownOrFolded :
         ShownOrFolded (Ui.Element Msg)
     }
 
@@ -118,9 +118,9 @@ type ShownOrFolded content
 type NNatsTag =
     NNatsValue
 
-type NatNTypeTag
-    = NatNTypeExact
-    | NatNTypeAtLeast
+type TypeNatsTag
+    = TypeNatsExact
+    | TypeNatsAtLeast
 
 --
 
@@ -128,7 +128,7 @@ type NatNTypeTag
 init : ( Model, Cmd Msg )
 init =
     ( { nNatsModuleShownOrFolded = Folded
-      , natNTypeModuleShownOrFolded = Folded
+      , typeNatsModuleShownOrFolded = Folded
       }
     , Cmd.none
     )
@@ -142,7 +142,7 @@ type Msg
 
 type ModulesInElmNArrays
     = NNats
-    | NatNType
+    | TypeNats
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -172,7 +172,7 @@ update msg model =
                  in
                  Zip.fromEntries
                     [ toZipEntry nNatsModule
-                    , toZipEntry natNTypeModule
+                    , toZipEntry typeNatsModule
                     ]
                     |> Zip.toBytes
                 )
@@ -187,12 +187,12 @@ update msg model =
                                 (.nNatsModuleShownOrFolded model)
                                 viewNNatsModule
                     }
-                NatNType ->
+                TypeNats ->
                     { model
-                        | natNTypeModuleShownOrFolded =
+                        | typeNatsModuleShownOrFolded =
                             switchShownOrFolded
-                                (.natNTypeModuleShownOrFolded model)
-                                viewNatNTypeModule
+                                (.typeNatsModuleShownOrFolded model)
+                                viewTypeNatsModule
                     }
             , Cmd.none
             )
@@ -287,7 +287,7 @@ nNatsModule =
                     ]
             }
     , imports =
-        [ importStmt [ "N" ] noAlias
+        [ importStmt [ "T" ] noAlias
             (exposingExplicit
                 ([ openTypeExpose "Nat"
                 ]
@@ -296,7 +296,7 @@ nNatsModule =
                         )
                 )
             )
-        , importStmt [ "TypeNats" ] noAlias exposingAll
+        , importStmt [ "N" ] noAlias exposingAll
         ]
     , declarations =
         List.range 0 lastNatN
@@ -317,13 +317,13 @@ nNatsModule =
     }
 
 
-viewNatNTypeModule : Ui.Element msg
-viewNatNTypeModule =
-    Ui.module_ natNTypeModule
+viewTypeNatsModule : Ui.Element msg
+viewTypeNatsModule =
+    Ui.module_ typeNatsModule
 
 
-natNTypeModule : Module NatNTypeTag
-natNTypeModule =
+typeNatsModule : Module TypeNatsTag
+typeNatsModule =
     { name = [ "TypeNats" ]
     , roleInPackage =
         PackageExposedModule
@@ -341,32 +341,20 @@ natNTypeModule =
                     , markdown "- the compilation stops"
                     , markdown "- the elm-stuff can corrupt"
                     , markdown "## at least"
-                    , docTagsFrom NatNTypeAtLeast declarations
+                    , docTagsFrom TypeNatsAtLeast declarations
                     , markdown "## exact"
-                    , docTagsFrom NatNTypeExact declarations
+                    , docTagsFrom TypeNatsExact declarations
                     ]
             }
     , imports =
         [ importStmt [ "N" ]
-            noAlias
-            (exposingExplicit
-                [ typeOrAliasExpose "S"
-                , typeOrAliasExpose "Z"
-                ]
-            )
+            noAlias noExposings
         ]
     , declarations =
-        [ [ packageExposedAliasDecl NatNTypeAtLeast
-                [ markdown "1 + some n, which is at least 1."
-                ]
-                "Nat1Plus"
-                [ "n" ]
-                (typed "S" [ typeVar "n" ])
-          ]
-        , List.range 2 lastN
+        [ List.range 1 lastN
             |> List.map
                 (\n ->
-                    packageExposedAliasDecl NatNTypeAtLeast
+                    packageExposedAliasDecl TypeNatsAtLeast
                         [ markdown
                             (String.fromInt n
                                 ++ " + some n, which is at least "
@@ -376,26 +364,17 @@ natNTypeModule =
                         ]
                         ("Nat" ++ String.fromInt n ++ "Plus")
                         [ "n" ]
-                        (natXPlusAnn (n - 1)
-                            (typed "S" [ typeVar "n" ])
-                        )
+                        (fqTyped [ "N" ] ("Nat" ++ String.fromInt n ++ "Plus") [ typeVar "n" ])
                 )
-        , [ packageExposedAliasDecl NatNTypeExact
-                [ markdown "Exact the natural number 0."
-                ]
-                "Nat0"
-                []
-                (typed "Z" [])
-          ]
-        , List.range 1 192
+        , List.range 0 lastN
             |> List.map
                 (\n ->
-                    packageExposedAliasDecl NatNTypeExact
+                    packageExposedAliasDecl TypeNatsExact
                         [ markdown ("Exact the natural number " ++ String.fromInt n ++ ".")
                         ]
                         ("Nat" ++ String.fromInt n)
                         []
-                        (natXPlusAnn n (typed "Z" []))
+                        (fqTyped [ "N" ] ("Nat" ++ String.fromInt n) [])
                 )
         ]
             |> List.concat
@@ -432,7 +411,7 @@ charPrefixed use last =
 
 
 view : Model -> Html Msg
-view { nNatsModuleShownOrFolded, natNTypeModuleShownOrFolded } =
+view { nNatsModuleShownOrFolded, typeNatsModuleShownOrFolded } =
     Ui.layoutWith
         { options =
             [ Ui.focusStyle
@@ -511,8 +490,8 @@ view { nNatsModuleShownOrFolded, natNTypeModuleShownOrFolded } =
                         [ ( nNatsModuleShownOrFolded
                           , ( "NNats", NNats )
                           )
-                        , ( natNTypeModuleShownOrFolded
-                          , ( "TypeNats", NatNType )
+                        , ( typeNatsModuleShownOrFolded
+                          , ( "TypeNats", TypeNats )
                           )
                         ]
                             |> List.map

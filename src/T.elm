@@ -1,4 +1,4 @@
-module N exposing (Differences, In, Is, Nat(..), S, To, ValueN, Z)
+module T exposing (Differences, In, Is, Nat(..), To, ValueN)
 
 {-| For performance reasons, supplying the modules [`TypeNats`](TypeNats) & [`NNats`](NNats) from here to make names shorter.
 -}
@@ -6,14 +6,6 @@ module N exposing (Differences, In, Is, Nat(..), S, To, ValueN, Z)
 
 type Nat range
     = Nat Int
-
-
-type S more
-    = S Never
-
-
-type Z
-    = Z Never
 
 
 type Is a to b

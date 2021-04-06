@@ -35,10 +35,10 @@ If the maximum isn't known, use the operations in `MinNat`.
 -}
 
 import Internal
+import N exposing (..)
 import NNats exposing (..)
 import Nat exposing (Nat, bi, toInt)
 import Nat.Bound exposing (..)
-import TypeNats exposing (..)
 
 
 

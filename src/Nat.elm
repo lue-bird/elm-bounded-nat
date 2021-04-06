@@ -51,10 +51,10 @@ module Nat exposing
 -}
 
 import Internal
-import N as Internal
+import N exposing (..)
 import Nat.Bound exposing (In, Is, N, To, ValueIn, ValueMin)
 import Random
-import TypeNats exposing (..)
+import T as Internal
 
 
 {-| A **bounded** natural number (`>= 0`).

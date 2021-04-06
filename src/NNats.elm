@@ -40,8 +40,8 @@ See [`Nat.Bound.N`](Nat-Bound#N), [`Nat.Bound.ValueN`](Nat-Bound#ValueN) & [`NNa
 
 -}
 
-import N exposing (Is, Nat(..), To, ValueN)
-import TypeNats exposing (..)
+import N exposing (..)
+import T exposing (Is, Nat(..), To, ValueN)
 
 
 {-| The `Nat` 0.

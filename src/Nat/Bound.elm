@@ -26,7 +26,7 @@ module Nat.Bound exposing
 
 -}
 
-import N as Internal
+import T as Internal
 
 
 {-| `ValueIn minimum maximum`: A value somewhere within a minimum & maximum. We don't know the exact value, though.

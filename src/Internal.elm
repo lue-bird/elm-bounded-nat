@@ -30,8 +30,8 @@ module Internal exposing
 
 -}
 
-import N exposing (Nat(..))
 import Nat.Bound exposing (In, Is, To, ValueIn, ValueMin, ValueN)
+import T exposing (Nat(..))
 import TypeNats exposing (..)
 
 
