@@ -70,3 +70,7 @@ Updated many old names in the documentation.
 ## 2.0.0
 
 Fixed a bug in the type of `InNat.isAtMost`, `InNat.isInRange` & `MinNat.isAtMost`.
+
+## 3.0.0
+
+Improved compiling speed using [indique/n](https://package.elm-lang.org/packages/indique/n/1.0.0/N).
