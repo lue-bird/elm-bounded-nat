@@ -24,10 +24,8 @@ suite =
 
 
 testAddN =
-    nat7
-        |> NNat.add ( nat9, nat9 )
+    nat7 |> NNat.add ( nat9, nat9 )
 
 
 testSubN =
-    nat17
-        |> NNat.sub ( nat9, nat9 )
+    nat17 |> NNat.sub ( nat9, nat9 )
