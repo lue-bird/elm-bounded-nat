@@ -308,11 +308,6 @@ nNatsModule =
                         ("nat" ++ String.fromInt x)
                         []
                         (construct "Nat" [ int x ])
-                        {-(applyBinOp
-                            (val ("nat" ++ String.fromInt (x - 1)))
-                            piper
-                            (fun "add1")
-                        )-}
                 )
     }
 
@@ -340,15 +335,14 @@ typeNatsModule =
                     , markdown "If a type alias is not fully expanded after ~192 tries,"
                     , markdown "- the compilation stops"
                     , markdown "- the elm-stuff can corrupt"
-                    , markdown "## at least"
+                    , markdown "## plus n"
                     , docTagsFrom TypeNatsAtLeast declarations
                     , markdown "## exact"
                     , docTagsFrom TypeNatsExact declarations
                     ]
             }
     , imports =
-        [ importStmt [ "N" ]
-            noAlias noExposings
+        [ importStmt [ "N" ] noAlias noExposing
         ]
     , declarations =
         [ List.range 1 lastN
@@ -356,11 +350,7 @@ typeNatsModule =
                 (\n ->
                     packageExposedAliasDecl TypeNatsAtLeast
                         [ markdown
-                            (String.fromInt n
-                                ++ " + some n, which is at least "
-                                ++ String.fromInt n
-                                ++ "."
-                            )
+                            (String.fromInt n ++ " + some n.")
                         ]
                         ("Nat" ++ String.fromInt n ++ "Plus")
                         [ "n" ]
