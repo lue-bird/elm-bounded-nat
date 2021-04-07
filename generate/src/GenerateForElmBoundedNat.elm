@@ -266,7 +266,7 @@ lastN =
 -}
 lastNatN : Int
 lastNatN =
-    168
+    160
 
 viewNNatsModule : Ui.Element msg
 viewNNatsModule =
@@ -283,6 +283,7 @@ nNatsModule =
                     [ markdown ("`Nat (N Nat0 ...)` to `Nat (N " ++ String.fromInt lastNatN ++ " ...)`.")
                     , markdown "Bigger `Nat (N ...)` s start to slow down compilation, so they are avoided."
                     , markdown "See [`Nat.Bound.N`](Nat-Bound#N), [`Nat.Bound.ValueN`](Nat-Bound#ValueN) & [`NNat`](NNat) for an explanation."
+                    , markdown "There could be more numbers, but it's avoided because of compiling performance reasons."
                     , docTagsFrom NNatsValue declarations
                     ]
             }
