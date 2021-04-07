@@ -303,7 +303,7 @@ nNatsModule =
             |> List.map
                 (\x ->
                     packageExposedFunDecl NNatsValue
-                        [ markdown ("The `Nat` " ++ String.fromInt x ++ ".") ]
+                        [ markdown ("The exact `Nat` " ++ String.fromInt x ++ ".") ]
                         (natNAnn (nAnn x))
                         ("nat" ++ String.fromInt x)
                         []
