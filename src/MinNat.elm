@@ -49,11 +49,11 @@ If you have don't the minimum added value at hand, use [`InNat.addLossy`](InNat#
 
 -}
 add :
-    Nat (In addedMin addedMax addedMaybeN)
-    -> Nat (N addedMin (Is min To sumMin) x)
+    Nat (In minAdded maxAdded addedMaybeN)
+    -> Nat (N minAdded (Is min To sumMin) x)
     -> Nat (In min max maybeN)
     -> Nat (ValueMin sumMin)
-add inNatToAdd addedMin =
+add inNatToAdd minAdded =
     Internal.add inNatToAdd
 
 
@@ -177,7 +177,7 @@ isAtLeast :
     Nat (In triedMin (Nat1Plus triedMinMinus1PlusA) triedMaybeN)
     -> { min : Nat (N min (Is minToTriedMin To triedMin) x) }
     ->
-        { less : Nat (ValueIn min triedMinMinus1PlusA) -> result
+        { less : Nat (In min triedMinMinus1PlusA maybeN) -> result
         , equalOrGreater : Nat (ValueMin triedMin) -> result
         }
     -> Nat (In min max maybeN)
