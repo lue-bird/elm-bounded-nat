@@ -63,7 +63,7 @@ Other changes
 - moved `mul`, `div`, `remainderBy`, `toPower`, `maxIs`, `toMin`, `lowerMin` from `MinNat` & `InNat` to `Nat`
 - moved `atLeast` from `MinNat` to `InNat`
 
-## 1.0.1
+#### 1.0.1
 
 Updated many old names in the documentation.
 
@@ -87,3 +87,7 @@ Changed `isAtLeast`'s `less` variant to be a `In ... maybeN`, not a `ValueIn`.
 - updated links to elm-bounded-array
 - replaced wrong usages of `natX |> NNat.toIn` in doc with `betweenXAndY`
 - Changed some argument names
+
+#### 5.0.1
+
+Updated exposings & when to use `ValueSomething` in the readme.
