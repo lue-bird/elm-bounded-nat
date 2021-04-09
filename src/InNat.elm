@@ -47,13 +47,9 @@ import Nat.Bound exposing (..)
 
 {-| **Cap** the `Nat (In ...)` to at most a number.
 
-    nat5 |> NNat.toIn
+    between5And15
         |> InNat.atMost nat10 { min = nat5 }
-    --> InNat 5
-
-    nat15 |> NNat.toIn |> Nat.lowerMin nat5
-        |> InNat.atMost nat10 { min = nat5 }
-    --> Nat 10
+    --> is of type Nat (ValueIn Nat5 (Nat10Plus a))
 
 `min` ensures that that number is at least the minimum.
 
@@ -289,9 +285,9 @@ isInRange interval min cases =
 
 {-| Add a `Nat (In ...)`.
 
-    NNat.toIn nat3
+    between3And10
         |> InNat.add between1And12 nat1 nat12
-    --> of type Nat (In Nat4 (Nat15Plus a))
+    --> is of type Nat (In Nat4 (Nat22Plus a))
 
 -}
 add :
@@ -306,9 +302,9 @@ add inNatToAdd minAdded maxAdded =
 
 {-| Add a fixed `Nat (N ...)` value.
 
-    nat70 |> NNat.toIn
+    between70And100
         |> InNat.addN nat7
-    --> is of type Nat (In Nat77 (Nat77Plus a))
+    --> is of type Nat (In Nat77 (Nat107Plus a))
 
 -}
 addN :
@@ -344,11 +340,11 @@ sub inNatToSubtract minSubtracted maxSubtracted =
 
 {-| Subtract a fixed `Nat` value.
 
-    nat7 |> NNat.toIn
+    between7And10
         |> InNat.subN nat7
-    --> is of type Nat (In Nat0 a)
+    --> is of type Nat (ValueIn Nat0 (Nat3Plus a))
 
-**Use [`MinNat.subN`](MinNat#subN) if the maximum value is `Infinity`**.
+**Use [`MinNat.subN`](MinNat#subN) if the maximum value is not known**.
 
 -}
 subN :

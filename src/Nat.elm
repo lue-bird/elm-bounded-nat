@@ -2,11 +2,11 @@ module Nat exposing
     ( Nat
     , abs, range, random
     , intAtLeast, intInRange
-    , isIntInRange, isIntAtLeast
+    , isIntInRange, isIntAtLeast, theGreater, theSmaller
     , toPower, remainderBy, mul, div
     , toInt, bi
-    , theGreater, theSmaller
-    , lowerMin, toMin, maxIs
+    , lowerMin, toMin
+    , maxIs
     )
 
 {-|
@@ -26,7 +26,7 @@ module Nat exposing
 
 ### compare
 
-@docs isIntInRange, isIntAtLeast
+@docs isIntInRange, isIntAtLeast, theGreater, theSmaller
 
 
 ## modify
@@ -39,14 +39,14 @@ module Nat exposing
 @docs toInt, bi
 
 
-## compare
-
-@docs theGreater, theSmaller
-
-
 ## drop information
 
-@docs lowerMin, toMin, maxIs
+@docs lowerMin, toMin
+
+
+## restore information
+
+@docs maxIs
 
 -}
 
@@ -162,11 +162,11 @@ random min max =
 {-| Convert a `Nat` to an `Int`.
 
     nat4 |> Nat.toInt --> 4
-    nat4 |> NNat.toIn |> Nat.toInt --> 4
-    nat4 |> Nat.toMin |> Nat.toInt --> 4
+    between4And10 |> Nat.toInt
+    atLeast4 |> Nat.toInt
 
-    compare : Nat range -> Nat range -> Order
-    compare a b =
+    compareNats : Nat range -> Nat range -> Order
+    compareNats a b =
         compare (Nat.toInt a) (Nat.toInt b)
 
 -}
