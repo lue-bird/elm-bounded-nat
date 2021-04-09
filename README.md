@@ -13,10 +13,10 @@ Setup
 ```elm
 import Nat exposing (Nat)
 import Nat.Bound exposing (..)
-    --In, Only, N, Is, To, Exact, InValue, ValueOnly, ValueMin
+    --In, Only, N, Is, To, ValueIn, ValueOnly, ValueMin, ValueN
 import TypeNats exposing (..)
-    --Nat0 to Nat192 & Nat0Plus to Nat192Plus
-import NNats exposing (..) --nat0 to nat168
+    --Nat0 to Nat160 & Nat0Plus to Nat60Plus
+import NNats exposing (..) --nat0 to nat160
 import NNat
 import InNat
 import MinNat
@@ -63,7 +63,7 @@ They can prove it by
 - already knowing
 
 ```elm
--- the type is Nat (N Nat100 ...)
+-- the type is Nat (ValueN Nat100 ...)
 -- so it's also between 100 and 100 (101 / 102 /...)
 nat100
 
@@ -119,8 +119,8 @@ The type of a value reflects how much you know.
 
 - `ValueIn`: between a minimum & maximum value
 - `ValueMin`: at least a minimum value
-- `N`: exact value
-    - (also describes the difference between 2 values)
+- `ValueN`: exact value
+    - also describes the difference between 2 values
 
 
 &emsp;
@@ -160,7 +160,7 @@ factorialHelp =
                     |> Nat.mul
                         (factorial
                             (atLeast1 |> MinNat.subN nat1)
-                            -- so we can safely subtract 1 👍
+                            -- we can subtract 1 👍
                         )
         }
 ```
@@ -194,12 +194,12 @@ No extra work.
 - keep _as much type information as possible_ and drop it only where you need to.
 ```elm
 squares2To10 =
-    -- every Nat is In Nat2 Nat10
+    -- every Nat is ValueIn Nat2 (Nat10Plus a)
     Nat.range nat2 nat10
         |> List.map
             (Nat.toPower nat2
             -- we can't compute the exact minimum & maximum
-            -- but we know its at least Nat2
+            -- but we know it's at least Nat2
             )
 ```
 - keep your _function annotations as general as possible_
@@ -221,7 +221,7 @@ rgb : Nat (In redMin Nat100 maybeN) -> --...
 charFromCode : Nat (ValueMin min) -> Char
 ```
 
-which you should also never do, allow `Nat (In min ...)` with any max & `Nat (N ...)` to fit in as well!
+which you should also never do, allow `Nat (In min ...)` with any max & `Nat (ValueN ...)` to fit in as well!
 
 ```elm
 charFromCode : Nat (In min max maybeN) -> Char
@@ -231,6 +231,6 @@ Take a look at [`elm-bounded-array`][bounded-array] to see a lot of this in acti
 
 You get to know that
 - a `Nat (In ...)` is very useful as an index
-- a `Nat.Bound` can describe amounts well
+- `Nat.Bound`s can describe amounts well
 
 [bounded-array]: https://package.elm-lang.org/packages/lue-bird/elm-bounded-array/latest/
