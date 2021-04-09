@@ -462,7 +462,7 @@ subLossy natToSubtract =
 
 -}
 addLossy :
-    Nat (In addedMin addedMax addedMaybeN)
+    Nat (In minAdded maxAdded addedMaybeN)
     -> Nat (In min max maybeN)
     -> Nat (ValueMin min)
 addLossy natToAdd =

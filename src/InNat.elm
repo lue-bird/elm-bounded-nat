@@ -295,12 +295,12 @@ isInRange interval min cases =
 
 -}
 add :
-    Nat (In addedMin addedMax addedMaybeMax)
-    -> Nat (N addedMin (Is min To sumMin) x)
-    -> Nat (N addedMax (Is max To sumMax) y)
+    Nat (In minAdded maxAdded addedMaybeMax)
+    -> Nat (N minAdded (Is min To sumMin) x)
+    -> Nat (N maxAdded (Is max To sumMax) y)
     -> Nat (In min max maybeN)
     -> Nat (ValueIn sumMin sumMax)
-add inNatToAdd addedMin addedMax =
+add inNatToAdd minAdded maxAdded =
     Internal.add inNatToAdd
 
 
