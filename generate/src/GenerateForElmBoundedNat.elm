@@ -345,7 +345,7 @@ typeNatsModule =
                 (\n ->
                     packageExposedAliasDecl TypeNatsAtLeast
                         [ markdown
-                            (String.fromInt n ++ " + some n.")
+                            (String.fromInt n ++ " + some natural number n.")
                         ]
                         ("Nat" ++ String.fromInt n ++ "Plus")
                         [ "n" ]
