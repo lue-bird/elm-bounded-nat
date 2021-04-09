@@ -91,3 +91,7 @@ Changed `isAtLeast`'s `less` variant to be a `In ... maybeN`, not a `ValueIn`.
 #### 5.0.1
 
 Updated exposings & when to use `ValueSomething` in the readme.
+
+#### 5.0.2
+
+Corrected forgotten `maybeN`s, wrongly named `ValueMin/In`s & minor doc mistakes.
