@@ -16,7 +16,7 @@ If you have questions, don't hesitate to ask (e.g. start a discussion in github)
 ### Summary Guide
 
 commits look like this:
-> do details | make other details & this
+> do details, make other details & this
 
 #### Category
 | mark     | means   |
