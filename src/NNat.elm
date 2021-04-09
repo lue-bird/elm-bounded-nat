@@ -61,7 +61,7 @@ add nNatToAdd =
     Internal.add (nNatToAdd |> Tuple.first)
 
 
-{-| The `Nat (N ...)` plus another `Nat (N ...)`. Give the added value twice as a tuple.
+{-| The `Nat (N ...)` plus another `Nat (N ...)`. Give the subtracted value twice as a tuple.
 
     nat6 |> NNat.sub ( nat5, nat5 )
     --> Nat 1 of type

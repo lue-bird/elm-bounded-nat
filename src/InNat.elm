@@ -91,7 +91,7 @@ atLeast lowerLimit =
   - `less`?
 
 ```
-vote : { age : Nat (In (Nat18Plus orOlder) max) } -> Vote
+vote : { age : Nat (In (Nat18Plus orOlder) max maybeN) } -> Vote
 
 tryToVote =
     Nat.lowerMin nat0
@@ -136,13 +136,14 @@ isAtLeast triedLowerLimit min cases =
   - `greater`?
 
 ```
-goToU18Party : { age : Nat (In min Nat17) } -> List Snack
+goToU18Party : { age : Nat (In min Nat17 maybeN) } -> List Snack
 
 tryToGoToU18Party =
     Nat.lowerMin nat0
         >> InNat.isAtMost nat17
             { min = nat0 }
-            { equalOrLess = \age -> Just (goToU18Party { age = age })
+            { equalOrLess =
+                \age -> Just (goToU18Party { age = age })
             , greater = Nothing
             }
 ```
@@ -171,7 +172,7 @@ isAtMost triedUpperLimit min cases =
             .greater cases (Internal.newRange inNat)
 
 
-{-| Compare the `Nat (In ...)` to a `Nat (N ...)`. Is it `greater`, `less` or `equal`?
+{-| Compare the `Nat (In ...)` to an exact `Nat (N ...)`. Is it `greater`, `less` or `equal`?
 
 `min` ensures that the `Nat (N ...)` is bigger than the minimum.
 
@@ -287,7 +288,7 @@ isInRange interval min cases =
 
     between3And10
         |> InNat.add between1And12 nat1 nat12
-    --> is of type Nat (In Nat4 (Nat22Plus a))
+    --> is of type Nat (ValueIn Nat4 (Nat22Plus a))
 
 -}
 add :
@@ -323,9 +324,11 @@ The 2 following arguments are
 
   - the maximum subtracted value
 
-    in6To12
-    |> InNat.sub in1And5 nat1 nat5
-    --> is of type Nat (In Nat1 (Nat5Plus a))
+```
+between6And12
+    |> InNat.sub between1And5 nat1 nat5
+--> is of type Nat (ValueIn Nat1 (Nat5Plus a))
+```
 
 -}
 sub :
@@ -338,7 +341,7 @@ sub inNatToSubtract minSubtracted maxSubtracted =
     Internal.sub inNatToSubtract
 
 
-{-| Subtract a fixed `Nat` value.
+{-| Subtract an exact `Nat (N ...)` value.
 
     between7And10
         |> InNat.subN nat7

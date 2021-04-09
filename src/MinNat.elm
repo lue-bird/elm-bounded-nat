@@ -40,12 +40,10 @@ import Nat.Bound exposing (In, Is, N, To, ValueIn, ValueMin)
 -- ## modify
 
 
-{-| Add a `Nat (ValueMin ...)`. The second argument is the minimum if the added `Nat (ValueMin ...)`.
+{-| Add a `Nat (In ...)`. The second argument is the minimum added value.
 
     atLeast5 |> MinNat.add atLeast2 nat2
     --> is of type Nat (ValueMin Nat7)
-
-If you have don't the minimum added value at hand, use [`InNat.addLossy`](InNat#addLossy).
 
 -}
 add :
@@ -87,8 +85,8 @@ subN nNatToSubtract =
 
 {-| Subtract a `Nat (In ...)`. The second argument is the maximum of the subtracted `Nat (In ...)`.
 
-    atLeast6 |> MinNat.sub in0To5 nat5
-    --> is of type Nat (In Nat1 (Nat6Plus a))
+    atLeast6 |> MinNat.sub between0And5 nat5
+    --> is of type Nat (ValueMin Nat1)
 
 If you have don't the maximum subtracted value at hand, use [`subLossy`](InNat#subLossy).
 
@@ -113,7 +111,7 @@ sub inNatToSubtract maxSubtracted =
 `min` ensures that the `Nat (N ...)` is bigger than the minimum.
 
     present =
-        MNat.lowerMin nat0
+        Nat.lowerMin nat0
             >> MinNat.is nat18
                 { min = nat0 }
                 { less = \age -> appropriateToy { age = age }
@@ -156,9 +154,9 @@ is tried min cases =
   - `less`?
 
 ```
-factorial : MinNat min -> MinNat Nat1
+factorial : Nat (In min max maybeN) -> Nat (ValueMin Nat1)
 factorial =
-    MNat.lowerMin nat0
+    Nat.lowerMin nat0
         >> MinNat.isAtLeast nat1
             { min = nat0 }
             { less = \_ -> nat1 |> Nat.toMin
@@ -201,7 +199,7 @@ isAtLeast triedLowerLimit min cases =
 goToU18Party : { age : Nat (In min Nat17 maybeN) } -> List Snack
 
 tryToGoToU18Party =
-    MNat.lowerMin nat0
+    Nat.lowerMin nat0
         >> MinNat.isAtMost nat17
             { min = nat0 }
             { equalOrLess = \age -> Just (goToU18Party { age = age })

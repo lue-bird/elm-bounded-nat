@@ -91,15 +91,12 @@ import T as Internal
     -- any, just >= 0
     Nat range
 
-    -- Not constuctable
-    Nat Banana
-
 -}
 type alias Nat range =
     Internal.Nat range
 
 
-{-| The absolute value of an `Int`, which is at least `Nat0`.
+{-| The absolute value of an `Int`, which is `>= Nat0`.
 
     Nat.abs 16 --> Nat 16
 
@@ -126,7 +123,7 @@ abs int =
     Basics.abs int |> Internal.Nat
 
 
-{-| `Nat (In ...)`s from a first to a last value.
+{-| `Nat (ValueIn ...)`s from a first to a last value.
 
     from3To10 : List (Nat (ValueIn Nat3 (Nat10Plus a)))
     from3To10 =
@@ -205,17 +202,25 @@ theSmaller a b =
         b
 
 
-{-| An `Int` compared to a range from `first` to `last`.
+{-| Compared to a range `first` to `last`, is the `Int`
 
-    rejectOrAcceptUserInt =
-        Nat.isIntInRange nat1 nat100
-            { less = Err "must be >= 1"
-            , greater = \_-> Err "must be <= 100"
-            , inRange = Ok
-            }
+  - `inRange`
 
-    rejectOrAcceptUserInt 0
-    --> Err "must be >= 1"
+  - `greater` than the `last` or
+
+  - `less` than the `first`?
+
+```
+rejectOrAcceptUserInt =
+    Nat.isIntInRange nat1 nat100
+        { less = Err "must be >= 1"
+        , greater = \_-> Err "must be <= 100"
+        , inRange = Ok
+        }
+
+rejectOrAcceptUserInt 0
+--> Err "must be >= 1"
+```
 
 -}
 isIntInRange :
@@ -233,7 +238,7 @@ isIntInRange interval cases int =
     Internal.isIntInRange interval cases int
 
 
-{-| A `Nat (In ...)` from an `Int`, **clamped** between a minimum & maximum.
+{-| A `Nat (ValueIn ...)` from an `Int`, **clamped** between a minimum & maximum.
 
   - if the `Int < minimum`, `minimum` is returned
   - if the `Int > maximum`, `maximum` is returned
@@ -261,7 +266,7 @@ intInRange lowerLimit upperLimit =
     Internal.intInRange lowerLimit upperLimit
 
 
-{-| If the `Int >= a minimum`, `Just` the `Nat (Min minimum)`, else `Nothing`.
+{-| If the `Int >= a minimum`, `Just` the `Nat (ValueMin minimum)`, else `Nothing`.
 
     4 |> Nat.isIntAtLeast nat5 --> Nothing
 
@@ -280,7 +285,7 @@ isIntAtLeast minimum int =
         Nothing
 
 
-{-| A `Nat (Min ...)` from an `Int`; if the `Int < minimum`, `minimum` is returned.
+{-| A `Nat (ValueMin ...)` from an `Int`; if the `Int < minimum`, `minimum` is returned.
 
     9 |> Nat.intAtLeast nat3
     --> Nat 9
@@ -336,7 +341,7 @@ bi op a b =
 -- ## modify
 
 
-{-| Multiply by a `Nat (In ...)` >= 1.
+{-| Multiply by a `Nat >= 1`.
 we know that if `a >= 1`, `x * a >= x`.
 
     atLeast5  |> Nat.mul nat2
@@ -356,7 +361,7 @@ mul natToMultiply =
     Internal.map ((*) (toInt natToMultiply))
 
 
-{-| Divide (`//`) by a `Nat (In ...)`.
+{-| Divide (`//`) by a `Nat >= 1`.
 
   - `/ 0` is impossible
 
@@ -396,7 +401,7 @@ remainderBy divNat =
     Internal.map (Basics.remainderBy (divNat |> toInt))
 
 
-{-| The `Nat (ValueMin ...) ^ a Nat (ValueMin ...)`.
+{-| The `Nat ^ a Nat >= 1`.
 We know that if `a >= 1  →  x ^ a >= x`
 
     atLeast5 |> Nat.toPower nat2
@@ -482,7 +487,7 @@ Elm complains:
 > But all the previous elements in the list are: `Nat (ValueMin Nat3)`
 
     [ atLeast3
-    , atLeast4 |> MNat.lowerMin nat3
+    , atLeast4 |> Nat.lowerMin nat3
     ]
 
 -}
