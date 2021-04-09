@@ -75,3 +75,8 @@ Fixed a bug in the type of `InNat.isAtMost`, `InNat.isInRange` & `MinNat.isAtMos
 
 Improved compiling speed using [indique/n](https://package.elm-lang.org/packages/indique/n/).
 - removed `nat161` to `nat168` for better compiling speed
+
+## 4.0.0
+
+Use [indique/n 2.0.0](https://package.elm-lang.org/packages/indique/n/).
+- removed `Nat161`/`Nat161Plus` and above for better compiling speed
