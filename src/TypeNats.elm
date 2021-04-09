@@ -10,43 +10,34 @@ module TypeNats exposing
     , Nat144Plus, Nat145Plus, Nat146Plus, Nat147Plus, Nat148Plus, Nat149Plus
     , Nat14Plus, Nat150Plus, Nat151Plus, Nat152Plus, Nat153Plus, Nat154Plus
     , Nat155Plus, Nat156Plus, Nat157Plus, Nat158Plus, Nat159Plus, Nat15Plus
-    , Nat160Plus, Nat161Plus, Nat162Plus, Nat163Plus, Nat164Plus, Nat165Plus
-    , Nat166Plus, Nat167Plus, Nat168Plus, Nat169Plus, Nat16Plus, Nat170Plus
-    , Nat171Plus, Nat172Plus, Nat173Plus, Nat174Plus, Nat175Plus, Nat176Plus
-    , Nat177Plus, Nat178Plus, Nat179Plus, Nat17Plus, Nat180Plus, Nat181Plus
-    , Nat182Plus, Nat183Plus, Nat184Plus, Nat185Plus, Nat186Plus, Nat187Plus
-    , Nat188Plus, Nat189Plus, Nat18Plus, Nat190Plus, Nat191Plus, Nat192Plus
-    , Nat19Plus, Nat1Plus, Nat20Plus, Nat21Plus, Nat22Plus, Nat23Plus, Nat24Plus
-    , Nat25Plus, Nat26Plus, Nat27Plus, Nat28Plus, Nat29Plus, Nat2Plus, Nat30Plus
-    , Nat31Plus, Nat32Plus, Nat33Plus, Nat34Plus, Nat35Plus, Nat36Plus, Nat37Plus
-    , Nat38Plus, Nat39Plus, Nat3Plus, Nat40Plus, Nat41Plus, Nat42Plus, Nat43Plus
-    , Nat44Plus, Nat45Plus, Nat46Plus, Nat47Plus, Nat48Plus, Nat49Plus, Nat4Plus
-    , Nat50Plus, Nat51Plus, Nat52Plus, Nat53Plus, Nat54Plus, Nat55Plus, Nat56Plus
-    , Nat57Plus, Nat58Plus, Nat59Plus, Nat5Plus, Nat60Plus, Nat61Plus, Nat62Plus
-    , Nat63Plus, Nat64Plus, Nat65Plus, Nat66Plus, Nat67Plus, Nat68Plus, Nat69Plus
-    , Nat6Plus, Nat70Plus, Nat71Plus, Nat72Plus, Nat73Plus, Nat74Plus, Nat75Plus
-    , Nat76Plus, Nat77Plus, Nat78Plus, Nat79Plus, Nat7Plus, Nat80Plus, Nat81Plus
-    , Nat82Plus, Nat83Plus, Nat84Plus, Nat85Plus, Nat86Plus, Nat87Plus, Nat88Plus
-    , Nat89Plus, Nat8Plus, Nat90Plus, Nat91Plus, Nat92Plus, Nat93Plus, Nat94Plus
-    , Nat95Plus, Nat96Plus, Nat97Plus, Nat98Plus, Nat99Plus, Nat9Plus
+    , Nat160Plus, Nat16Plus, Nat17Plus, Nat18Plus, Nat19Plus, Nat1Plus, Nat20Plus
+    , Nat21Plus, Nat22Plus, Nat23Plus, Nat24Plus, Nat25Plus, Nat26Plus, Nat27Plus
+    , Nat28Plus, Nat29Plus, Nat2Plus, Nat30Plus, Nat31Plus, Nat32Plus, Nat33Plus
+    , Nat34Plus, Nat35Plus, Nat36Plus, Nat37Plus, Nat38Plus, Nat39Plus, Nat3Plus
+    , Nat40Plus, Nat41Plus, Nat42Plus, Nat43Plus, Nat44Plus, Nat45Plus, Nat46Plus
+    , Nat47Plus, Nat48Plus, Nat49Plus, Nat4Plus, Nat50Plus, Nat51Plus, Nat52Plus
+    , Nat53Plus, Nat54Plus, Nat55Plus, Nat56Plus, Nat57Plus, Nat58Plus, Nat59Plus
+    , Nat5Plus, Nat60Plus, Nat61Plus, Nat62Plus, Nat63Plus, Nat64Plus, Nat65Plus
+    , Nat66Plus, Nat67Plus, Nat68Plus, Nat69Plus, Nat6Plus, Nat70Plus, Nat71Plus
+    , Nat72Plus, Nat73Plus, Nat74Plus, Nat75Plus, Nat76Plus, Nat77Plus, Nat78Plus
+    , Nat79Plus, Nat7Plus, Nat80Plus, Nat81Plus, Nat82Plus, Nat83Plus, Nat84Plus
+    , Nat85Plus, Nat86Plus, Nat87Plus, Nat88Plus, Nat89Plus, Nat8Plus, Nat90Plus
+    , Nat91Plus, Nat92Plus, Nat93Plus, Nat94Plus, Nat95Plus, Nat96Plus, Nat97Plus
+    , Nat98Plus, Nat99Plus, Nat9Plus
     , Nat0, Nat1, Nat10, Nat100, Nat101, Nat102, Nat103, Nat104, Nat105, Nat106, Nat107
     , Nat108, Nat109, Nat11, Nat110, Nat111, Nat112, Nat113, Nat114, Nat115, Nat116
     , Nat117, Nat118, Nat119, Nat12, Nat120, Nat121, Nat122, Nat123, Nat124, Nat125
     , Nat126, Nat127, Nat128, Nat129, Nat13, Nat130, Nat131, Nat132, Nat133, Nat134
     , Nat135, Nat136, Nat137, Nat138, Nat139, Nat14, Nat140, Nat141, Nat142, Nat143
     , Nat144, Nat145, Nat146, Nat147, Nat148, Nat149, Nat15, Nat150, Nat151, Nat152
-    , Nat153, Nat154, Nat155, Nat156, Nat157, Nat158, Nat159, Nat16, Nat160, Nat161
-    , Nat162, Nat163, Nat164, Nat165, Nat166, Nat167, Nat168, Nat169, Nat17, Nat170
-    , Nat171, Nat172, Nat173, Nat174, Nat175, Nat176, Nat177, Nat178, Nat179, Nat18
-    , Nat180, Nat181, Nat182, Nat183, Nat184, Nat185, Nat186, Nat187, Nat188, Nat189
-    , Nat19, Nat190, Nat191, Nat192, Nat2, Nat20, Nat21, Nat22, Nat23, Nat24, Nat25, Nat26
-    , Nat27, Nat28, Nat29, Nat3, Nat30, Nat31, Nat32, Nat33, Nat34, Nat35, Nat36, Nat37, Nat38
-    , Nat39, Nat4, Nat40, Nat41, Nat42, Nat43, Nat44, Nat45, Nat46, Nat47, Nat48, Nat49, Nat5
-    , Nat50, Nat51, Nat52, Nat53, Nat54, Nat55, Nat56, Nat57, Nat58, Nat59, Nat6, Nat60, Nat61
-    , Nat62, Nat63, Nat64, Nat65, Nat66, Nat67, Nat68, Nat69, Nat7, Nat70, Nat71, Nat72, Nat73
-    , Nat74, Nat75, Nat76, Nat77, Nat78, Nat79, Nat8, Nat80, Nat81, Nat82, Nat83, Nat84, Nat85
-    , Nat86, Nat87, Nat88, Nat89, Nat9, Nat90, Nat91, Nat92, Nat93, Nat94, Nat95, Nat96, Nat97
-    , Nat98, Nat99
+    , Nat153, Nat154, Nat155, Nat156, Nat157, Nat158, Nat159, Nat16, Nat160, Nat17, Nat18
+    , Nat19, Nat2, Nat20, Nat21, Nat22, Nat23, Nat24, Nat25, Nat26, Nat27, Nat28, Nat29, Nat3
+    , Nat30, Nat31, Nat32, Nat33, Nat34, Nat35, Nat36, Nat37, Nat38, Nat39, Nat4, Nat40, Nat41
+    , Nat42, Nat43, Nat44, Nat45, Nat46, Nat47, Nat48, Nat49, Nat5, Nat50, Nat51, Nat52, Nat53
+    , Nat54, Nat55, Nat56, Nat57, Nat58, Nat59, Nat6, Nat60, Nat61, Nat62, Nat63, Nat64, Nat65
+    , Nat66, Nat67, Nat68, Nat69, Nat7, Nat70, Nat71, Nat72, Nat73, Nat74, Nat75, Nat76, Nat77
+    , Nat78, Nat79, Nat8, Nat80, Nat81, Nat82, Nat83, Nat84, Nat85, Nat86, Nat87, Nat88, Nat89
+    , Nat9, Nat90, Nat91, Nat92, Nat93, Nat94, Nat95, Nat96, Nat97, Nat98, Nat99
     )
 
 {-| Express exact natural numbers in a type.
@@ -88,25 +79,20 @@ If a type alias is not fully expanded after ~192 tries,
 @docs Nat144Plus, Nat145Plus, Nat146Plus, Nat147Plus, Nat148Plus, Nat149Plus
 @docs Nat14Plus, Nat150Plus, Nat151Plus, Nat152Plus, Nat153Plus, Nat154Plus
 @docs Nat155Plus, Nat156Plus, Nat157Plus, Nat158Plus, Nat159Plus, Nat15Plus
-@docs Nat160Plus, Nat161Plus, Nat162Plus, Nat163Plus, Nat164Plus, Nat165Plus
-@docs Nat166Plus, Nat167Plus, Nat168Plus, Nat169Plus, Nat16Plus, Nat170Plus
-@docs Nat171Plus, Nat172Plus, Nat173Plus, Nat174Plus, Nat175Plus, Nat176Plus
-@docs Nat177Plus, Nat178Plus, Nat179Plus, Nat17Plus, Nat180Plus, Nat181Plus
-@docs Nat182Plus, Nat183Plus, Nat184Plus, Nat185Plus, Nat186Plus, Nat187Plus
-@docs Nat188Plus, Nat189Plus, Nat18Plus, Nat190Plus, Nat191Plus, Nat192Plus
-@docs Nat19Plus, Nat1Plus, Nat20Plus, Nat21Plus, Nat22Plus, Nat23Plus, Nat24Plus
-@docs Nat25Plus, Nat26Plus, Nat27Plus, Nat28Plus, Nat29Plus, Nat2Plus, Nat30Plus
-@docs Nat31Plus, Nat32Plus, Nat33Plus, Nat34Plus, Nat35Plus, Nat36Plus, Nat37Plus
-@docs Nat38Plus, Nat39Plus, Nat3Plus, Nat40Plus, Nat41Plus, Nat42Plus, Nat43Plus
-@docs Nat44Plus, Nat45Plus, Nat46Plus, Nat47Plus, Nat48Plus, Nat49Plus, Nat4Plus
-@docs Nat50Plus, Nat51Plus, Nat52Plus, Nat53Plus, Nat54Plus, Nat55Plus, Nat56Plus
-@docs Nat57Plus, Nat58Plus, Nat59Plus, Nat5Plus, Nat60Plus, Nat61Plus, Nat62Plus
-@docs Nat63Plus, Nat64Plus, Nat65Plus, Nat66Plus, Nat67Plus, Nat68Plus, Nat69Plus
-@docs Nat6Plus, Nat70Plus, Nat71Plus, Nat72Plus, Nat73Plus, Nat74Plus, Nat75Plus
-@docs Nat76Plus, Nat77Plus, Nat78Plus, Nat79Plus, Nat7Plus, Nat80Plus, Nat81Plus
-@docs Nat82Plus, Nat83Plus, Nat84Plus, Nat85Plus, Nat86Plus, Nat87Plus, Nat88Plus
-@docs Nat89Plus, Nat8Plus, Nat90Plus, Nat91Plus, Nat92Plus, Nat93Plus, Nat94Plus
-@docs Nat95Plus, Nat96Plus, Nat97Plus, Nat98Plus, Nat99Plus, Nat9Plus
+@docs Nat160Plus, Nat16Plus, Nat17Plus, Nat18Plus, Nat19Plus, Nat1Plus, Nat20Plus
+@docs Nat21Plus, Nat22Plus, Nat23Plus, Nat24Plus, Nat25Plus, Nat26Plus, Nat27Plus
+@docs Nat28Plus, Nat29Plus, Nat2Plus, Nat30Plus, Nat31Plus, Nat32Plus, Nat33Plus
+@docs Nat34Plus, Nat35Plus, Nat36Plus, Nat37Plus, Nat38Plus, Nat39Plus, Nat3Plus
+@docs Nat40Plus, Nat41Plus, Nat42Plus, Nat43Plus, Nat44Plus, Nat45Plus, Nat46Plus
+@docs Nat47Plus, Nat48Plus, Nat49Plus, Nat4Plus, Nat50Plus, Nat51Plus, Nat52Plus
+@docs Nat53Plus, Nat54Plus, Nat55Plus, Nat56Plus, Nat57Plus, Nat58Plus, Nat59Plus
+@docs Nat5Plus, Nat60Plus, Nat61Plus, Nat62Plus, Nat63Plus, Nat64Plus, Nat65Plus
+@docs Nat66Plus, Nat67Plus, Nat68Plus, Nat69Plus, Nat6Plus, Nat70Plus, Nat71Plus
+@docs Nat72Plus, Nat73Plus, Nat74Plus, Nat75Plus, Nat76Plus, Nat77Plus, Nat78Plus
+@docs Nat79Plus, Nat7Plus, Nat80Plus, Nat81Plus, Nat82Plus, Nat83Plus, Nat84Plus
+@docs Nat85Plus, Nat86Plus, Nat87Plus, Nat88Plus, Nat89Plus, Nat8Plus, Nat90Plus
+@docs Nat91Plus, Nat92Plus, Nat93Plus, Nat94Plus, Nat95Plus, Nat96Plus, Nat97Plus
+@docs Nat98Plus, Nat99Plus, Nat9Plus
 
 
 ## exact
@@ -117,18 +103,14 @@ If a type alias is not fully expanded after ~192 tries,
 @docs Nat126, Nat127, Nat128, Nat129, Nat13, Nat130, Nat131, Nat132, Nat133, Nat134
 @docs Nat135, Nat136, Nat137, Nat138, Nat139, Nat14, Nat140, Nat141, Nat142, Nat143
 @docs Nat144, Nat145, Nat146, Nat147, Nat148, Nat149, Nat15, Nat150, Nat151, Nat152
-@docs Nat153, Nat154, Nat155, Nat156, Nat157, Nat158, Nat159, Nat16, Nat160, Nat161
-@docs Nat162, Nat163, Nat164, Nat165, Nat166, Nat167, Nat168, Nat169, Nat17, Nat170
-@docs Nat171, Nat172, Nat173, Nat174, Nat175, Nat176, Nat177, Nat178, Nat179, Nat18
-@docs Nat180, Nat181, Nat182, Nat183, Nat184, Nat185, Nat186, Nat187, Nat188, Nat189
-@docs Nat19, Nat190, Nat191, Nat192, Nat2, Nat20, Nat21, Nat22, Nat23, Nat24, Nat25, Nat26
-@docs Nat27, Nat28, Nat29, Nat3, Nat30, Nat31, Nat32, Nat33, Nat34, Nat35, Nat36, Nat37, Nat38
-@docs Nat39, Nat4, Nat40, Nat41, Nat42, Nat43, Nat44, Nat45, Nat46, Nat47, Nat48, Nat49, Nat5
-@docs Nat50, Nat51, Nat52, Nat53, Nat54, Nat55, Nat56, Nat57, Nat58, Nat59, Nat6, Nat60, Nat61
-@docs Nat62, Nat63, Nat64, Nat65, Nat66, Nat67, Nat68, Nat69, Nat7, Nat70, Nat71, Nat72, Nat73
-@docs Nat74, Nat75, Nat76, Nat77, Nat78, Nat79, Nat8, Nat80, Nat81, Nat82, Nat83, Nat84, Nat85
-@docs Nat86, Nat87, Nat88, Nat89, Nat9, Nat90, Nat91, Nat92, Nat93, Nat94, Nat95, Nat96, Nat97
-@docs Nat98, Nat99
+@docs Nat153, Nat154, Nat155, Nat156, Nat157, Nat158, Nat159, Nat16, Nat160, Nat17, Nat18
+@docs Nat19, Nat2, Nat20, Nat21, Nat22, Nat23, Nat24, Nat25, Nat26, Nat27, Nat28, Nat29, Nat3
+@docs Nat30, Nat31, Nat32, Nat33, Nat34, Nat35, Nat36, Nat37, Nat38, Nat39, Nat4, Nat40, Nat41
+@docs Nat42, Nat43, Nat44, Nat45, Nat46, Nat47, Nat48, Nat49, Nat5, Nat50, Nat51, Nat52, Nat53
+@docs Nat54, Nat55, Nat56, Nat57, Nat58, Nat59, Nat6, Nat60, Nat61, Nat62, Nat63, Nat64, Nat65
+@docs Nat66, Nat67, Nat68, Nat69, Nat7, Nat70, Nat71, Nat72, Nat73, Nat74, Nat75, Nat76, Nat77
+@docs Nat78, Nat79, Nat8, Nat80, Nat81, Nat82, Nat83, Nat84, Nat85, Nat86, Nat87, Nat88, Nat89
+@docs Nat9, Nat90, Nat91, Nat92, Nat93, Nat94, Nat95, Nat96, Nat97, Nat98, Nat99
 
 -}
 
@@ -1095,198 +1077,6 @@ type alias Nat160Plus n =
     N.Nat160Plus n
 
 
-{-| 161 + some n.
--}
-type alias Nat161Plus n =
-    N.Nat161Plus n
-
-
-{-| 162 + some n.
--}
-type alias Nat162Plus n =
-    N.Nat162Plus n
-
-
-{-| 163 + some n.
--}
-type alias Nat163Plus n =
-    N.Nat163Plus n
-
-
-{-| 164 + some n.
--}
-type alias Nat164Plus n =
-    N.Nat164Plus n
-
-
-{-| 165 + some n.
--}
-type alias Nat165Plus n =
-    N.Nat165Plus n
-
-
-{-| 166 + some n.
--}
-type alias Nat166Plus n =
-    N.Nat166Plus n
-
-
-{-| 167 + some n.
--}
-type alias Nat167Plus n =
-    N.Nat167Plus n
-
-
-{-| 168 + some n.
--}
-type alias Nat168Plus n =
-    N.Nat168Plus n
-
-
-{-| 169 + some n.
--}
-type alias Nat169Plus n =
-    N.Nat169Plus n
-
-
-{-| 170 + some n.
--}
-type alias Nat170Plus n =
-    N.Nat170Plus n
-
-
-{-| 171 + some n.
--}
-type alias Nat171Plus n =
-    N.Nat171Plus n
-
-
-{-| 172 + some n.
--}
-type alias Nat172Plus n =
-    N.Nat172Plus n
-
-
-{-| 173 + some n.
--}
-type alias Nat173Plus n =
-    N.Nat173Plus n
-
-
-{-| 174 + some n.
--}
-type alias Nat174Plus n =
-    N.Nat174Plus n
-
-
-{-| 175 + some n.
--}
-type alias Nat175Plus n =
-    N.Nat175Plus n
-
-
-{-| 176 + some n.
--}
-type alias Nat176Plus n =
-    N.Nat176Plus n
-
-
-{-| 177 + some n.
--}
-type alias Nat177Plus n =
-    N.Nat177Plus n
-
-
-{-| 178 + some n.
--}
-type alias Nat178Plus n =
-    N.Nat178Plus n
-
-
-{-| 179 + some n.
--}
-type alias Nat179Plus n =
-    N.Nat179Plus n
-
-
-{-| 180 + some n.
--}
-type alias Nat180Plus n =
-    N.Nat180Plus n
-
-
-{-| 181 + some n.
--}
-type alias Nat181Plus n =
-    N.Nat181Plus n
-
-
-{-| 182 + some n.
--}
-type alias Nat182Plus n =
-    N.Nat182Plus n
-
-
-{-| 183 + some n.
--}
-type alias Nat183Plus n =
-    N.Nat183Plus n
-
-
-{-| 184 + some n.
--}
-type alias Nat184Plus n =
-    N.Nat184Plus n
-
-
-{-| 185 + some n.
--}
-type alias Nat185Plus n =
-    N.Nat185Plus n
-
-
-{-| 186 + some n.
--}
-type alias Nat186Plus n =
-    N.Nat186Plus n
-
-
-{-| 187 + some n.
--}
-type alias Nat187Plus n =
-    N.Nat187Plus n
-
-
-{-| 188 + some n.
--}
-type alias Nat188Plus n =
-    N.Nat188Plus n
-
-
-{-| 189 + some n.
--}
-type alias Nat189Plus n =
-    N.Nat189Plus n
-
-
-{-| 190 + some n.
--}
-type alias Nat190Plus n =
-    N.Nat190Plus n
-
-
-{-| 191 + some n.
--}
-type alias Nat191Plus n =
-    N.Nat191Plus n
-
-
-{-| 192 + some n.
--}
-type alias Nat192Plus n =
-    N.Nat192Plus n
-
-
 {-| Exact the natural number 0.
 -}
 type alias Nat0 =
@@ -2251,195 +2041,3 @@ type alias Nat159 =
 -}
 type alias Nat160 =
     N.Nat160
-
-
-{-| Exact the natural number 161.
--}
-type alias Nat161 =
-    N.Nat161
-
-
-{-| Exact the natural number 162.
--}
-type alias Nat162 =
-    N.Nat162
-
-
-{-| Exact the natural number 163.
--}
-type alias Nat163 =
-    N.Nat163
-
-
-{-| Exact the natural number 164.
--}
-type alias Nat164 =
-    N.Nat164
-
-
-{-| Exact the natural number 165.
--}
-type alias Nat165 =
-    N.Nat165
-
-
-{-| Exact the natural number 166.
--}
-type alias Nat166 =
-    N.Nat166
-
-
-{-| Exact the natural number 167.
--}
-type alias Nat167 =
-    N.Nat167
-
-
-{-| Exact the natural number 168.
--}
-type alias Nat168 =
-    N.Nat168
-
-
-{-| Exact the natural number 169.
--}
-type alias Nat169 =
-    N.Nat169
-
-
-{-| Exact the natural number 170.
--}
-type alias Nat170 =
-    N.Nat170
-
-
-{-| Exact the natural number 171.
--}
-type alias Nat171 =
-    N.Nat171
-
-
-{-| Exact the natural number 172.
--}
-type alias Nat172 =
-    N.Nat172
-
-
-{-| Exact the natural number 173.
--}
-type alias Nat173 =
-    N.Nat173
-
-
-{-| Exact the natural number 174.
--}
-type alias Nat174 =
-    N.Nat174
-
-
-{-| Exact the natural number 175.
--}
-type alias Nat175 =
-    N.Nat175
-
-
-{-| Exact the natural number 176.
--}
-type alias Nat176 =
-    N.Nat176
-
-
-{-| Exact the natural number 177.
--}
-type alias Nat177 =
-    N.Nat177
-
-
-{-| Exact the natural number 178.
--}
-type alias Nat178 =
-    N.Nat178
-
-
-{-| Exact the natural number 179.
--}
-type alias Nat179 =
-    N.Nat179
-
-
-{-| Exact the natural number 180.
--}
-type alias Nat180 =
-    N.Nat180
-
-
-{-| Exact the natural number 181.
--}
-type alias Nat181 =
-    N.Nat181
-
-
-{-| Exact the natural number 182.
--}
-type alias Nat182 =
-    N.Nat182
-
-
-{-| Exact the natural number 183.
--}
-type alias Nat183 =
-    N.Nat183
-
-
-{-| Exact the natural number 184.
--}
-type alias Nat184 =
-    N.Nat184
-
-
-{-| Exact the natural number 185.
--}
-type alias Nat185 =
-    N.Nat185
-
-
-{-| Exact the natural number 186.
--}
-type alias Nat186 =
-    N.Nat186
-
-
-{-| Exact the natural number 187.
--}
-type alias Nat187 =
-    N.Nat187
-
-
-{-| Exact the natural number 188.
--}
-type alias Nat188 =
-    N.Nat188
-
-
-{-| Exact the natural number 189.
--}
-type alias Nat189 =
-    N.Nat189
-
-
-{-| Exact the natural number 190.
--}
-type alias Nat190 =
-    N.Nat190
-
-
-{-| Exact the natural number 191.
--}
-type alias Nat191 =
-    N.Nat191
-
-
-{-| Exact the natural number 192.
--}
-type alias Nat192 =
-    N.Nat192

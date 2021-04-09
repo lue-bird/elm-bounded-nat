@@ -261,11 +261,6 @@ toIntAnn =
 
 lastN : Int
 lastN =
-    192
-{- can be >= 168, avoided because of performance reasons.
--}
-lastNatN : Int
-lastNatN =
     160
 
 viewNNatsModule : Ui.Element msg
@@ -280,7 +275,7 @@ nNatsModule =
         PackageExposedModule
             { moduleComment =
                 \declarations->
-                    [ markdown ("`Nat (N Nat0 ...)` to `Nat (N " ++ String.fromInt lastNatN ++ " ...)`.")
+                    [ markdown ("`Nat (N Nat0 ...)` to `Nat (N " ++ String.fromInt lastN ++ " ...)`.")
                     , markdown "Bigger `Nat (N ...)` s start to slow down compilation, so they are avoided."
                     , markdown "See [`Nat.Bound.N`](Nat-Bound#N), [`Nat.Bound.ValueN`](Nat-Bound#ValueN) & [`NNat`](NNat) for an explanation."
                     , docTagsFrom NNatsValue declarations
@@ -299,7 +294,7 @@ nNatsModule =
         , importStmt [ "N" ] noAlias exposingAll
         ]
     , declarations =
-        List.range 0 lastNatN
+        List.range 0 lastN
             |> List.map
                 (\x ->
                     packageExposedFunDecl NNatsValue
