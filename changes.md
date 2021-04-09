@@ -80,3 +80,10 @@ Improved compiling speed using [indique/n](https://package.elm-lang.org/packages
 
 Use [indique/n 2.0.0](https://package.elm-lang.org/packages/indique/n/).
 - removed `Nat161`/`Nat161Plus` and above for better compiling speed
+
+## 5.0.0
+
+Changed `isAtLeast`'s `less` variant to be a `In ... maybeN`, not a `ValueIn`.
+- updated links to elm-bounded-array
+- replaced wrong usages of `natX |> NNat.toIn` in doc with `betweenXAndY`
+- Changed some argument names
