@@ -185,9 +185,9 @@ isAtMost triedUpperLimit min cases =
                 , equal = \() -> bigPresent
                 }
 
-    appropriateToy : { age : Nat (In Nat0 Nat17) } -> Toy
+    appropriateToy : { age : Nat (In min Nat17 maybeN) } -> Toy
 
-    appropriateExperience : { age : Nat (In Nat19 max) } -> Experience
+    appropriateExperience : { age : Nat (In (Nat19Plus orOlder) max maybeN) } -> Experience
 
 -}
 is :
