@@ -98,4 +98,4 @@ Corrected forgotten `maybeN`s, wrongly named `ValueMin/-In`s & minor doc mistake
 
 #### 5.0.3
 
-Corrected forgotten `maybeN`s & `min`s that were set to an exact value in doc
+Corrected forgotten `maybeN`s & `min`s that were set to an exact value in doc.
