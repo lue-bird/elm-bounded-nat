@@ -135,6 +135,8 @@ abs int =
 
 The resulting `List` always has at least 1 element.
 
+With [Arr.range](https://package.elm-lang.org/packages/lue-bird/elm-bounded-array/latest/Arr#range) the type even knows the length! Try it.
+
 -}
 range :
     Nat (In firstMin lastMin firstMaybeN)
@@ -258,7 +260,7 @@ If you want to handle the cases `< minimum` & `> maximum` explicitly, use [`isIn
 
 -}
 intInRange :
-    Nat (In min firstMax maybeN)
+    Nat (In min firstMax lowerMaybeN)
     -> Nat (In firstMax max upperMaybeN)
     -> Int
     -> Nat (ValueIn min max)
@@ -274,7 +276,7 @@ intInRange lowerLimit upperLimit =
 
 -}
 isIntAtLeast :
-    Nat (In min max maybeN)
+    Nat (In min max lowerMaybeN)
     -> Int
     -> Maybe (Nat (ValueMin min))
 isIntAtLeast minimum int =
@@ -309,7 +311,7 @@ If you want to handle the case `< minimum` yourself, use [`Nat.isIntAtLeast`](Na
 
 -}
 intAtLeast :
-    Nat (In min max maybeN)
+    Nat (In min max lowerMaybeN)
     -> Int
     -> Nat (ValueMin min)
 intAtLeast minimum =
