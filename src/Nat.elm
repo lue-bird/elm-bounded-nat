@@ -501,23 +501,23 @@ lowerMin =
     \_ -> Internal.newRange
 
 
-{-| Convert an exact `Nat (In min ...)` to a `Nat (ValueMin min)`.
+{-| Convert a `Nat (In min ...)` to a `Nat (ValueMin min)`.
 
-    in4To10 |> Nat.toMin
+    between3And10 |> Nat.toMin
     --> is of type Nat (ValueMin Nat4)
 
 There is **only 1 situation you should use this.**
 
 To make these the same type.
 
-    [ atLeast1, in1To10 ]
+    [ atLeast1, between1And10 ]
 
 Elm complains:
 
 > But all the previous elements in the list are: `Nat (ValueMin Nat1)`
 
     [ atLeast1
-    , in1To10 |> Nat.toMin
+    , between1And10 |> Nat.toMin
     ]
 
 -}
