@@ -94,4 +94,8 @@ Updated exposings & when to use `ValueSomething` in the readme.
 
 #### 5.0.2
 
-Corrected forgotten `maybeN`s, wrongly named `ValueMin/In`s & minor doc mistakes.
+Corrected forgotten `maybeN`s, wrongly named `ValueMin/-In`s & minor doc mistakes.
+
+#### 5.0.3
+
+Corrected forgotten `maybeN`s & `min`s that were set to an exact value in doc
