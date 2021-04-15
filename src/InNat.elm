@@ -34,10 +34,10 @@ If the maximum isn't known, use the operations in `MinNat`.
 
 -}
 
-import Internal
+import I as Internal
 import N exposing (Nat1Plus, Nat2Plus)
-import Nat exposing (Nat, bi, toInt)
-import Nat.Bound exposing (..)
+import Nat exposing (In, Is, N, Nat, To, ValueIn)
+import Val exposing (val, val2)
 
 
 
@@ -60,7 +60,7 @@ atMost :
     -> Nat (In min max maybeN)
     -> Nat (ValueIn min atLeastNewMax)
 atMost higherLimit min =
-    Internal.map (Basics.min (higherLimit |> toInt))
+    Internal.atMost higherLimit min
 
 
 {-| If the `Nat (In ...)` is less than a number, return that number instead.
@@ -77,7 +77,7 @@ atLeast :
     -> Nat (In min max maybeN)
     -> Nat (ValueIn newMin max)
 atLeast lowerLimit =
-    Internal.map (max (toInt lowerLimit))
+    Internal.atLeast lowerLimit
 
 
 
@@ -122,7 +122,7 @@ isAtLeast :
     -> result
 isAtLeast triedLowerLimit min cases =
     \inNat ->
-        if bi (>=) inNat triedLowerLimit then
+        if val2 (>=) inNat triedLowerLimit then
             .equalOrGreater cases (Internal.newRange inNat)
 
         else
@@ -165,7 +165,7 @@ isAtMost :
     -> result
 isAtMost triedUpperLimit min cases =
     \inNat ->
-        if toInt inNat <= (triedUpperLimit |> toInt) then
+        if val inNat <= (triedUpperLimit |> val) then
             .equalOrLess cases (Internal.newRange inNat)
 
         else
@@ -207,7 +207,7 @@ is :
     -> result
 is tried min cases =
     \inNat ->
-        case bi compare inNat tried of
+        case val2 compare inNat tried of
             EQ ->
                 .equal cases ()
 
@@ -270,10 +270,10 @@ isInRange :
     -> result
 isInRange interval min cases =
     \inNat ->
-        if bi (<) inNat (.first interval) then
+        if val2 (<) inNat (.first interval) then
             .less cases (Internal.newRange inNat)
 
-        else if bi (>) inNat (.last interval) then
+        else if val2 (>) inNat (.last interval) then
             .greater cases (Internal.newRange inNat)
 
         else

@@ -28,12 +28,12 @@ module MinNat exposing
 
 -}
 
+import I as Internal
 import InNat
-import Internal
 import N exposing (Nat1Plus, Nat2Plus)
 import NNats exposing (nat0)
-import Nat exposing (Nat, toInt)
-import Nat.Bound exposing (In, Is, N, To, ValueIn, ValueMin)
+import Nat exposing (In, Is, N, Nat, To, ValueIn, ValueMin)
+import Val exposing (val)
 
 
 
@@ -136,7 +136,7 @@ is :
     -> result
 is tried min cases =
     \minNat ->
-        case compare (toInt minNat) (toInt tried) of
+        case compare (val minNat) (val tried) of
             EQ ->
                 .equal cases ()
 
@@ -182,7 +182,7 @@ isAtLeast :
     -> result
 isAtLeast triedLowerLimit min cases =
     \minNat ->
-        if toInt minNat >= toInt triedLowerLimit then
+        if val minNat >= val triedLowerLimit then
             .equalOrGreater cases (Internal.newRange minNat)
 
         else
@@ -219,7 +219,7 @@ isAtMost :
     -> result
 isAtMost triedUpperLimit min cases =
     \minNat ->
-        if toInt minNat <= toInt triedUpperLimit then
+        if val minNat <= val triedUpperLimit then
             .equalOrLess cases (minNat |> Internal.newRange)
 
         else

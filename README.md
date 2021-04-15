@@ -8,18 +8,26 @@ toHexChar : Nat (In min Nat15 maybeN) -> Char
 
 **No number below 0 or above 15** can be passed in as an argument!
 
-Setup
+# examples
+
+```noformatingples
+elm install lue-bird/elm-bounded-nat
+elm install lue-bird/elm-typed-value
+```
 
 ```elm
-import Nat exposing (Nat)
-import Nat.Bound exposing (..)
-    --In, Only, N, Is, To, ValueIn, ValueOnly, ValueMin, ValueN
+import Nat exposing
+    ( Nat, In, Only, N, Is, To
+    , ValueIn, ValueOnly, ValueMin, ValueN
+    )
+--Nat0 to Nat160 & Nat1Plus to Nat160Plus
 import TypeNats exposing (..)
-    --Nat0 to Nat160 & Nat0Plus to Nat60Plus
-import NNats exposing (..) --nat0 to nat160
-import NNat
+--nat0 to nat160
+import NNats exposing (..)
 import InNat
 import MinNat
+-- from elm-typed-value
+import Val exposing (val, val2)
 ```
 
 

@@ -8,7 +8,6 @@ import Expect
 import NNat
 import NNats exposing (..)
 import Nat exposing (Nat)
-import Nat.Bound exposing (..)
 import Test exposing (Test, describe, test)
 import TypeNats exposing (..)
 

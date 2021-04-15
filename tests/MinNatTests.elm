@@ -19,7 +19,7 @@ suite =
         [ test "factorial"
             (\() ->
                 factorial nat4
-                    |> Nat.toInt
+                    |> val
                     |> Expect.equal 24
             )
         ]

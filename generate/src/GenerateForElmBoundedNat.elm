@@ -8,7 +8,7 @@ Thanks to [`the-sett/elm-syntax-dsl`](https://package.elm-lang.org/packages/the-
 -}
 
 import Browser
---import NNats exposing (..)
+import NNats exposing (..)
 import Bytes.Encode
 import Element as Ui
 import Element.Background as UiBg
@@ -24,6 +24,7 @@ import Elm.CodeGen
         , binOp
         , binOpChain
         , caseExpr
+        , fqVal
         , char
         , code
         , composel
@@ -36,7 +37,7 @@ import Elm.CodeGen
         , fqConstruct
         , fqFun
         , fqNamedPattern
-        , fqTyped
+        , fqVal
         , fun
         , funExpose
         , importStmt
@@ -104,6 +105,8 @@ type alias Model =
         ShownOrFolded (Ui.Element Msg)
     , typeNatsModuleShownOrFolded :
         ShownOrFolded (Ui.Element Msg)
+    , iValuesShownOrFolded :
+        ShownOrFolded (Ui.Element Msg)
     }
 
 
@@ -129,6 +132,7 @@ init : ( Model, Cmd Msg )
 init =
     ( { nNatsModuleShownOrFolded = Folded
       , typeNatsModuleShownOrFolded = Folded
+      , iValuesShownOrFolded = Folded
       }
     , Cmd.none
     )
@@ -137,12 +141,13 @@ init =
 type Msg
     = DownloadModules
     | DownloadModulesAtTime ( Time.Zone, Time.Posix )
-    | SwitchVisibleModule ModulesInElmNArrays
+    | SwitchVisibleModule CodeForElmBoundedArray
 
 
-type ModulesInElmNArrays
+type CodeForElmBoundedArray
     = NNats
     | TypeNats
+    | IValues
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -173,6 +178,7 @@ update msg model =
                  Zip.fromEntries
                     [ toZipEntry nNatsModule
                     , toZipEntry typeNatsModule
+                    , toZipEntry iValues
                     ]
                     |> Zip.toBytes
                 )
@@ -193,6 +199,13 @@ update msg model =
                             switchShownOrFolded
                                 (.typeNatsModuleShownOrFolded model)
                                 viewTypeNatsModule
+                    }
+                IValues ->
+                    { model
+                        | iValuesShownOrFolded =
+                            switchShownOrFolded
+                                (.iValuesShownOrFolded model)
+                                viewIValues
                     }
             , Cmd.none
             )
@@ -224,7 +237,7 @@ nAnn : Int  -> Elm.CodeGen.TypeAnnotation
 nAnn n =
     typed "ValueN"
         [ natXAnn n
-        , natXPlusAnn n (typeVar "more")
+        , natXPlusAnn n (typeVar "orMore")
         , isAnn n "a"
         , isAnn n "b"
         ]
@@ -250,8 +263,8 @@ natXPlusAnn x more =
         _-> typed ("Nat" ++ String.fromInt x ++ "Plus") [ more ]
 
 
-toIntAnn : Elm.CodeGen.TypeAnnotation
-toIntAnn =
+valAnn : Elm.CodeGen.TypeAnnotation
+valAnn =
     funAnn [ natNAnn (typeVar "n") ] intAnn
 
 
@@ -262,6 +275,31 @@ toIntAnn =
 lastN : Int
 lastN =
     160
+
+viewIValues : Ui.Element msg
+viewIValues =
+    Ui.module_ iValues
+
+iValues : Module Never
+iValues =
+    { name = [ "IValues" ]
+    , roleInPackage = PackageInternalModule
+    , imports = []
+    , declarations =
+        List.range 0 lastN
+            |> List.map
+                (\x->
+                    packageInternalExposedFunDecl
+                        (natNAnn (nAnn x))
+                        ("nat" ++ String.fromInt x)
+                        []
+                        (applyBinOp
+                            (construct "tag" [ int x ])
+                            piper
+                            (construct "isChecked" [ fun "Nat" ])
+                        )
+                )
+    }
 
 viewNNatsModule : Ui.Element msg
 viewNNatsModule =
@@ -282,13 +320,10 @@ nNatsModule =
                     ]
             }
     , imports =
-        [ importStmt [ "T" ] noAlias
+        [ importStmt [ "I" ] noAlias
             (exposingExplicit
-                ([ openTypeExpose "Nat"
-                ]
-                    ++ ([ "Is", "ValueN", "To" ]
-                            |> List.map typeOrAliasExpose
-                        )
+                ([ "ValueN", "Is", "To", "Nat" ]
+                    |> List.map typeOrAliasExpose
                 )
             )
         , importStmt [ "N" ] noAlias exposingAll
@@ -296,13 +331,13 @@ nNatsModule =
     , declarations =
         List.range 0 lastN
             |> List.map
-                (\x ->
+                (\x->
                     packageExposedFunDecl NNatsValue
                         [ markdown ("The exact `Nat` " ++ String.fromInt x ++ ".") ]
                         (natNAnn (nAnn x))
                         ("nat" ++ String.fromInt x)
                         []
-                        (construct "Nat" [ int x ])
+                        (fqVal [ "I" ] ("nat" ++ String.fromInt x))
                 )
     }
 
@@ -349,7 +384,7 @@ typeNatsModule =
                         ]
                         ("Nat" ++ String.fromInt n ++ "Plus")
                         [ "n" ]
-                        (fqTyped [ "N" ] ("Nat" ++ String.fromInt n ++ "Plus") [ typeVar "n" ])
+                        (fqVal [ "N" ] ("Nat" ++ String.fromInt n ++ "Plus") [ typeVar "n" ])
                 )
         , List.range 0 lastN
             |> List.map
@@ -359,7 +394,7 @@ typeNatsModule =
                         ]
                         ("Nat" ++ String.fromInt n)
                         []
-                        (fqTyped [ "N" ] ("Nat" ++ String.fromInt n) [])
+                        (fqVal [ "N" ] ("Nat" ++ String.fromInt n) [])
                 )
         ]
             |> List.concat
@@ -396,7 +431,7 @@ charPrefixed use last =
 
 
 view : Model -> Html Msg
-view { nNatsModuleShownOrFolded, typeNatsModuleShownOrFolded } =
+view { nNatsModuleShownOrFolded, typeNatsModuleShownOrFolded, iValuesShownOrFolded } =
     Ui.layoutWith
         { options =
             [ Ui.focusStyle
@@ -477,6 +512,9 @@ view { nNatsModuleShownOrFolded, typeNatsModuleShownOrFolded } =
                           )
                         , ( typeNatsModuleShownOrFolded
                           , ( "TypeNats", TypeNats )
+                          )
+                        , ( typeNatsModuleShownOrFolded
+                          , ( "values in I", IValues )
                           )
                         ]
                             |> List.map

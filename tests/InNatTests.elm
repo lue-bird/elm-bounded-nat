@@ -8,8 +8,7 @@ import InNat
 import MinNat
 import MinNatTests
 import NNats exposing (..)
-import Nat exposing (Nat)
-import Nat.Bound exposing (..)
+import Nat exposing (In, Nat, ValueIn, ValueMin)
 import Test exposing (Test, describe, test)
 import TypeNats exposing (..)
 
@@ -21,8 +20,7 @@ suite =
             [ test "ultraSafeFactorial"
                 (\() ->
                     ultraSafeFactorial nat4
-                        |> Nat.toInt
-                        |> Expect.equal 24
+                        |> Expect.equal (nat24 |> Nat.toMin |> Nat.lowerMin nat1)
                 )
             ]
         ]

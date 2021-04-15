@@ -17,9 +17,8 @@ module NNat exposing
 
 -}
 
-import Internal
-import Nat.Bound exposing (..)
-import T as Internal exposing (Nat)
+import I as Internal
+import Nat exposing (In, Is, N, Nat, To, ValueIn, ValueN)
 
 
 {-| The `Nat (N ...)` plus another `Nat (N ...)`. Give the added value twice as a tuple.
@@ -132,4 +131,4 @@ Elm complains:
 -}
 toIn : Nat (In min max maybeN) -> Nat (ValueIn min max)
 toIn =
-    Internal.toIn
+    Internal.newRange

@@ -1,10 +1,12 @@
 module Nat exposing
     ( Nat
+    , In, Only
+    , N, Is, To
+    , ValueMin, ValueIn, ValueN, ValueOnly
     , abs, range, random
     , intAtLeast, intInRange
     , isIntInRange, isIntAtLeast, theGreater, theSmaller
     , toPower, remainderBy, mul, div
-    , toInt, bi
     , lowerMin, toMin
     , maxIs
     )
@@ -12,6 +14,24 @@ module Nat exposing
 {-|
 
 @docs Nat
+
+
+## bounds
+
+
+### function argument
+
+@docs In, Only
+
+
+#### N
+
+@docs N, Is, To
+
+
+### value / return type
+
+@docs ValueMin, ValueIn, ValueN, ValueOnly
 
 
 ## create
@@ -34,11 +54,6 @@ module Nat exposing
 @docs toPower, remainderBy, mul, div
 
 
-## transform
-
-@docs toInt, bi
-
-
 ## drop information
 
 @docs lowerMin, toMin
@@ -50,11 +65,10 @@ module Nat exposing
 
 -}
 
-import Internal
+import I as Internal exposing (NatTag)
 import N exposing (Nat0, Nat1Plus)
-import Nat.Bound exposing (In, Is, N, To, ValueIn, ValueMin)
 import Random
-import T as Internal
+import Val exposing (Checked, Public, Val, val, val2)
 
 
 {-| A **bounded** natural number (`>= 0`).
@@ -93,7 +107,178 @@ import T as Internal
 
 -}
 type alias Nat range =
-    Internal.Nat range
+    Val Checked (NatTag range) Public Int
+
+
+
+-- ## bounds
+
+
+{-| `ValueIn minimum maximum`: A value somewhere within a minimum & maximum. We don't know the exact value, though.
+
+       ↓ minimum   ↓ maximum
+    ⨯ [✓ ✓ ✓ ✓ ✓ ✓ ✓] ⨯ ⨯ ⨯...
+
+To be used as a return type, **not** as a function argument.
+
+A number between 3 and 5
+
+    Nat (ValueIn Nat3 (Nat5Plus a))
+
+-}
+type alias ValueIn minimum maximum =
+    In minimum maximum Internal.NotN
+
+
+{-| `In minimum maximum maybeN`: Somewhere within a minimum & maximum.
+
+       ↓ minimum   ↓ maximum
+    ⨯ [✓ ✓ ✓ ✓ ✓ ✓ ✓] ⨯ ⨯ ⨯...
+
+Note: maximum >= minimum for every existing `Nat (In min max ...)`:
+
+    percent : Nat (In min Nat100 maybeN) -> Percent
+
+→ `min <= Nat100`
+
+If you want a number where you just care about the minimum, leave the `max` as a type _variable_.
+
+       ↓ minimum    ↓ maximum or  →
+    ⨯ [✓ ✓ ✓ ✓ ✓ ✓ ✓...
+
+Any natural number:
+
+    Nat (In min max maybeN)
+
+A number, at least 5:
+
+    Nat (In (Nat5Plus minMinus5) max maybeN)
+
+  - `max` could be a maximum value if there is one
+
+  - `maybeN` could contain extra information for `N ...` if the number was exact
+
+-}
+type alias In minimum maximum maybeN =
+    Internal.In minimum maximum maybeN
+
+
+{-| Only **value / return types should be `Min`**.
+
+Sometimes, you simply cannot compute a maximum.
+
+    abs : Int -> Nat (ValueIn Nat0 ??)
+
+This is where to use `Min`.
+
+    abs : Int -> Nat (Min Nat0)
+
+A number, which is at least 5 is be of type
+
+    Nat (ValueMin Nat5)
+
+Every `ValueMin min` is of type `In min ...`.
+
+-}
+type alias ValueMin minimum =
+    ValueIn minimum Internal.Infinity
+
+
+{-| Just the exact number.
+
+Only useful as a function **argument** type.
+
+Every `In NatXYZ (NatXYZPlus a) maybeN` is a `Only NatXYZ maybeN`.
+
+    byte : Arr (Only maybeN Nat8) Bit -> Byte
+
+→ A given [`Arr`](https://package.elm-lang.org/packages/lue-bird/elm-bounded-array/latest/) must have _exact 8_ `Bit`s.
+
+`Only` is useful for [`Arr`](https://package.elm-lang.org/packages/lue-bird/elm-bounded-array/latest/)s,
+but you will never need it in combination with `Nat`s.
+
+-}
+type alias Only n maybeN =
+    In n n maybeN
+
+
+{-| Just the exact number.
+
+Only useful as a **value & return** type.
+
+    repeatOnly :
+        Nat (Only n maybeN)
+        -> element
+        -> Arr (ValueOnly n) element
+
+→ A given [`Arr`](https://package.elm-lang.org/packages/lue-bird/elm-bounded-array/latest/) must has _exactly `n`_ `element`s.
+
+`ValueOnly` is useful for [`Arr`](https://package.elm-lang.org/packages/lue-bird/elm-bounded-array/latest/)s,
+but you will never need it in combination with `Nat`s.
+
+-}
+type alias ValueOnly n =
+    ValueIn n n
+
+
+{-| No special meaning.
+
+    Is a To b
+
+→ distance `b - a`.
+
+-}
+type alias To =
+    Internal.To
+
+
+{-| `Is a To b`: an exact value as the diffference `b - a`.
+
+    N Nat5
+        (Nat5Plus more)
+        (Is myAge To sistersAge)
+        (Is mothersAge To fathersAge)
+
+  - `myAge + 5 = sistersAge`
+  - `mothersAge + 5 = fathersAge`
+
+-}
+type alias Is a to b =
+    Internal.Is a to b
+
+
+{-| Expect an exact value.
+[`InNat.addN`](InNat#addN) for example also uses the knowledge that the number is exact to describe the number as differences between other type variables.
+
+    addN :
+        Nat
+            (N
+                added
+                (Is min To sumMin)
+                (Is max To sumMax)
+            )
+        -> Nat (In min max)
+        -> Nat (In sumMin sumMax)
+
+You can just ignore the second difference if you don't need it ([`MinNat.addN`](MinNat#addN)).
+
+    addN :
+        Nat (N added (Is min To sumMin) x)
+        -> Nat (In min max maybeN)
+        -> Nat (ValueMin sumMin)
+
+-}
+type alias N n asADifference asAnotherDifference =
+    ValueN n n asADifference asAnotherDifference
+
+
+{-| The most detailed description of an exact value.
+
+Don't use this as a function argument.
+
+-}
+type alias ValueN n atLeastN asADifference asAnotherDifference =
+    In n atLeastN (Internal.Differences asADifference asAnotherDifference)
 
 
 {-| The absolute value of an `Int`, which is `>= Nat0`.
@@ -120,7 +305,7 @@ If something like this isn't possible, use [`MinNat.intAtLeast`](MinNat#intAtLea
 -}
 abs : Int -> Nat (ValueMin Nat0)
 abs int =
-    Basics.abs int |> Internal.Nat
+    Internal.abs int
 
 
 {-| `Nat (ValueIn ...)`s from a first to a last value.
@@ -143,8 +328,7 @@ range :
     -> Nat (In lastMin lastMax lastMaybeN)
     -> List (Nat (ValueIn firstMin lastMax))
 range first last =
-    bi List.range first last
-        |> List.map Internal.Nat
+    Internal.range first last
 
 
 {-| Generate a random `Nat (ValueIn ...)` in a range.
@@ -154,24 +338,7 @@ random :
     -> Nat (In lastMin lastMax lastMaybeN)
     -> Random.Generator (Nat (ValueIn firstMin lastMax))
 random min max =
-    bi Random.int min max
-        |> Random.map Internal.Nat
-
-
-{-| Convert a `Nat` to an `Int`.
-
-    nat4 |> Nat.toInt --> 4
-    between4And10 |> Nat.toInt
-    atLeast4 |> Nat.toInt
-
-    compareNats : Nat range -> Nat range -> Order
-    compareNats a b =
-        compare (Nat.toInt a) (Nat.toInt b)
-
--}
-toInt : Nat range -> Int
-toInt =
-    Internal.toInt
+    Internal.random min max
 
 
 {-| The greater of 2 `Nat`s.
@@ -182,7 +349,7 @@ toInt =
 -}
 theGreater : Nat range -> Nat range -> Nat range
 theGreater a b =
-    if bi (>) a b then
+    if val2 (>) a b then
         a
 
     else
@@ -197,7 +364,7 @@ theGreater a b =
 -}
 theSmaller : Nat range -> Nat range -> Nat range
 theSmaller a b =
-    if bi (<) a b then
+    if val2 (<) a b then
         a
 
     else
@@ -280,11 +447,7 @@ isIntAtLeast :
     -> Int
     -> Maybe (Nat (ValueMin min))
 isIntAtLeast minimum int =
-    if int >= toInt minimum then
-        Just (Internal.Nat int)
-
-    else
-        Nothing
+    Internal.isIntAtLeast minimum int
 
 
 {-| A `Nat (ValueMin ...)` from an `Int`; if the `Int < minimum`, `minimum` is returned.
@@ -319,26 +482,6 @@ intAtLeast minimum =
         >> Maybe.withDefault (toMin minimum)
 
 
-{-| Use the `Int` values of two `Nat`s to return a result.
-
-    Nat.bi (>=) nat5 nat4 --> True
-
-    Nat.bi (>=) nat5 nat40 --> False
-
-Note, that you must give the `Nat`s in the same order you would give `Int`s.
-
-Don't overuse this.
-
--}
-bi :
-    (Int -> Int -> result)
-    -> Nat aRange
-    -> Nat bRange
-    -> result
-bi op a b =
-    op (toInt a) (toInt b)
-
-
 
 -- ## modify
 
@@ -360,7 +503,7 @@ mul :
     -> Nat (In min max maybeN)
     -> Nat (ValueMin min)
 mul natToMultiply =
-    Internal.map ((*) (toInt natToMultiply))
+    Internal.mul natToMultiply
 
 
 {-| Divide (`//`) by a `Nat >= 1`.
@@ -381,7 +524,7 @@ div :
     -> Nat (In min max maybeN)
     -> Nat (ValueIn Nat0 max)
 div divNat =
-    Internal.map (\x -> x // toInt divNat)
+    Internal.div divNat
 
 
 {-| The remainder after division.
@@ -400,7 +543,7 @@ remainderBy :
     -> Nat (In min max maybeN)
     -> Nat (ValueIn Nat0 max)
 remainderBy divNat =
-    Internal.map (Basics.remainderBy (divNat |> toInt))
+    Internal.remainderBy divNat
 
 
 {-| The `Nat ^ a Nat >= 1`.
@@ -418,7 +561,83 @@ toPower :
     -> Nat (In min max maybeN)
     -> Nat (ValueMin min)
 toPower power =
-    Internal.map (\x -> x ^ toInt power)
+    Internal.toPower power
+
+
+
+-- ## drop information
+
+
+{-| Set the minimum lower.
+
+    [ atLeast3, atLeast4 ]
+
+Elm complains:
+
+> But all the previous elements in the list are: `Nat (ValueMin Nat3)`
+
+    [ atLeast3
+    , atLeast4 |> Nat.lowerMin nat3
+    ]
+
+-}
+lowerMin :
+    Nat (In lowerMin min lowerMaybeN)
+    -> Nat (In min max maybeN)
+    -> Nat (ValueIn lowerMin max)
+lowerMin =
+    \_ -> Internal.newRange
+
+
+{-| Convert a `Nat (In min ...)` to a `Nat (ValueMin min)`.
+
+    between3And10 |> Nat.toMin
+    --> is of type Nat (ValueMin Nat4)
+
+There is **only 1 situation you should use this.**
+
+To make these the same type.
+
+    [ atLeast1, between1And10 ]
+
+Elm complains:
+
+> But all the previous elements in the list are: `Nat (ValueMin Nat1)`
+
+    [ atLeast1
+    , between1And10 |> Nat.toMin
+    ]
+
+-}
+toMin : Nat (In min max maybeN) -> Nat (ValueMin min)
+toMin =
+    Internal.newRange
+
+
+{-| Make it fit into functions with require a higher maximum.
+
+You should design type annotations as general as possible.
+
+    onlyAtMost18 : Nat (In min Nat18 maybeN)
+
+    onlyAtMost18 between3And8 --fine
+
+But once you implement `onlyAtMost18`, you might use the value in `onlyAtMost19`.
+
+    onlyAtMost18 value =
+        -- onlyAtMost19 value --error :(
+        onlyAtMost19
+            (value |> Nat.maxIs nat18 {- works :) -})
+
+[`lowerMin`](Nat#lowerMin) is also handy in those situations.
+
+-}
+maxIs :
+    Nat (N max (Is a To atLeastMax) x)
+    -> Nat (In min max maybeN)
+    -> Nat (In min atLeastMax maybeN)
+maxIs =
+    \_ -> Internal.newRange
 
 
 
@@ -474,79 +693,3 @@ addLossy :
     -> Nat (ValueMin min)
 addLossy natToAdd =
     Internal.add natToAdd
-
-
-
--- ## drop information
-
-
-{-| Set the minimum lower.
-
-    [ atLeast3, atLeast4 ]
-
-Elm complains:
-
-> But all the previous elements in the list are: `Nat (ValueMin Nat3)`
-
-    [ atLeast3
-    , atLeast4 |> Nat.lowerMin nat3
-    ]
-
--}
-lowerMin :
-    Nat (In lowerMin min lowerMaybeN)
-    -> Nat (In min max maybeN)
-    -> Nat (ValueIn lowerMin max)
-lowerMin =
-    \_ -> Internal.newRange
-
-
-{-| Convert a `Nat (In min ...)` to a `Nat (ValueMin min)`.
-
-    between3And10 |> Nat.toMin
-    --> is of type Nat (ValueMin Nat4)
-
-There is **only 1 situation you should use this.**
-
-To make these the same type.
-
-    [ atLeast1, between1And10 ]
-
-Elm complains:
-
-> But all the previous elements in the list are: `Nat (ValueMin Nat1)`
-
-    [ atLeast1
-    , between1And10 |> Nat.toMin
-    ]
-
--}
-toMin : Nat (In min max maybeN) -> Nat (ValueMin min)
-toMin =
-    Internal.toMin
-
-
-{-| Make it fit into functions with require a higher maximum.
-
-You should design type annotations as general as possible.
-
-    onlyAtMost18 : Nat (In min Nat18 maybeN)
-
-    onlyAtMost18 between3And8 --fine
-
-But once you implement `onlyAtMost18`, you might use the value in `onlyAtMost19`.
-
-    onlyAtMost18 value =
-        -- onlyAtMost19 value --error :(
-        onlyAtMost19
-            (value |> Nat.maxIs nat18 {- works :) -})
-
-[`lowerMin`](Nat#lowerMin) is also handy in those situations.
-
--}
-maxIs :
-    Nat (N max (Is a To atLeastMax) x)
-    -> Nat (In min max maybeN)
-    -> Nat (In min atLeastMax maybeN)
-maxIs =
-    \_ -> Internal.newRange

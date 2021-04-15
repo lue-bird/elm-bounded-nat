@@ -16,6 +16,7 @@
             "elm/random": "1.0.0",
             "elm/time": "1.0.0",
             "indique/n": "1.0.0",
+            "lue-bird/elm-typed-value": "1.0.0",
             "mdgriffith/elm-ui": "1.1.8",
             "pablohirafuji/elm-syntax-highlight": "3.4.0",
             "the-sett/elm-syntax-dsl": "5.2.0"
