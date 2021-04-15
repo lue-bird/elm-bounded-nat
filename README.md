@@ -31,7 +31,7 @@ import Val exposing (val, val2)
 ```
 
 
-## example: color
+## color
 
 ```elm
 rgb : Float -> Float -> Float -> Color
@@ -105,7 +105,7 @@ grey float =
 &emsp;
 
 
-## example: digit
+## digit
 
 ```elm
 toDigit : Char -> Maybe Int
@@ -134,7 +134,7 @@ The type of a value reflects how much you know.
 &emsp;
 
 
-## example: factorial
+## factorial
 
 ```elm
 intFactorial : Int -> Int
