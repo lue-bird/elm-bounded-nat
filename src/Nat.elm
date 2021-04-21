@@ -68,7 +68,7 @@ module Nat exposing
 import I as Internal exposing (NatTag)
 import N exposing (Nat0, Nat1Plus)
 import Random
-import Val exposing (Checked, Public, Val, val, val2)
+import Typed exposing (Checked, Public, Typed, val, val2)
 
 
 {-| A **bounded** natural number (`>= 0`).
@@ -107,7 +107,7 @@ import Val exposing (Checked, Public, Val, val, val2)
 
 -}
 type alias Nat range =
-    Val Checked (NatTag range) Public Int
+    Typed Checked (NatTag range) Public Int
 
 
 
@@ -192,9 +192,9 @@ Every `In NatXYZ (NatXYZPlus a) maybeN` is a `Only NatXYZ maybeN`.
 
     byte : Arr (Only maybeN Nat8) Bit -> Byte
 
-→ A given [`Arr`](https://package.elm-lang.org/packages/lue-bird/elm-bounded-array/latest/) must have _exact 8_ `Bit`s.
+→ A given [`Arr`](https://package.elm-lang.org/packages/lue-bird/elm-typesafe-array/latest/) must have _exact 8_ `Bit`s.
 
-`Only` is useful for [`Arr`](https://package.elm-lang.org/packages/lue-bird/elm-bounded-array/latest/)s,
+`Only` is useful for [`Arr`](https://package.elm-lang.org/packages/lue-bird/elm-typesafe-array/latest/)s,
 but you will never need it in combination with `Nat`s.
 
 -}
@@ -211,9 +211,9 @@ Only useful as a **value & return** type.
         -> element
         -> Arr (ValueOnly n) element
 
-→ A given [`Arr`](https://package.elm-lang.org/packages/lue-bird/elm-bounded-array/latest/) must has _exactly `n`_ `element`s.
+→ A given [`Arr`](https://package.elm-lang.org/packages/lue-bird/elm-typesafe-array/latest/) must has _exactly `n`_ `element`s.
 
-`ValueOnly` is useful for [`Arr`](https://package.elm-lang.org/packages/lue-bird/elm-bounded-array/latest/)s,
+`ValueOnly` is useful for [`Arr`](https://package.elm-lang.org/packages/lue-bird/elm-typesafe-array/latest/)s,
 but you will never need it in combination with `Nat`s.
 
 -}
@@ -320,7 +320,7 @@ abs int =
 
 The resulting `List` always has at least 1 element.
 
-With [Arr.range](https://package.elm-lang.org/packages/lue-bird/elm-bounded-array/latest/Arr#range) the type even knows the length! Try it.
+With [Arr.range](https://package.elm-lang.org/packages/lue-bird/elm-typesafe-array/latest/Arr#range) the type even knows the length! Try it.
 
 -}
 range :

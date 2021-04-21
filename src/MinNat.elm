@@ -33,7 +33,7 @@ import InNat
 import N exposing (Nat1Plus, Nat2Plus)
 import NNats exposing (nat0)
 import Nat exposing (In, Is, N, Nat, To, ValueIn, ValueMin)
-import Val exposing (val)
+import Typed exposing (val)
 
 
 

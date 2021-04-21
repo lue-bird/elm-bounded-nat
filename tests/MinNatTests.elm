@@ -7,10 +7,10 @@ import Expect
 import MinNat
 import NNat
 import NNats exposing (..)
-import Nat exposing (Nat)
-import Nat.Bound exposing (In, ValueIn, ValueMin)
+import Nat exposing (In, Nat, ValueIn, ValueMin)
 import Test exposing (Test, describe, test)
 import TypeNats exposing (..)
+import Typed exposing (val)
 
 
 suite : Test

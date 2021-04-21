@@ -37,7 +37,7 @@ If the maximum isn't known, use the operations in `MinNat`.
 import I as Internal
 import N exposing (Nat1Plus, Nat2Plus)
 import Nat exposing (In, Is, N, Nat, To, ValueIn)
-import Val exposing (val, val2)
+import Typed exposing (val, val2)
 
 
 

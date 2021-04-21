@@ -46,11 +46,11 @@ For performance reasons, the name is shortened, so that [`NNats`](NNats)'s compi
 
 import N exposing (..)
 import Random
-import Val exposing (Checked, Public, Val, isChecked, map, map2, tag, val, val2)
+import Typed exposing (Checked, Public, Typed, isChecked, map, map2, tag, val, val2)
 
 
 type alias Nat range =
-    Val Checked (NatTag range) Public Int
+    Typed Checked (NatTag range) Public Int
 
 
 type NatTag range
@@ -107,12 +107,12 @@ type D a b
 
 add : Nat addedRange -> Nat range -> Nat sumRange
 add natToAdd =
-    map2 (+) natToAdd >> isChecked Nat
+    val2 (+) natToAdd >> tag >> isChecked Nat
 
 
 sub : Nat subtractedRange -> Nat range -> Nat differenceRange
 sub natToSubtract =
-    map2 (\toSub x -> x - toSub) natToSubtract >> isChecked Nat
+    val2 (\toSub x -> x - toSub) natToSubtract >> tag >> isChecked Nat
 
 
 newRange : Nat min -> Nat newMin
@@ -152,9 +152,9 @@ intInRange :
     -> Int
     -> Nat (ValueIn min max)
 intInRange lowerLimit upperLimit =
-    tag
-        >> map2 Basics.min upperLimit
-        >> map2 Basics.max lowerLimit
+    Basics.min (val upperLimit)
+        >> Basics.max (val lowerLimit)
+        >> tag
         >> isChecked Nat
 
 
@@ -219,7 +219,7 @@ mul :
     -> Nat (In min max maybeN)
     -> Nat (ValueMin min)
 mul natToMultiply =
-    map2 (*) natToMultiply >> isChecked Nat
+    val2 (*) natToMultiply >> tag >> isChecked Nat
 
 
 div :
@@ -235,7 +235,7 @@ remainderBy :
     -> Nat (In min max maybeN)
     -> Nat (ValueIn Nat0 max)
 remainderBy divNat =
-    map2 Basics.remainderBy divNat >> isChecked Nat
+    val2 Basics.remainderBy divNat >> tag >> isChecked Nat
 
 
 toPower :

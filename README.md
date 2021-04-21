@@ -27,7 +27,7 @@ import NNats exposing (..)
 import InNat
 import MinNat
 -- from elm-typed-value
-import Val exposing (val, val2)
+import Typed exposing (val, val2)
 ```
 
 
@@ -235,10 +235,10 @@ which you should also never do, allow `Nat (In min ...)` with any max & `Nat (Va
 charFromCode : Nat (In min max maybeN) -> Char
 ```
 
-Take a look at [`elm-bounded-array`][bounded-array] to see a lot of this in action!
+Take a look at [`elm-typesafe-array`][bounded-array] to see a lot of this in action!
 
 You get to know that
 - a `Nat (In ...)` is very useful as an index
 - `Nat.Bound`s can describe amounts well
 
-[bounded-array]: https://package.elm-lang.org/packages/lue-bird/elm-bounded-array/latest/
+[bounded-array]: https://package.elm-lang.org/packages/lue-bird/elm-typesafe-array/latest/
