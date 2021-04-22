@@ -100,7 +100,7 @@ Corrected forgotten `maybeN`s, wrongly named `ValueMin/-In`s & minor doc mistake
 
 Corrected forgotten `maybeN`s & `min`s that were set to an exact value in doc.
 
-#### 6.0.0
+## 6.0.0
 
 `Nat range` is now of type `Typed Checked (NatTag range) Public Int` from [`elm-typed-value`](https://package.elm-lang.org/packages/lue-bird/elm-typed-value/4.0.0/).
 - removed `Nat.toInt` & `Nat.bi`. Use `val`/`val2` in `Typed`
