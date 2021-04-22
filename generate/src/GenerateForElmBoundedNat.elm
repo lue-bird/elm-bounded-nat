@@ -10,6 +10,7 @@ Thanks to [`the-sett/elm-syntax-dsl`](https://package.elm-lang.org/packages/the-
 import Browser
 import NNats exposing (..)
 import Bytes.Encode
+import NNats exposing (..)
 import Element as Ui
 import Element.Background as UiBg
 import Element.Border as UiBorder
@@ -37,7 +38,7 @@ import Elm.CodeGen
         , fqConstruct
         , fqFun
         , fqNamedPattern
-        , fqVal
+        , fqTyped
         , fun
         , funExpose
         , importStmt
@@ -384,7 +385,7 @@ typeNatsModule =
                         ]
                         ("Nat" ++ String.fromInt n ++ "Plus")
                         [ "n" ]
-                        (fqVal [ "N" ] ("Nat" ++ String.fromInt n ++ "Plus") [ typeVar "n" ])
+                        (fqTyped [ "N" ] ("Nat" ++ String.fromInt n ++ "Plus") [ typeVar "n" ])
                 )
         , List.range 0 lastN
             |> List.map
@@ -394,7 +395,7 @@ typeNatsModule =
                         ]
                         ("Nat" ++ String.fromInt n)
                         []
-                        (fqVal [ "N" ] ("Nat" ++ String.fromInt n) [])
+                        (fqTyped [ "N" ] ("Nat" ++ String.fromInt n) [])
                 )
         ]
             |> List.concat
