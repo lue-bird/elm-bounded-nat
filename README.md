@@ -20,12 +20,14 @@ import Nat exposing
     ( Nat, In, Only, N, Is, To
     , ValueIn, ValueOnly, ValueMin, ValueN
     )
---Nat0 to Nat160 & Nat1Plus to Nat160Plus
-import TypeNats exposing (..)
---nat0 to nat160
 import NNats exposing (..)
+    -- nat0 to nat160
 import InNat
 import MinNat
+
+import TypeNats exposing (..)
+    -- Nat0 to Nat160 & Nat1Plus to Nat160Plus
+
 -- from elm-typed-value
 import Typed exposing (val, val2)
 ```
