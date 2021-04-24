@@ -292,7 +292,9 @@ value =
 For decoded `Int`s lower than minimum expected value, the `Result` is an error message.
 
 -}
-serialize : Nat (N lowerLimit x y) -> Serialize.Codec String (Nat (ValueMin lowerLimit))
+serialize :
+    Nat (In minLowerLimit maxLowerLimit lowerLimitMaybeN)
+    -> Serialize.Codec String (Nat (ValueMin minLowerLimit))
 serialize lowerLimit =
     Internal.serialize
         { lowerLimit = lowerLimit

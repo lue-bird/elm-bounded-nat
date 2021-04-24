@@ -218,10 +218,10 @@ random min max =
 
 
 serialize :
-    { lowerLimit : Nat (N lowerLimit x y)
+    { lowerLimit : Nat (In minLowerLimit maxLowerLimit lowerLimitMaybeN)
     , isGreaterThanUpperLimit : Int -> Bool
     }
-    -> Serialize.Codec String (Nat (In lowerLimit upperLimit NotN))
+    -> Serialize.Codec String (Nat (ValueIn minLowerLimit upperLimit))
 serialize { lowerLimit, isGreaterThanUpperLimit } =
     Serialize.int
         |> Typed.serializeChecked Nat
