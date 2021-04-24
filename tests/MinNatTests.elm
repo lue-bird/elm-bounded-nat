@@ -40,7 +40,7 @@ factorialHelp : Nat (In Nat0 max maybeN) -> Nat (ValueMin Nat1)
 factorialHelp =
     MinNat.isAtLeast nat1
         { min = nat0 }
-        { less = \_ -> nat1 |> Nat.toMin
+        { less = \_ -> nat1 |> MinNat.value
         , equalOrGreater =
             \atLeast1 ->
                 atLeast1
@@ -63,7 +63,7 @@ listLength =
             MinNat.addN nat1
                 >> Nat.lowerMin nat0
         )
-        (nat0 |> Nat.toMin)
+        (nat0 |> MinNat.value)
 
 
 
@@ -97,6 +97,6 @@ testSubN =
 
 testLowerMin : List (Nat (ValueIn Nat3 (Nat4Plus a)))
 testLowerMin =
-    [ nat3 |> NNat.toIn
-    , nat4 |> NNat.toIn |> Nat.lowerMin nat3
+    [ nat3 |> InNat.value
+    , nat4 |> InNat.value |> Nat.lowerMin nat3
     ]

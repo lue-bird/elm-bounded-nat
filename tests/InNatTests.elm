@@ -20,7 +20,7 @@ suite =
             [ test "ultraSafeFactorial"
                 (\() ->
                     ultraSafeFactorial nat4
-                        |> Expect.equal (nat24 |> Nat.toMin |> Nat.lowerMin nat1)
+                        |> Expect.equal (nat24 |> MinNat.value |> Nat.lowerMin nat1)
                 )
             ]
         ]
@@ -43,7 +43,7 @@ factorialHelp : Nat (In Nat0 max maybeN) -> Nat (ValueMin Nat1)
 factorialHelp =
     MinNat.isAtLeast nat1
         { min = nat0 }
-        { less = \_ -> nat1 |> Nat.toMin
+        { less = \_ -> nat1 |> MinNat.value
         , equalOrGreater =
             \atLeast1 ->
                 atLeast1

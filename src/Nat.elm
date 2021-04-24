@@ -7,7 +7,7 @@ module Nat exposing
     , intAtLeast, intInRange
     , isIntInRange, isIntAtLeast, theGreater, theSmaller
     , toPower, remainderBy, mul, div
-    , lowerMin, toMin
+    , lowerMin
     , maxIs
     )
 
@@ -56,7 +56,7 @@ module Nat exposing
 
 ## drop information
 
-@docs lowerMin, toMin
+@docs lowerMin
 
 
 ## restore information
@@ -298,7 +298,7 @@ Really only use this if you want the absolute value.
                 MinNat.addN nat1
                     >> Nat.lowerMin nat0
             )
-            (nat0 |> Nat.toMin)
+            (nat0 |> MinNat.value)
 
 If something like this isn't possible, use [`MinNat.intAtLeast`](MinNat#intAtLeast)!
 
@@ -468,7 +468,7 @@ But avoid it if you can do better, like
                 MinNat.addN nat1
                     >> Nat.lowerMin nat0
             )
-            (nat0 |> Nat.toMin)
+            (nat0 |> MinNat.value)
 
 If you want to handle the case `< minimum` yourself, use [`Nat.isIntAtLeast`](Nat#isIntAtLeast).
 
@@ -479,7 +479,7 @@ intAtLeast :
     -> Nat (ValueMin min)
 intAtLeast minimum =
     isIntAtLeast minimum
-        >> Maybe.withDefault (toMin minimum)
+        >> Maybe.withDefault (Internal.newRange minimum)
 
 
 
@@ -587,31 +587,6 @@ lowerMin :
     -> Nat (ValueIn lowerMin max)
 lowerMin =
     \_ -> Internal.newRange
-
-
-{-| Convert a `Nat (In min ...)` to a `Nat (ValueMin min)`.
-
-    between3And10 |> Nat.toMin
-    --> is of type Nat (ValueMin Nat4)
-
-There is **only 1 situation you should use this.**
-
-To make these the same type.
-
-    [ atLeast1, between1And10 ]
-
-Elm complains:
-
-> But all the previous elements in the list are: `Nat (ValueMin Nat1)`
-
-    [ atLeast1
-    , between1And10 |> Nat.toMin
-    ]
-
--}
-toMin : Nat (In min max maybeN) -> Nat (ValueMin min)
-toMin =
-    Internal.newRange
 
 
 {-| Make it fit into functions with require a higher maximum.

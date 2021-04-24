@@ -1,6 +1,8 @@
 module MinNat exposing
     ( is, isAtLeast, isAtMost
     , subN, add, sub, addN
+    , value
+    , serialize
     )
 
 {-| 2 situations where you use these operations instead of the ones in [`Nat`](Nat) or [`InNat`](InNat):
@@ -26,6 +28,16 @@ module MinNat exposing
 
 @docs subN, add, sub, addN
 
+
+## drop information
+
+@docs value
+
+
+## extra
+
+@docs serialize
+
 -}
 
 import I as Internal
@@ -33,6 +45,7 @@ import InNat
 import N exposing (Nat1Plus, Nat2Plus)
 import NNats exposing (nat0)
 import Nat exposing (In, Is, N, Nat, To, ValueIn, ValueMin)
+import Serialize
 import Typed exposing (val)
 
 
@@ -159,7 +172,7 @@ factorial =
     Nat.lowerMin nat0
         >> MinNat.isAtLeast nat1
             { min = nat0 }
-            { less = \_ -> nat1 |> Nat.toMin
+            { less = \_ -> nat1 |> MinNat.value
             , equalOrGreater =
                 \atLeast1 ->
                     atLeast1
@@ -224,3 +237,64 @@ isAtMost triedUpperLimit min cases =
 
         else
             .greater cases (Internal.newRange minNat)
+
+
+
+-- ## drop information
+
+
+{-| Convert a `Nat (In min ...)` to a `Nat (ValueMin min)`.
+
+    between3And10 |> MinNat.value
+    --> is of type Nat (ValueMin Nat4)
+
+There is **only 1 situation you should use this.**
+
+To make these the same type.
+
+    [ atLeast1, between1And10 ]
+
+Elm complains:
+
+> But all the previous elements in the list are: `Nat (ValueMin Nat1)`
+
+    [ atLeast1
+    , between1And10 |> MinNat.value
+    ]
+
+-}
+value : Nat (In min max maybeN) -> Nat (ValueMin min)
+value =
+    Internal.newRange
+
+
+
+-- ## extra
+
+
+{-| A [`Codec`](https://package.elm-lang.org/packages/MartinSStewart/elm-serialize/latest/) to serialize `Nat`s with a lower limit.
+
+    import Serialize
+
+    serializeNaturalNumber : Serialize.Codec String (Nat (ValueMin Nat0))
+    serializeNaturalNumber =
+        MinNat.serialize nat0
+
+    encode : Nat (In min max maybeN) -> Bytes
+    encode =
+        MinNat.value
+            >> Serialize.encodeToBytes serializeNaturalNumber
+
+    decode : Bytes -> Result (Serialize.Error String) (Nat (ValueMin Nat0))
+    decode =
+        Serialize.decodeFromBytes serializeNaturalNumber
+
+For decoded `Int`s lower than minimum expected value, the `Result` is an error message.
+
+-}
+serialize : Nat (N lowerLimit x y) -> Serialize.Codec String (Nat (ValueMin lowerLimit))
+serialize lowerLimit =
+    Internal.serialize
+        { lowerLimit = lowerLimit
+        , isGreaterThanUpperLimit = always False
+        }

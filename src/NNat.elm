@@ -1,7 +1,4 @@
-module NNat exposing
-    ( add, sub
-    , toIn
-    )
+module NNat exposing (add, sub)
 
 {-| Operations that only apply for `Nat (N ...)`s.
 
@@ -10,15 +7,10 @@ module NNat exposing
 
 @docs add, sub
 
-
-## drop information
-
-@docs toIn
-
 -}
 
 import I as Internal
-import Nat exposing (In, Is, N, Nat, To, ValueIn, ValueN)
+import Nat exposing (Is, N, Nat, To, ValueN)
 
 
 {-| The `Nat (N ...)` plus another `Nat (N ...)`. Give the added value twice as a tuple.
@@ -103,32 +95,3 @@ sub :
             )
 sub nNatToSubtract =
     Internal.sub (nNatToSubtract |> Tuple.first)
-
-
-
--- ## drop information
-
-
-{-| Convert it to a `Nat (ValueIn min max)`.
-
-    nat4 |> NNat.toIn
-    --> is of type Nat (ValueIn Nat4 (Nat4Plus a))
-
-There is **only 1 situation you should use this.**
-
-To make these the same type.
-
-    [ in3To10, nat3 ]
-
-Elm complains:
-
-> But all the previous elements in the list are: `Nat (ValueIn Nat3)`
-
-    [ in3To10
-    , nat3 |> NNat.toIn
-    ]
-
--}
-toIn : Nat (In min max maybeN) -> Nat (ValueIn min max)
-toIn =
-    Internal.newRange

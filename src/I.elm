@@ -4,8 +4,9 @@ module I exposing
     , isIntInRange, isIntAtLeast, atLeast, atMost
     , intInRange
     , mul, toPower, remainderBy, div
+    , serialize, random, range
     , nat0, nat1, nat10, nat100, nat101, nat102, nat103, nat104, nat105, nat106, nat107, nat108, nat109, nat11, nat110, nat111, nat112, nat113, nat114, nat115, nat116, nat117, nat118, nat119, nat12, nat120, nat121, nat122, nat123, nat124, nat125, nat126, nat127, nat128, nat129, nat13, nat130, nat131, nat132, nat133, nat134, nat135, nat136, nat137, nat138, nat139, nat14, nat140, nat141, nat142, nat143, nat144, nat145, nat146, nat147, nat148, nat149, nat15, nat150, nat151, nat152, nat153, nat154, nat155, nat156, nat157, nat158, nat159, nat16, nat160, nat17, nat18, nat19, nat2, nat20, nat21, nat22, nat23, nat24, nat25, nat26, nat27, nat28, nat29, nat3, nat30, nat31, nat32, nat33, nat34, nat35, nat36, nat37, nat38, nat39, nat4, nat40, nat41, nat42, nat43, nat44, nat45, nat46, nat47, nat48, nat49, nat5, nat50, nat51, nat52, nat53, nat54, nat55, nat56, nat57, nat58, nat59, nat6, nat60, nat61, nat62, nat63, nat64, nat65, nat66, nat67, nat68, nat69, nat7, nat70, nat71, nat72, nat73, nat74, nat75, nat76, nat77, nat78, nat79, nat8, nat80, nat81, nat82, nat83, nat84, nat85, nat86, nat87, nat88, nat89, nat9, nat90, nat91, nat92, nat93, nat94, nat95, nat96, nat97, nat98, nat99
-    , abs, random, range
+    , abs
     )
 
 {-| The internals of this package. Only this package can mark `Int`s as `Nat`s.
@@ -38,6 +39,11 @@ For performance reasons, the name is shortened, so that [`NNats`](NNats)'s compi
 @docs mul, toPower, remainderBy, div
 
 
+## other
+
+@docs serialize, random, range
+
+
 ## NNats
 
 @docs nat0, nat1, nat10, nat100, nat101, nat102, nat103, nat104, nat105, nat106, nat107, nat108, nat109, nat11, nat110, nat111, nat112, nat113, nat114, nat115, nat116, nat117, nat118, nat119, nat12, nat120, nat121, nat122, nat123, nat124, nat125, nat126, nat127, nat128, nat129, nat13, nat130, nat131, nat132, nat133, nat134, nat135, nat136, nat137, nat138, nat139, nat14, nat140, nat141, nat142, nat143, nat144, nat145, nat146, nat147, nat148, nat149, nat15, nat150, nat151, nat152, nat153, nat154, nat155, nat156, nat157, nat158, nat159, nat16, nat160, nat17, nat18, nat19, nat2, nat20, nat21, nat22, nat23, nat24, nat25, nat26, nat27, nat28, nat29, nat3, nat30, nat31, nat32, nat33, nat34, nat35, nat36, nat37, nat38, nat39, nat4, nat40, nat41, nat42, nat43, nat44, nat45, nat46, nat47, nat48, nat49, nat5, nat50, nat51, nat52, nat53, nat54, nat55, nat56, nat57, nat58, nat59, nat6, nat60, nat61, nat62, nat63, nat64, nat65, nat66, nat67, nat68, nat69, nat7, nat70, nat71, nat72, nat73, nat74, nat75, nat76, nat77, nat78, nat79, nat8, nat80, nat81, nat82, nat83, nat84, nat85, nat86, nat87, nat88, nat89, nat9, nat90, nat91, nat92, nat93, nat94, nat95, nat96, nat97, nat98, nat99
@@ -46,7 +52,8 @@ For performance reasons, the name is shortened, so that [`NNats`](NNats)'s compi
 
 import N exposing (..)
 import Random
-import Typed exposing (Checked, Public, Typed, isChecked, map, map2, tag, val, val2)
+import Serialize
+import Typed exposing (Checked, Public, Typed, isChecked, map, tag, val, val2)
 
 
 type alias Nat range =
@@ -208,6 +215,27 @@ random :
 random min max =
     val2 Random.int min max
         |> Random.map (tag >> isChecked Nat)
+
+
+serialize :
+    { lowerLimit : Nat (N lowerLimit x y)
+    , isGreaterThanUpperLimit : Int -> Bool
+    }
+    -> Serialize.Codec String (Nat (In lowerLimit upperLimit NotN))
+serialize { lowerLimit, isGreaterThanUpperLimit } =
+    Serialize.int
+        |> Typed.serializeChecked Nat
+            (\int ->
+                if int < val lowerLimit then
+                    Err "the decoded Int was lower than the expected minimum value"
+
+                else if isGreaterThanUpperLimit int then
+                    Err "the decoded Int was greater than the expected maximum value"
+
+                else
+                    Ok int
+            )
+            identity
 
 
 

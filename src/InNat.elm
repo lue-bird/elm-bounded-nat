@@ -2,6 +2,8 @@ module InNat exposing
     ( atMost, atLeast
     , is, isInRange, isAtLeast, isAtMost
     , addN, subN, add, sub
+    , value
+    , serialize
     )
 
 {-| Operations when you know the `maximum` of the `Nat (In minimum maximum maybeN)`.
@@ -32,11 +34,22 @@ If the maximum isn't known, use the operations in `MinNat`.
 
 @docs addN, subN, add, sub
 
+
+## drop information
+
+@docs value
+
+
+## extra
+
+@docs serialize
+
 -}
 
 import I as Internal
 import N exposing (Nat1Plus, Nat2Plus)
 import Nat exposing (In, Is, N, Nat, To, ValueIn)
+import Serialize
 import Typed exposing (val, val2)
 
 
@@ -356,3 +369,65 @@ subN :
     -> Nat (ValueIn differenceMin differenceMax)
 subN nNatToSubtract =
     Internal.sub nNatToSubtract
+
+
+
+-- ## drop information
+
+
+{-| Convert it to a `Nat (ValueIn min max)`.
+
+    nat4 |> InNat.value
+    --> is of type Nat (ValueIn Nat4 (Nat4Plus a))
+
+Example
+
+    [ in3To10, nat3 ]
+
+Elm complains:
+
+> But all the previous elements in the list are: `Nat (ValueIn Nat3 Nat10)`
+
+    [ in3To10
+    , nat3 |> InNat.value
+    ]
+
+-}
+value : Nat (In min max maybeN) -> Nat (ValueIn min max)
+value =
+    Internal.newRange
+
+
+
+-- ## extra
+
+
+{-| A [`Codec`](https://package.elm-lang.org/packages/MartinSStewart/elm-serialize/latest/) to serialize `Nat`s with a lower limit.
+
+    import Serialize
+
+    serializePercent : Serialize.Codec String (Nat (ValueIn Nat0 (Nat100Plus a)))
+    serializePercent =
+        InNat.serialize nat0 nat100
+
+    encode : Nat (In min Nat100 maybeN) -> Bytes
+    encode =
+        InNat.value
+            >> Serialize.encodeToBytes serializePercent
+
+    decode : Bytes -> Result (Serialize.Error String) (Nat (ValueIn Nat0 (Nat100Plus a)))
+    decode =
+        Serialize.decodeFromBytes serializePercent
+
+For decoded `Int`s lower than minimum expected value, the `Result` is an error message.
+
+-}
+serialize :
+    Nat (N lowerLimit x y)
+    -> Nat (N upperLimit (Is more To atLeastUpperLimit) z)
+    -> Serialize.Codec String (Nat (ValueIn lowerLimit atLeastUpperLimit))
+serialize lowerLimit upperLimit =
+    Internal.serialize
+        { lowerLimit = lowerLimit
+        , isGreaterThanUpperLimit = \int -> int > val upperLimit
+        }

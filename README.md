@@ -162,7 +162,7 @@ factorialHelp =
         { min = nat0 } -- the minimum of the x
         { less =
             -- x < 1 ? → then 1
-            \_ -> nat1 |> Nat.toMin
+            \_ -> nat1 |> MinNat.value
         , equalOrGreater =
             \atLeast1 ->
                 -- a Nat (ValueMin Nat1)
