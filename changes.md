@@ -106,7 +106,7 @@ Corrected forgotten `maybeN`s & `min`s that were set to an exact value in doc.
 - removed `Nat.toInt` & `Nat.bi`. Use `val`/`val2` in `Typed`
 - merged `Nat.Bound` types into `Nat`
 
-### 7.0.0
+## 7.0.0
 
 - added `MinNat.serialize` & `InNat.serialize`
 - moved & renamed `toIn` from `NNat` to `InNat.value`
