@@ -85,7 +85,7 @@ Use [indique/n 2.0.0](https://package.elm-lang.org/packages/indique/n/).
 
 Changed `isAtLeast`'s `less` variant to be a `In ... maybeN`, not a `ValueIn`.
 - updated links to elm-bounded-array
-- replaced wrong usages of `natX |> NNat.toIn` in doc with `betweenXAndY`
+- replaced wrong usages of `natX |> InNat.value` in doc with `betweenXAndY`
 - Changed some argument names
 
 #### 5.0.1
@@ -105,3 +105,9 @@ Corrected forgotten `maybeN`s & `min`s that were set to an exact value in doc.
 `Nat range` is now of type `Typed Checked (NatTag range) Public Int` from [`elm-typed-value`](https://package.elm-lang.org/packages/lue-bird/elm-typed-value/4.0.0/).
 - removed `Nat.toInt` & `Nat.bi`. Use `val`/`val2` in `Typed`
 - merged `Nat.Bound` types into `Nat`
+
+### 7.0.0
+
+- added `MinNat.serialize` & `InNat.serialize`
+- moved & renamed `toIn` from `NNat` to `InNat.value`
+- moved & renamed `toMin` from `Nat` to `MinNat.value`
