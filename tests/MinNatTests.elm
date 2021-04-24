@@ -4,8 +4,8 @@ module MinNatTests exposing (factorial, suite)
 -}
 
 import Expect
+import InNat
 import MinNat
-import NNat
 import NNats exposing (..)
 import Nat exposing (In, Nat, ValueIn, ValueMin)
 import Test exposing (Test, describe, test)
