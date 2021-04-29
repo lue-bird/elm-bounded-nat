@@ -121,7 +121,7 @@ sub inNatToSubtract maxSubtracted =
 
 {-| Compare the `Nat (ValueMin ...)` to a `Nat (N ...)`. Is it `greater`, `less` or `equal`?
 
-`min` ensures that the `Nat (N ...)` is bigger than the minimum.
+`min` ensures that the `Nat (N ...)` is greater than the minimum.
 
     present =
         Nat.lowerMin nat0
@@ -193,9 +193,9 @@ isAtLeast :
         }
     -> Nat (In min max maybeN)
     -> result
-isAtLeast triedLowerLimit min cases =
+isAtLeast triedLowerBound min cases =
     \minNat ->
-        if val minNat >= val triedLowerLimit then
+        if val minNat >= val triedLowerBound then
             .equalOrGreater cases (Internal.newRange minNat)
 
         else
@@ -230,9 +230,9 @@ isAtMost :
         }
     -> Nat (In min max maybeN)
     -> result
-isAtMost triedUpperLimit min cases =
+isAtMost triedUpperBound min cases =
     \minNat ->
-        if val minNat <= val triedUpperLimit then
+        if val minNat <= val triedUpperBound then
             .equalOrLess cases (minNat |> Internal.newRange)
 
         else
@@ -272,11 +272,14 @@ value =
 -- ## extra
 
 
-{-| A [`Codec`](https://package.elm-lang.org/packages/MartinSStewart/elm-serialize/latest/) to serialize `Nat`s with a lower limit.
+{-| A [`Codec`](https://package.elm-lang.org/packages/MartinSStewart/elm-serialize/latest/) to serialize `Nat`s with a lower bound.
 
     import Serialize
 
-    serializeNaturalNumber : Serialize.Codec String (Nat (ValueMin Nat0))
+    serializeNaturalNumber :
+        Serialize.Codec
+            String
+            (Nat (ValueMin Nat0))
     serializeNaturalNumber =
         MinNat.serialize nat0
 
@@ -285,18 +288,20 @@ value =
         MinNat.value
             >> Serialize.encodeToBytes serializeNaturalNumber
 
-    decode : Bytes -> Result (Serialize.Error String) (Nat (ValueMin Nat0))
+    decode :
+        Bytes
+        -> Result (Serialize.Error String) (Nat (ValueMin Nat0))
     decode =
         Serialize.decodeFromBytes serializeNaturalNumber
 
-For decoded `Int`s lower than minimum expected value, the `Result` is an error message.
-
 -}
 serialize :
-    Nat (In minLowerLimit maxLowerLimit lowerLimitMaybeN)
-    -> Serialize.Codec String (Nat (ValueMin minLowerLimit))
-serialize lowerLimit =
-    Internal.serialize
-        { lowerLimit = lowerLimit
-        , isGreaterThanUpperLimit = always False
-        }
+    Nat (In minLowerBound maxLowerBound lowerBoundMaybeN)
+    -> Serialize.Codec String (Nat (ValueMin minLowerBound))
+serialize lowerBound =
+    Serialize.int
+        |> Serialize.mapValid
+            (Internal.isIntAtLeast lowerBound
+                >> Result.fromMaybe "Int was less than the required minimum"
+            )
+            val
