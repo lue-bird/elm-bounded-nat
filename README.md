@@ -28,7 +28,6 @@ import MinNat
 import TypeNats exposing (..)
     -- Nat0 to Nat160 & Nat1Plus to Nat160Plus
 
--- from elm-typed-value
 import Typed exposing (val, val2)
 ```
 
@@ -41,7 +40,7 @@ rgb : Float -> Float -> Float -> Color
 
 This is common, but
 - _the one implementing_ the function has to handle the case where a value is not between 0 and 1
-- the _type_ doesn't tell us that only a `Float` between 0 & 1 is needed
+- the _type_ doesn't tell us that a `Float` between 0 & 1 is wanted
 
 ```elm
 rgbPer100 :
@@ -50,7 +49,7 @@ rgbPer100 :
     -> Nat (In blueMin Nat100 blueMaybeN)
     -> Color
 ```
-- _the one using_ this function must make sure to you that the numbers are actually between 0 and 100
+- _the one using_ this function must make sure that the numbers are actually between 0 and 100
 - you clearly know what input is desired
 
 The type
@@ -73,13 +72,12 @@ They can prove it by
 - already knowing
 
 ```elm
--- the type is Nat (ValueN Nat100 ...)
--- so it's also between 100 and 100 (101 / 102 /...)
 nat100
+-- : Nat (ValueN Nat100 ...)
+-- so it's also between ... and 100
 
 red =
-    rgbPer100 nat100 nat0 nat0
-    -- 👍
+    rgbPer100 nat100 nat0 nat0 -- 👍
 ```
 - checking
 
@@ -188,7 +186,7 @@ factorial =
 → We have the extra promise, that every result is `>= 1`
 
 We can do even better!
-We know that `!19` is already bigger than the maximum safe `Int` `2^53 - 1`.
+We know that `!19` is already greater than the maximum safe `Int` `2^53 - 1`.
 
 ```elm
 safeFactorial : Nat (In min Nat18 maybeN) -> Nat (ValueMin Nat1)
