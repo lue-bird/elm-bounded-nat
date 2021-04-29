@@ -308,7 +308,7 @@ abs int =
     Internal.abs int
 
 
-{-| `Nat (ValueIn ...)`s from a first to a last value.
+{-| `Nat (ValueIn ...)`s from a first to last value.
 
     from3To10 : List (Nat (ValueIn Nat3 (Nat10Plus a)))
     from3To10 =
@@ -334,9 +334,9 @@ range first last =
 {-| Generate a random `Nat (ValueIn ...)` in a range.
 -}
 random :
-    Nat (In firstMin lastMin firstMaybeN)
-    -> Nat (In lastMin lastMax lastMaybeN)
-    -> Random.Generator (Nat (ValueIn firstMin lastMax))
+    Nat (In lowerBoundMin upperBoundMin lowerBoundMaybeN)
+    -> Nat (In upperBoundMin upperBoundMax upperBoundMaybeN)
+    -> Random.Generator (Nat (ValueIn lowerBoundMin upperBoundMax))
 random min max =
     Internal.random min max
 
@@ -371,13 +371,13 @@ theSmaller a b =
         b
 
 
-{-| Compared to a range `first` to `last`, is the `Int`
+{-| Compared to a range from a lower to an upper bound, is the `Int`
 
   - `inRange`
 
-  - `greater` than the `last` or
+  - `greater` than the upper bound or
 
-  - `less` than the `first`?
+  - `less` than the lower bound?
 
 ```
 rejectOrAcceptUserInt =
@@ -393,18 +393,17 @@ rejectOrAcceptUserInt 0
 
 -}
 isIntInRange :
-    { first : Nat (In minFirst last firstMaybeN)
-    , last : Nat (In last lastPlusA lastMaybeN)
-    }
+    Nat (In minLowerBound upperBound lowerBoundMaybeN)
+    -> Nat (In upperBound upperBoundPlusA upperBoundMaybeN)
     ->
         { less : () -> result
-        , greater : Nat (ValueMin (Nat1Plus last)) -> result
-        , inRange : Nat (ValueIn minFirst lastPlusA) -> result
+        , greater : Nat (ValueMin (Nat1Plus upperBound)) -> result
+        , inRange : Nat (ValueIn minLowerBound upperBoundPlusA) -> result
         }
     -> Int
     -> result
-isIntInRange interval cases int =
-    Internal.isIntInRange interval cases int
+isIntInRange lowerBound upperBound cases int =
+    Internal.isIntInRange lowerBound upperBound cases int
 
 
 {-| A `Nat (ValueIn ...)` from an `Int`, **clamped** between a minimum & maximum.
@@ -427,12 +426,12 @@ If you want to handle the cases `< minimum` & `> maximum` explicitly, use [`isIn
 
 -}
 intInRange :
-    Nat (In min firstMax lowerMaybeN)
-    -> Nat (In firstMax max upperMaybeN)
+    Nat (In min lowerBoundMax lowerMaybeN)
+    -> Nat (In lowerBoundMax max upperMaybeN)
     -> Int
     -> Nat (ValueIn min max)
-intInRange lowerLimit upperLimit =
-    Internal.intInRange lowerLimit upperLimit
+intInRange lowerBound upperBound =
+    Internal.intInRange lowerBound upperBound
 
 
 {-| If the `Int >= a minimum`, `Just` the `Nat (ValueMin minimum)`, else `Nothing`.
