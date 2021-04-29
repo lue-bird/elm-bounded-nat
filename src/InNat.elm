@@ -72,8 +72,8 @@ atMost :
     -> { min : Nat (N min (Is minToMinNewMax To minNewMax) x) }
     -> Nat (In min max maybeN)
     -> Nat (ValueIn min atLeastNewMax)
-atMost higherLimit min =
-    Internal.atMost higherLimit min
+atMost higherBound min =
+    Internal.atMost higherBound min
 
 
 {-| If the `Nat (In ...)` is less than a number, return that number instead.
@@ -89,8 +89,8 @@ atLeast :
     Nat (In newMin max lowerMaybeN)
     -> Nat (In min max maybeN)
     -> Nat (ValueIn newMin max)
-atLeast lowerLimit =
-    Internal.atLeast lowerLimit
+atLeast lowerBound =
+    Internal.atLeast lowerBound
 
 
 
@@ -133,9 +133,9 @@ isAtLeast :
         }
     -> Nat (In min max maybeN)
     -> result
-isAtLeast triedLowerLimit min cases =
+isAtLeast triedLowerBound min cases =
     \inNat ->
-        if val2 (>=) inNat triedLowerLimit then
+        if val2 (>=) inNat triedLowerBound then
             .equalOrGreater cases (Internal.newRange inNat)
 
         else
@@ -176,9 +176,9 @@ isAtMost :
         }
     -> Nat (In min max maybeN)
     -> result
-isAtMost triedUpperLimit min cases =
+isAtMost triedUpperBound min cases =
     \inNat ->
-        if val inNat <= (triedUpperLimit |> val) then
+        if val inNat <= (triedUpperBound |> val) then
             .equalOrLess cases (Internal.newRange inNat)
 
         else
@@ -187,7 +187,7 @@ isAtMost triedUpperLimit min cases =
 
 {-| Compare the `Nat (In ...)` to an exact `Nat (N ...)`. Is it `greater`, `less` or `equal`?
 
-`min` ensures that the `Nat (N ...)` is bigger than the minimum.
+`min` ensures that the `Nat (N ...)` is greater than the minimum.
 
     present =
         Nat.lowerMin nat0
@@ -231,48 +231,46 @@ is tried min cases =
                 .less cases (Internal.newRange inNat)
 
 
-{-| Compared to a range `first` to `last`, is the `Nat (In ...)`
+{-| Compared to a range from a lower to an upper bound, is the `Nat (In ...)`
 
   - `inRange`
 
-  - `greater` than the `last` or
+  - `greater` than the upper bound or
 
-  - `less` than the `first`?
+  - `less` than the lower bound?
 
-```
-justIfBetween3And10 =
-    Nat.lowerMin nat0
-        >> InNat.isInRange { first = nat3, last = nat10 }
-            { min = nat0 }
-            { less = \_ -> Nothing
-            , greater = \_ -> Nothing
-            , inRange = Just
-            }
+`min` ensures that the lower bound is greater than the minimum.
 
-justIfBetween3And10 nat9
---> Just (Nat 9)
+    justIfBetween3And10 =
+        Nat.lowerMin nat0
+            >> InNat.isInRange nat3 nat10
+                { min = nat0 }
+                { less = \_ -> Nothing
+                , greater = \_ -> Nothing
+                , inRange = Just
+                }
 
-justIfBetween3And10 nat123
---> Nothing
-```
+    justIfBetween3And10 nat9
+    --> Just (Nat 9)
+
+    justIfBetween3And10 nat123
+    --> Nothing
 
 -}
 isInRange :
-    { first :
-        Nat
-            (N
-                first
-                (Is firstToLast To last)
-                (Is firstA To (Nat1Plus atLeastFirstMinus1))
-            )
-    , last :
+    Nat
+        (N
+            first
+            (Is firstToLast To last)
+            (Is firstA To (Nat1Plus atLeastFirstMinus1))
+        )
+    ->
         Nat
             (N
                 last
                 (Is lastToMax To max)
                 (Is lastA To atLeastLast)
             )
-    }
     -> { min : Nat (N min (Is minToFirst To first) x) }
     ->
         { inRange : Nat (In first atLeastLast maybeN) -> result
@@ -281,12 +279,12 @@ isInRange :
         }
     -> Nat (In min max maybeN)
     -> result
-isInRange interval min cases =
+isInRange lowerBound upperBound min cases =
     \inNat ->
-        if val2 (<) inNat (.first interval) then
+        if val2 (<) inNat lowerBound then
             .less cases (Internal.newRange inNat)
 
-        else if val2 (>) inNat (.last interval) then
+        else if val2 (>) inNat upperBound then
             .greater cases (Internal.newRange inNat)
 
         else
@@ -360,8 +358,6 @@ sub inNatToSubtract minSubtracted maxSubtracted =
         |> InNat.subN nat7
     --> is of type Nat (ValueIn Nat0 (Nat3Plus a))
 
-**Use [`MinNat.subN`](MinNat#subN) if the maximum value is not known**.
-
 -}
 subN :
     Nat (N sub (Is differenceMin To min) (Is differenceMax To max))
@@ -402,11 +398,14 @@ value =
 -- ## extra
 
 
-{-| A [`Codec`](https://package.elm-lang.org/packages/MartinSStewart/elm-serialize/latest/) to serialize `Nat`s with a lower limit.
+{-| A [`Codec`](https://package.elm-lang.org/packages/MartinSStewart/elm-serialize/latest/) to serialize `Nat`s with a lower bound.
 
     import Serialize
 
-    serializePercent : Serialize.Codec String (Nat (ValueIn Nat0 (Nat100Plus a)))
+    serializePercent :
+        Serialize.Codec
+            String
+            (Nat (ValueIn Nat0 (Nat100Plus a)))
     serializePercent =
         InNat.serialize nat0 nat100
 
@@ -423,11 +422,22 @@ For decoded `Int`s lower than minimum expected value, the `Result` is an error m
 
 -}
 serialize :
-    Nat (In minLowerLimit maxLowerLimit lowerLimitMaybeN)
-    -> Nat (In maxLowerLimit maxUpperLimit upperLimitMaybeN)
-    -> Serialize.Codec String (Nat (ValueIn minLowerLimit maxUpperLimit))
-serialize lowerLimit upperLimit =
-    Internal.serialize
-        { lowerLimit = lowerLimit
-        , isGreaterThanUpperLimit = \int -> int > val upperLimit
-        }
+    Nat (In minLowerBound maxLowerBound lowerBoundMaybeN)
+    -> Nat (In maxLowerBound maxUpperBound upperBoundMaybeN)
+    -> Serialize.Codec String (Nat (ValueIn minLowerBound maxUpperBound))
+serialize lowerBound upperBound =
+    Serialize.int
+        |> Serialize.mapValid
+            (Internal.isIntInRange
+                lowerBound
+                upperBound
+                { less =
+                    \() ->
+                        Err "Int was less than the expected minimum"
+                , greater =
+                    \_ ->
+                        Err "Int was greatrer than the expected maximum"
+                , inRange = Ok
+                }
+            )
+            val
