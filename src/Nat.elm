@@ -8,7 +8,7 @@ module Nat exposing
     , isIntInRange, isIntAtLeast, theGreater, theSmaller
     , toPower, remainderBy, mul, div
     , lowerMin
-    , maxIs
+    , restoreMax
     )
 
 {-|
@@ -61,7 +61,7 @@ module Nat exposing
 
 ## restore information
 
-@docs maxIs
+@docs restoreMax
 
 -}
 
@@ -601,16 +601,16 @@ But once you implement `onlyAtMost18`, you might use the value in `onlyAtMost19`
     onlyAtMost18 value =
         -- onlyAtMost19 value --error :(
         onlyAtMost19
-            (value |> Nat.maxIs nat18 {- works :) -})
+            (value |> Nat.restoreMax nat18 {- works :) -})
 
 [`lowerMin`](Nat#lowerMin) is also handy in those situations.
 
 -}
-maxIs :
+restoreMax :
     Nat (N max (Is a To atLeastMax) x)
     -> Nat (In min max maybeN)
     -> Nat (In min atLeastMax maybeN)
-maxIs =
+restoreMax =
     \_ -> Internal.newRange
 
 
