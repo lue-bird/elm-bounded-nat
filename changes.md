@@ -111,3 +111,9 @@ Corrected forgotten `maybeN`s & `min`s that were set to an exact value in doc.
 - added `MinNat.serialize` & `InNat.serialize`
 - moved & renamed `toIn` from `NNat` to `InNat.value`
 - moved & renamed `toMin` from `Nat` to `MinNat.value`
+
+## 8.0.0
+
+- added serialize versions
+- renamed `Nat.maxIs` to `restoreMax`
+- `intInRange` & `InNat.isInRange` take 2 values instead of a record `{ first, last }`
