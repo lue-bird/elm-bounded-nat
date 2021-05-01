@@ -46,7 +46,7 @@ import N exposing (Nat1Plus, Nat2Plus)
 import NNats exposing (nat0)
 import Nat exposing (In, Is, N, Nat, To, ValueIn, ValueMin)
 import Serialize
-import Typed exposing (val)
+import Typed exposing (val, val2)
 
 
 
@@ -138,26 +138,26 @@ sub inNatToSubtract maxSubtracted =
 
 -}
 is :
-    Nat (In (Nat1Plus triedMinus1) (Nat1Plus atLeastTriedMinus1) triedMaybeN)
-    -> { min : Nat (N min (Is minToTriedMinus1 To triedMinus1) x) }
+    Nat (N (Nat1Plus triedMinus1) (Is a To (Nat1Plus triedMinus1PlusA)) x)
+    -> { min : Nat (N min (Is minToTriedMinus1 To triedMinus1) y) }
     ->
         { equal : () -> result
-        , less : Nat (In min atLeastTriedMinus1 maybeN) -> result
+        , less : Nat (In min triedMinus1PlusA maybeN) -> result
         , greater : Nat (ValueMin (Nat2Plus triedMinus1)) -> result
         }
     -> Nat (In min max maybeN)
     -> result
 is tried min cases =
     \minNat ->
-        case compare (val minNat) (val tried) of
+        case val2 compare minNat tried of
             EQ ->
                 .equal cases ()
 
             LT ->
-                .less cases (Internal.newRange minNat)
+                .less cases (minNat |> Internal.newRange)
 
             GT ->
-                .greater cases (Internal.newRange minNat)
+                .greater cases (minNat |> Internal.newRange)
 
 
 {-| Is the `Nat (ValueMin ...)`
@@ -185,18 +185,18 @@ factorial =
 
 -}
 isAtLeast :
-    Nat (In triedMin (Nat1Plus triedMinMinus1PlusA) triedMaybeN)
-    -> { min : Nat (N min (Is minToTriedMin To triedMin) x) }
+    Nat (N lowerBound (Is a To (Nat1Plus lowerBoundMinus1PlusA)) x)
+    -> { min : Nat (N min (Is minToTriedMin To lowerBound) y) }
     ->
-        { less : Nat (In min triedMinMinus1PlusA maybeN) -> result
-        , equalOrGreater : Nat (ValueMin triedMin) -> result
+        { less : Nat (In min lowerBoundMinus1PlusA maybeN) -> result
+        , equalOrGreater : Nat (ValueMin lowerBound) -> result
         }
     -> Nat (In min max maybeN)
     -> result
 isAtLeast triedLowerBound min cases =
     \minNat ->
-        if val minNat >= val triedLowerBound then
-            .equalOrGreater cases (Internal.newRange minNat)
+        if val2 (>=) minNat triedLowerBound then
+            .equalOrGreater cases (minNat |> Internal.newRange)
 
         else
             .less cases (minNat |> Internal.newRange)
@@ -222,21 +222,21 @@ tryToGoToU18Party =
 
 -}
 isAtMost :
-    Nat (In atMostMin atLeastAtMostMin atMostMaybeN)
-    -> { min : Nat (N min (Is minToAtMostMin To atMostMin) x) }
+    Nat (N upperBound (Is a To upperBoundPlusA) x)
+    -> { min : Nat (N min (Is minToAtMostMin To upperBound) y) }
     ->
-        { equalOrLess : Nat (In min atLeastAtMostMin maybeN) -> result
-        , greater : Nat (ValueMin (Nat1Plus atMostMin)) -> result
+        { equalOrLess : Nat (In min upperBoundPlusA maybeN) -> result
+        , greater : Nat (ValueMin (Nat1Plus upperBound)) -> result
         }
     -> Nat (In min max maybeN)
     -> result
-isAtMost triedUpperBound min cases =
+isAtMost upperBound min cases =
     \minNat ->
-        if val minNat <= val triedUpperBound then
+        if val2 (<=) minNat upperBound then
             .equalOrLess cases (minNat |> Internal.newRange)
 
         else
-            .greater cases (Internal.newRange minNat)
+            .greater cases (minNat |> Internal.newRange)
 
 
 

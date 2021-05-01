@@ -117,3 +117,5 @@ Corrected forgotten `maybeN`s & `min`s that were set to an exact value in doc.
 - added serialize versions
 - renamed `Nat.maxIs` to `restoreMax`
 - `intInRange` & `InNat.isInRange` take 2 values instead of a record `{ first, last }`
+- fix types of `isAtLeast` & `is` & `isAtMost` type in `MinNat` to compare to a `Nat (N ...)`
+
