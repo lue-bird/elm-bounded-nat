@@ -8,7 +8,7 @@ import InNat
 import MinNat
 import MinNatTests
 import NNats exposing (..)
-import Nat exposing (ArgIn, ArgNat, In, Min)
+import Nat exposing (ArgIn, In, Min, Nat)
 import Test exposing (Test, describe, test)
 import TypeNats exposing (..)
 
