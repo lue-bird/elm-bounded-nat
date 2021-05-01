@@ -42,12 +42,12 @@ module TypeNats exposing
 
 {-| Express exact natural numbers in a type.
 
-    onlyExact1 : Nat (Only Nat1 maybeN) -> Cake
+    onlyExact1 : Nat (ArgOnly Nat1 maybeN) -> Cake
 
   - `takesOnlyExact1 nat10` is a compile-time error
 
 ```
-add2 : Nat (Only n maybeN) -> Nat (ValueOnly (Nat2Plus n))
+add2 : Nat (ArgOnly n maybeN) -> Nat (ValueOnly (Nat2Plus n))
 ```
 
   - `add2 nat2` is of type `Nat (ValueOnly Nat4)`

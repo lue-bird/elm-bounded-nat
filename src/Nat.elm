@@ -1,6 +1,6 @@
 module Nat exposing
     ( Nat
-    , In, Only
+    , In
     , N, Is, To
     , Min, ValueIn, ValueN, ValueOnly
     , abs, range, random
@@ -9,6 +9,7 @@ module Nat exposing
     , toPower, remainderBy, mul, div
     , lowerMin
     , restoreMax
+    , ArgOnly
     )
 
 {-|
@@ -188,30 +189,28 @@ type alias Min minimum =
 
 Only useful as an **argument** / storage type.
 
-Every `In NatXYZ (NatXYZPlus a) maybeN` is a `Only NatXYZ maybeN`.
+Every `In NatXYZ (NatXYZPlus a) maybeN` is a `ArgOnly NatXYZ maybeN`.
 
-    byte : Arr (Only Nat8 maybeN) Bit -> Byte
+    byte : Arr (ArgOnly Nat8 maybeN) Bit -> Byte
 
 → A given [`Arr`](https://package.elm-lang.org/packages/lue-bird/elm-typesafe-array/latest/) must have _exact 8_ `Bit`s.
 
-`Only` is useful for [`Arr`](https://package.elm-lang.org/packages/lue-bird/elm-typesafe-array/latest/)s,
+`ArgOnly` is useful for [`Arr`](https://package.elm-lang.org/packages/lue-bird/elm-typesafe-array/latest/)s,
 but you will never need it in combination with `Nat`s.
 
 -}
-type alias Only n maybeN =
+type alias ArgOnly n maybeN =
     In n n maybeN
 
 
 {-| Just the exact number.
 
-Only useful as a **value** type.
-
     repeatOnly :
-        Nat (Only n maybeN)
+        Nat (ArgOnly n maybeN)
         -> element
         -> Arr (ValueOnly n) element
 
-→ A given [`Arr`](https://package.elm-lang.org/packages/lue-bird/elm-typesafe-array/latest/) must has _exactly `n`_ `element`s.
+→ A given [`Arr`](https://package.elm-lang.org/packages/lue-bird/elm-typesafe-array/latest/) must have _exactly `n`_ `element`s.
 
 `ValueOnly` is useful for [`Arr`](https://package.elm-lang.org/packages/lue-bird/elm-typesafe-array/latest/)s,
 but you will never need it in combination with `Nat`s.

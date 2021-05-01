@@ -356,9 +356,9 @@ typeNatsModule =
             { moduleComment =
                 \declarations ->
                     [ markdown "Express exact natural numbers in a type."
-                    , code "onlyExact1 : Nat (Only Nat1 maybeN) -> Cake"
+                    , code "onlyExact1 : Nat (ArgOnly Nat1 maybeN) -> Cake"
                     , markdown "- `takesOnlyExact1 nat10` is a compile-time error"
-                    , code "add2 : Nat (Only n maybeN) -> Nat (ValueOnly (Nat2Plus n))"
+                    , code "add2 : Nat (ArgOnly n maybeN) -> Nat (ValueOnly (Nat2Plus n))"
                     , markdown "- `add2 nat2` is of type `Nat (ValueOnly Nat4)`"
                     , markdown "### about a big limitation"
                     , markdown "Sadly, while experimenting with type aliases, I discovered that type aliases can only expand so much."
