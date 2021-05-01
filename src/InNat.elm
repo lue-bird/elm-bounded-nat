@@ -319,7 +319,7 @@ add inNatToAdd minAdded maxAdded =
 
     between70And100
         |> InNat.addN nat7
-    --> : Nat (ArgIn Nat77 (Nat107Plus a))
+    --> : Nat (In Nat77 (Nat107Plus a))
 
 -}
 addN :
