@@ -44,7 +44,7 @@ import I as Internal
 import InNat
 import N exposing (Nat1Plus, Nat2Plus)
 import NNats exposing (nat0)
-import Nat exposing (In, Is, Min, N, Nat, To, ValueIn)
+import Nat exposing (ArgN, In, Is, Min, Nat, To, ValueIn)
 import Serialize
 import Typed exposing (val, val2)
 

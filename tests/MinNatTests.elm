@@ -7,7 +7,7 @@ import Expect
 import InNat
 import MinNat
 import NNats exposing (..)
-import Nat exposing (In, Min, Nat, ValueIn)
+import Nat exposing (ArgNat, In, Min, ValueIn)
 import Test exposing (Test, describe, test)
 import TypeNats exposing (..)
 import Typed exposing (val)

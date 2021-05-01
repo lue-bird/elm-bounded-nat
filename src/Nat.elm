@@ -1,7 +1,6 @@
 module Nat exposing
-    ( Nat
-    , In, Only
-    , N, Is, To
+    ( In, Only
+    , Is, To
     , Min, ValueIn, ValueN
     , abs, range, random
     , intAtLeast, intInRange
@@ -9,7 +8,7 @@ module Nat exposing
     , toPower, remainderBy, mul, div
     , lowerMin
     , restoreMax
-    , ArgOnly
+    , ArgN, ArgOnly
     )
 
 {-|
@@ -157,7 +156,7 @@ A number, at least 5:
 
   - `max` could be a maximum value if there is one
 
-  - `maybeN` could contain extra information for `N ...` if the number was exact
+  - `maybeN` could contain extra information if the argument is a `Nat (ValueN ...)`
 
 -}
 type alias In minimum maximum maybeN =
@@ -266,7 +265,7 @@ You can just ignore the second difference if you don't need it ([`MinNat.addN`](
         -> Nat (Min sumMin)
 
 -}
-type alias N n asADifference asAnotherDifference =
+type alias ArgN n asADifference asAnotherDifference =
     ValueN n n asADifference asAnotherDifference
 
 

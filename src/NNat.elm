@@ -10,7 +10,7 @@ module NNat exposing (add, sub)
 -}
 
 import I as Internal
-import Nat exposing (Is, N, Nat, To, ValueN)
+import Nat exposing (ArgN, Is, Nat, To, ValueN)
 
 
 {-| The `Nat (ArgN ...)` plus another `Nat (ArgN ...)`. Give the added value twice as a tuple.
