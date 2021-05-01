@@ -19,7 +19,7 @@ module Nat exposing
 ## bounds
 
 
-### function argument
+### argument type
 
 @docs In, Only
 
@@ -68,7 +68,7 @@ module Nat exposing
 import I as Internal exposing (NatTag)
 import N exposing (Nat0, Nat1Plus)
 import Random
-import Typed exposing (Checked, Public, Typed, val, val2)
+import Typed exposing (Checked, Public, Typed, val2)
 
 
 {-| A **bounded** natural number (`>= 0`).
@@ -119,7 +119,7 @@ type alias Nat range =
        ↓ minimum   ↓ maximum
     ⨯ [✓ ✓ ✓ ✓ ✓ ✓ ✓] ⨯ ⨯ ⨯...
 
-To be used as a return type, **not** as a function argument.
+Do **not** use it as an argument type.
 
 A number between 3 and 5
 
@@ -184,13 +184,13 @@ type alias ValueMin minimum =
     ValueIn minimum Internal.Infinity
 
 
-{-| Just the exact number.
+{-| Expect an exact number.
 
-Only useful as a function **argument** type.
+Only useful as an **argument** / storage type.
 
 Every `In NatXYZ (NatXYZPlus a) maybeN` is a `Only NatXYZ maybeN`.
 
-    byte : Arr (Only maybeN Nat8) Bit -> Byte
+    byte : Arr (Only Nat8 maybeN) Bit -> Byte
 
 → A given [`Arr`](https://package.elm-lang.org/packages/lue-bird/elm-typesafe-array/latest/) must have _exact 8_ `Bit`s.
 
@@ -204,7 +204,7 @@ type alias Only n maybeN =
 
 {-| Just the exact number.
 
-Only useful as a **value & return** type.
+Only useful as a **value** type.
 
     repeatOnly :
         Nat (Only n maybeN)
@@ -221,7 +221,7 @@ type alias ValueOnly n =
     ValueIn n n
 
 
-{-| No special meaning.
+{-| Only at type-level in [Is](Nat#Is).
 
     Is a To b
 
@@ -235,7 +235,6 @@ type alias To =
 {-| `Is a To b`: an exact value as the diffference `b - a`.
 
     N Nat5
-        (Nat5Plus more)
         (Is myAge To sistersAge)
         (Is mothersAge To fathersAge)
 
@@ -248,7 +247,7 @@ type alias Is a to b =
 
 
 {-| Expect an exact value.
-[`InNat.addN`](InNat#addN) for example also uses the knowledge that the number is exact to describe the number as differences between other type variables.
+[`InNat.addN`](InNat#addN) for example uses this knowledg to describe the number as differences between other type variables.
 
     addN :
         Nat
@@ -257,8 +256,8 @@ type alias Is a to b =
                 (Is min To sumMin)
                 (Is max To sumMax)
             )
-        -> Nat (In min max)
-        -> Nat (In sumMin sumMax)
+        -> Nat (In min max maybeN)
+        -> Nat (ValueIn sumMin sumMax)
 
 You can just ignore the second difference if you don't need it ([`MinNat.addN`](MinNat#addN)).
 
