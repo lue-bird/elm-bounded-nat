@@ -236,7 +236,7 @@ natNAnn n =
 
 nAnn : Int  -> Elm.CodeGen.TypeAnnotation
 nAnn n =
-    typed "ValueN"
+    typed "N"
         [ natXAnn n
         , natXPlusAnn n (typeVar "orMore")
         , isAnn n "a"
@@ -316,14 +316,14 @@ nNatsModule =
                 \declarations->
                     [ markdown ("`Nat (ArgN Nat0 ...)` to `Nat (ArgN " ++ String.fromInt lastN ++ " ...)`.")
                     , markdown "Bigger `Nat (ArgN ...)` s start to slow down compilation, so they are avoided."
-                    , markdown "See [`Nat.Bound.N`](Nat-Bound#N), [`Nat.Bound.ValueN`](Nat-Bound#ValueN) & [`NNat`](NNat) for an explanation."
+                    , markdown "See [`Nat.Bound.N`](Nat-Bound#N), [`Nat.Bound.N`](Nat-Bound#N) & [`NNat`](NNat) for an explanation."
                     , docTagsFrom NNatsValue declarations
                     ]
             }
     , imports =
         [ importStmt [ "I" ] noAlias
             (exposingExplicit
-                ([ "ValueN", "Is", "To", "Nat" ]
+                ([ "N", "Is", "To", "Nat" ]
                     |> List.map typeOrAliasExpose
                 )
             )

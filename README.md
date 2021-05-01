@@ -75,10 +75,10 @@ They can prove it by
 red =
     rgbPer100 nat100 nat0 nat0 -- 👍
 
-nat0 : Nat (ValueN Nat0 atLeast0)
+nat0 : Nat (N Nat0 atLeast0)
 -- so it's also between 0 and 0/1/.../100
 
-nat100 : Nat (ValueN Nat0 atLeast0)
+nat100 : Nat (N Nat0 atLeast0)
 -- so it's also between 100 and 100(/101/...)
 ```
 - checking
@@ -129,7 +129,7 @@ The type of a value reflects how much you know.
 
 - `In`: between a minimum & maximum value
 - `Min`: at least a minimum value
-- `ValueN`: exact value
+- `N`: exact value
     - also describes the difference between 2 values
 
 
@@ -217,7 +217,7 @@ squares2To10 =
 Instead of accepting only exact values
 
 ```elm
-rgb : Nat (ValueN red (Is redTo100 To Nat100) x) -> --...
+rgb : Nat (N red (Is redTo100 To Nat100) x) -> --...
 ```
 accept values that are somewhere in a range.
 
@@ -231,7 +231,7 @@ rgb : Nat (In redMin Nat100 maybeN) -> --...
 charFromCode : Nat (Min min) -> Char
 ```
 
-which you should also never do, allow `Nat (In min ...)` with any max & `Nat (ValueN ...)` to fit in as well!
+which you should also never do, allow `Nat (In min ...)` with any max & `Nat (N ...)` to fit in as well!
 
 ```elm
 charFromCode : Nat (In min max maybeN) -> Char

@@ -10,7 +10,7 @@ module NNat exposing (add, sub)
 -}
 
 import I as Internal
-import Nat exposing (ArgN, Is, Nat, To, ValueN)
+import Nat exposing (ArgN, Is, N, Nat, To)
 
 
 {-| The `Nat (ArgN ...)` plus another `Nat (ArgN ...)`. Give the added value twice as a tuple.
@@ -18,7 +18,7 @@ import Nat exposing (ArgN, Is, Nat, To, ValueN)
     nat6 |> NNat.add ( nat5, nat5 )
     --> Nat 11 :
     --> Nat
-    -->     (ValueN Nat11
+    -->     (N Nat11
     -->         (Nat11Plus a)
     -->         (Is a To Nat11Plus a)
     -->         (Is b To Nat11Plus b)
@@ -46,8 +46,8 @@ add :
             (Is bPlusN To bPlusSum)
         )
     )
-    -> Nat (ValueN n atLeastN (Is a To aPlusN) (Is b To bPlusN))
-    -> Nat (ValueN sum atLeastSum (Is a To aPlusSum) (Is b To bPlusSum))
+    -> Nat (N n atLeastN (Is a To aPlusN) (Is b To bPlusN))
+    -> Nat (N sum atLeastSum (Is a To aPlusSum) (Is b To bPlusSum))
 add nNatToAdd =
     Internal.add (nNatToAdd |> Tuple.first)
 
@@ -84,10 +84,10 @@ sub :
             (Is bPlusDifference To bPlusN)
         )
     )
-    -> Nat (ValueN n atLeastN (Is a To aPlusN) (Is b To bPlusN))
+    -> Nat (N n atLeastN (Is a To aPlusN) (Is b To bPlusN))
     ->
         Nat
-            (ValueN
+            (N
                 difference
                 atLeastDifference
                 (Is a To aPlusDifference)

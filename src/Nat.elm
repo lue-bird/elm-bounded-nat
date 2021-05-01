@@ -1,8 +1,8 @@
 module Nat exposing
     ( Nat
     , In, Only
-    , Is, To
-    , Min, ValueN
+    , N, Is, To
+    , Min
     , abs, range, random
     , intAtLeast, intInRange
     , isIntInRange, isIntAtLeast, theGreater, theSmaller
@@ -32,7 +32,7 @@ module Nat exposing
 
 ### value / return type
 
-@docs Min, In, ValueN, Only
+@docs Min, In, N, Only
 
 
 ## create
@@ -85,7 +85,7 @@ import Typed exposing (Checked, Public, Typed, val2)
 
     -- = 3, & 3, described as a difference
     Nat
-        (ValueN Nat3
+        (N Nat3
             (Nat3Plus more)
             (Is a To (Nat3Plus a))
             (Is b To (Nat3Plus b))
@@ -157,7 +157,7 @@ A number, at least 5:
 
   - `max` could be a maximum value if there is one
 
-  - `maybeN` could contain extra information if the argument is a `Nat (ValueN ...)`
+  - `maybeN` could contain extra information if the argument is a `Nat (N ...)`
 
 -}
 type alias ArgIn minimum maximum maybeN =
@@ -267,7 +267,7 @@ You can just ignore the second difference if you don't need it ([`MinNat.addN`](
 
 -}
 type alias ArgN n asADifference asAnotherDifference =
-    ValueN n n asADifference asAnotherDifference
+    N n n asADifference asAnotherDifference
 
 
 {-| The most detailed description of an exact value.
@@ -275,7 +275,7 @@ type alias ArgN n asADifference asAnotherDifference =
 Don't use this as a function argument.
 
 -}
-type alias ValueN n atLeastN asADifference asAnotherDifference =
+type alias N n atLeastN asADifference asAnotherDifference =
     ArgIn n atLeastN (Internal.Differences asADifference asAnotherDifference)
 
 
