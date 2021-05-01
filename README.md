@@ -153,7 +153,7 @@ This forms an infinite loop if we call `intFactorial -1`...
 Let's disallow negative numbers here!
 
 ```elm
-factorial : Nat (In min max maybeN) -> Nat (Min Nat1)
+factorial : Nat (ArgIn min max maybeN) -> Nat (Min Nat1)
 ```
 Says: for every natural number `n >= 0`, `n! >= 1`.
 ```elm
@@ -234,7 +234,7 @@ charFromCode : Nat (Min min) -> Char
 which you should also never do, allow `Nat (In min ...)` with any max & `Nat (N ...)` to fit in as well!
 
 ```elm
-charFromCode : Nat (In min max maybeN) -> Char
+charFromCode : Nat (ArgIn min max maybeN) -> Char
 ```
 
 Take a look at [`elm-typesafe-array`][bounded-array] to see a lot of this in action!
