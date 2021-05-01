@@ -1,6 +1,6 @@
 module NNat exposing (add, sub)
 
-{-| Operations that only apply for `Nat (ArgN ...)`s.
+{-| Operations that only apply for `Nat (N ...)`s.
 
 
 ## modify

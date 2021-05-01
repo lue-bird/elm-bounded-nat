@@ -19,22 +19,22 @@ module MinNat exposing
             --...
 
 
-### compare
+# compare
 
 @docs is, isAtLeast, isAtMost
 
 
-### modify
+# modify
 
 @docs subN, add, sub, addN
 
 
-## drop information
+# drop information
 
 @docs value
 
 
-## extra
+# extra
 
 @docs serialize
 

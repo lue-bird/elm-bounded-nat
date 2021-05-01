@@ -17,30 +17,30 @@ you should use `InNat` operations.
 If the maximum isn't known, use the operations in `MinNat`.
 
 
-## add information
+# create
 
 
-### clamp
+## clamp
 
 @docs atMost, atLeast
 
 
-### compare
+## compare
 
 @docs is, isInRange, isAtLeast, isAtMost
 
 
-## modify
+# modify
 
 @docs addN, subN, add, sub
 
 
-## drop information
+# drop information
 
 @docs value
 
 
-## extra
+# extra
 
 @docs serialize
 
