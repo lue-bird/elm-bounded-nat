@@ -11,7 +11,7 @@ module I exposing
 
 {-| The internals of this package. Only this package can mark `Int`s as `Nat`s.
 
-For performance reasons, the name is shortened, so that [`NNats`](NNats)'s compiling performance is better.
+For performance reasons, the names are shortened, so that [`NNats`](NNats)'s compiling performance is better.
 
 
 ## types
@@ -92,7 +92,7 @@ type NotN
 
 
 type alias N n atLeastN asADifference asAnotherDifference =
-    ArgIn n atLeastN (Differences asADifference asAnotherDifference)
+    ArgIn n atLeastN (D asADifference asAnotherDifference)
 
 
 type alias ArgN n asADifference asAnotherDifference =
@@ -103,7 +103,7 @@ type alias Differences a b =
     D a b
 
 
-type D a b
+type D aDifference bDifference
     = D Never
 
 
