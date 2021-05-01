@@ -11,22 +11,22 @@ toHexChar : Nat (In min Nat15 maybeN) -> Char
 # examples
 
 ```noformatingples
-elm install lue-bird/elm-bounded-nat
 elm install lue-bird/elm-typed-value
+elm install lue-bird/elm-bounded-nat
 ```
 
 ```elm
 import Nat exposing
-    ( Nat, In, Only, N, Is, To
-    , ValueIn, ValueOnly, ValueMin, ValueN
+    ( Nat, In, N, Is, To
+    , ValueIn, ValueMin
     )
 import NNats exposing (..)
-    -- nat0 to nat160
+    -- (..) = nat0 to nat160
 import InNat
 import MinNat
 
 import TypeNats exposing (..)
-    -- Nat0 to Nat160 & Nat1Plus to Nat160Plus
+    -- (..) = Nat0 to Nat160 & Nat1Plus to Nat160Plus
 
 import Typed exposing (val, val2)
 ```
@@ -49,7 +49,7 @@ rgbPer100 :
     -> Nat (In blueMin Nat100 blueMaybeN)
     -> Color
 ```
-- _the one using_ this function must make sure that the numbers are actually between 0 and 100
+- _the one using_ the function must prove that the numbers are actually between 0 and 100
 - you clearly know what input is desired
 
 The type
@@ -72,12 +72,14 @@ They can prove it by
 - already knowing
 
 ```elm
-nat100
--- : Nat (ValueN Nat100 ...)
--- so it's also between ... and 100
-
 red =
     rgbPer100 nat100 nat0 nat0 -- 👍
+
+nat0 : Nat (ValueN Nat0 atLeast0)
+-- so it's also between 0 and 0/1/.../100
+
+nat100 : Nat (ValueN Nat0 atLeast0)
+-- so it's also between 100 and 100(/101/...)
 ```
 - checking
 
