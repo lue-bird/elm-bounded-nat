@@ -119,3 +119,6 @@ Corrected forgotten `maybeN`s & `min`s that were set to an exact value in doc.
 - `intInRange` & `InNat.isInRange` take 2 values instead of a record `{ first, last }`
 - fix types of `isAtLeast` & `is` & `isAtMost` type in `MinNat` to compare to a `Nat (N ...)`
 
+#### 8.0.1
+
+- corrected `InNat.serialize` docs (only told one about the lower bound)
