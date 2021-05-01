@@ -1,15 +1,14 @@
 module Nat exposing
     ( Nat
-    , In, Only
-    , N, Is, To
-    , Min
+    , ArgIn, ArgOnly
+    , ArgN, Is, To
+    , Min, In, N, Only
     , abs, range, random
     , intAtLeast, intInRange
     , isIntInRange, isIntAtLeast, theGreater, theSmaller
     , toPower, remainderBy, mul, div
     , lowerMin
     , restoreMax
-    , ArgIn, ArgN, ArgOnly
     )
 
 {-|
@@ -17,50 +16,50 @@ module Nat exposing
 @docs Nat
 
 
-## bounds
+# bounds
 
 
-### argument type
+## argument type
 
-@docs In, Only
-
-
-#### N
-
-@docs N, Is, To
+@docs ArgIn, ArgOnly
 
 
-### value / return type
+### N
+
+@docs ArgN, Is, To
+
+
+## value / return type
 
 @docs Min, In, N, Only
 
 
-## create
+# create
 
 @docs abs, range, random
 
 
-### clamp
+## clamp
 
 @docs intAtLeast, intInRange
 
 
-### compare
+## compare
 
 @docs isIntInRange, isIntAtLeast, theGreater, theSmaller
 
 
-## modify
+# modify
 
 @docs toPower, remainderBy, mul, div
 
 
-## drop information
+# drop information
 
 @docs lowerMin
 
 
-## restore information
+# restore information
 
 @docs restoreMax
 
