@@ -121,4 +121,4 @@ Corrected forgotten `maybeN`s & `min`s that were set to an exact value in doc.
 
 #### 8.0.1
 
-- corrected `InNat.serialize` docs (only told one about the lower bound)
+- corrected `InNat.serialize` doc (only told one about the lower bound)
