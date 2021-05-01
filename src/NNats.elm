@@ -15,9 +15,9 @@ module NNats exposing
     , nat9, nat90, nat91, nat92, nat93, nat94, nat95, nat96, nat97, nat98, nat99
     )
 
-{-| `Nat (N Nat0 ...)` to `Nat (N 160 ...)`.
+{-| `Nat (ArgN Nat0 ...)` to `Nat (ArgN 160 ...)`.
 
-Bigger `Nat (N ...)` s start to slow down compilation, so they are avoided.
+Bigger `Nat (ArgN ...)` s start to slow down compilation, so they are avoided.
 
 See [`Nat.Bound.N`](Nat-Bound#N), [`Nat.Bound.ValueN`](Nat-Bound#ValueN) & [`NNat`](NNat) for an explanation.
 

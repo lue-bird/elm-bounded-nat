@@ -178,7 +178,7 @@ isIntAtLeast minimum int =
 
 atMost :
     Nat (In minNewMax atLeastNewMax newMaxMaybeN)
-    -> { min : Nat (N min (Is minToMinNewMax To minNewMax) x) }
+    -> { min : Nat (ArgN min (Is minToMinNewMax To minNewMax) x) }
     -> Nat (In min max maybeN)
     -> Nat (ValueIn min atLeastNewMax)
 atMost higherBound min =

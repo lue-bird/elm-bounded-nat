@@ -47,17 +47,17 @@ module TypeNats exposing
   - `takesOnlyExact1 nat10` is a compile-time error
 
 ```
-add2 : Nat (ArgOnly n maybeN) -> Nat (ValueOnly (Nat2Plus n))
+add2 : Nat (ArgOnly n maybeN) -> Nat (Only (Nat2Plus n))
 ```
 
-  - `add2 nat2` is of type `Nat (ValueOnly Nat4)`
+  - `add2 nat2` is of type `Nat (Only Nat4)`
 
 
 ### about a big limitation
 
 Sadly, while experimenting with type aliases, I discovered that type aliases can only expand so much.
 
-    compilingGetsKilled : Nat (N (Nat100Plus Nat93) x y)
+    compilingGetsKilled : Nat (ArgN (Nat100Plus Nat93) x y)
 
 If a type alias is not fully expanded after ~192 tries,
 

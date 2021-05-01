@@ -69,7 +69,7 @@ import Typed exposing (val, val2)
 -}
 atMost :
     Nat (In minNewMax atLeastNewMax newMaxMaybeN)
-    -> { min : Nat (N min (Is minToMinNewMax To minNewMax) x) }
+    -> { min : Nat (ArgN min (Is minToMinNewMax To minNewMax) x) }
     -> Nat (In min max maybeN)
     -> Nat (ValueIn min atLeastNewMax)
 atMost higherUpperBound min =
@@ -118,14 +118,14 @@ atLeast lowerBound =
 -}
 isAtLeast :
     Nat
-        (N
+        (ArgN
             tried
             (Is a To (Nat1Plus atLeastTriedMinus1))
             (Is atLeastRange To max)
         )
     ->
         { min :
-            Nat (N min (Is (Nat1Plus lessRange) To tried) x)
+            Nat (ArgN min (Is (Nat1Plus lessRange) To tried) x)
         }
     ->
         { less : Nat (In min atLeastTriedMinus1 maybeN) -> result
@@ -164,12 +164,12 @@ isAtLeast triedLowerBound min cases =
 -}
 isAtMost :
     Nat
-        (N
+        (ArgN
             tried
             (Is a To atLeastTried)
             (Is (Nat1Plus greaterRange) To max)
         )
-    -> { min : Nat (N min (Is minToTried To tried) x) }
+    -> { min : Nat (ArgN min (Is minToTried To tried) x) }
     ->
         { equalOrLess : Nat (In min atLeastTried maybeN) -> result
         , greater : Nat (In (Nat1Plus tried) max maybeN) -> result
@@ -185,10 +185,10 @@ isAtMost triedUpperBound min cases =
             .greater cases (Internal.newRange inNat)
 
 
-{-| Compare the `Nat (In ...)` to an exact `Nat (N ...)`.
+{-| Compare the `Nat (In ...)` to an exact `Nat (ArgN ...)`.
 Is it `greater`, `less` or `equal`?
 
-`min` ensures that the `Nat (N ...)` is greater than the minimum.
+`min` ensures that the `Nat (ArgN ...)` is greater than the minimum.
 
     present =
         Nat.lowerMin nat0
@@ -208,12 +208,12 @@ Is it `greater`, `less` or `equal`?
 -}
 is :
     Nat
-        (N
+        (ArgN
             tried
             (Is triedToMax To max)
             (Is a To (Nat1Plus atLeastTriedMinus1))
         )
-    -> { min : Nat (N min (Is minToTried To tried) x) }
+    -> { min : Nat (ArgN min (Is minToTried To tried) x) }
     ->
         { equal : () -> result
         , less : Nat (In min atLeastTriedMinus1 maybeN) -> result
@@ -262,19 +262,19 @@ is tried min cases =
 -}
 isInRange :
     Nat
-        (N
+        (ArgN
             lowerBound
             (Is lowerBoundToUpperBound To upperBound)
             (Is lowerBoundA To (Nat1Plus atLeastLowerBoundMinus1))
         )
     ->
         Nat
-            (N
+            (ArgN
                 upperBound
                 (Is upperBoundToMax To max)
                 (Is upperBoundA To atLeastUpperBound)
             )
-    -> { min : Nat (N min (Is minToLowerBound To lowerBound) x) }
+    -> { min : Nat (ArgN min (Is minToLowerBound To lowerBound) x) }
     ->
         { inRange : Nat (In lowerBound atLeastUpperBound maybeN) -> result
         , less : Nat (In min atLeastLowerBoundMinus1 maybeN) -> result
@@ -307,15 +307,15 @@ isInRange lowerBound upperBound min cases =
 -}
 add :
     Nat (In minAdded maxAdded addedMaybeMax)
-    -> Nat (N minAdded (Is min To sumMin) x)
-    -> Nat (N maxAdded (Is max To sumMax) y)
+    -> Nat (ArgN minAdded (Is min To sumMin) x)
+    -> Nat (ArgN maxAdded (Is max To sumMax) y)
     -> Nat (In min max maybeN)
     -> Nat (ValueIn sumMin sumMax)
 add inNatToAdd minAdded maxAdded =
     Internal.add inNatToAdd
 
 
-{-| Add a fixed `Nat (N ...)` value.
+{-| Add a fixed `Nat (ArgN ...)` value.
 
     between70And100
         |> InNat.addN nat7
@@ -323,7 +323,7 @@ add inNatToAdd minAdded maxAdded =
 
 -}
 addN :
-    Nat (N added (Is min To sumMin) (Is max To sumMax))
+    Nat (ArgN added (Is min To sumMin) (Is max To sumMax))
     -> Nat (In min max maybeN)
     -> Nat (ValueIn sumMin sumMax)
 addN nNatToAdd =
@@ -347,15 +347,15 @@ between6And12
 -}
 sub :
     Nat (In minSubbed maxSubbed subbedMaybeN)
-    -> Nat (N minSubbed (Is differenceMax To max) x)
-    -> Nat (N maxSubbed (Is differenceMin To min) y)
+    -> Nat (ArgN minSubbed (Is differenceMax To max) x)
+    -> Nat (ArgN maxSubbed (Is differenceMin To min) y)
     -> Nat (In min max maybeN)
     -> Nat (ValueIn differenceMin differenceMax)
 sub inNatToSubtract minSubtracted maxSubtracted =
     Internal.sub inNatToSubtract
 
 
-{-| Subtract an exact `Nat (N ...)` value.
+{-| Subtract an exact `Nat (ArgN ...)` value.
 
     between7And10
         |> InNat.subN nat7
@@ -363,7 +363,7 @@ sub inNatToSubtract minSubtracted maxSubtracted =
 
 -}
 subN :
-    Nat (N sub (Is differenceMin To min) (Is differenceMax To max))
+    Nat (ArgN sub (Is differenceMin To min) (Is differenceMax To max))
     -> Nat (In min max maybeN)
     -> Nat (ValueIn differenceMin differenceMax)
 subN nNatToSubtract =

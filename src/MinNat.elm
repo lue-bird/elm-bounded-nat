@@ -61,35 +61,35 @@ import Typed exposing (val, val2)
 -}
 add :
     Nat (In minAdded maxAdded addedMaybeN)
-    -> Nat (N minAdded (Is min To sumMin) x)
+    -> Nat (ArgN minAdded (Is min To sumMin) x)
     -> Nat (In min max maybeN)
     -> Nat (Min sumMin)
 add inNatToAdd minAdded =
     Internal.add inNatToAdd
 
 
-{-| Add a fixed `Nat (N ...)` value.
+{-| Add a fixed `Nat (ArgN ...)` value.
 
     atLeast70 |> InNat.addN nat7
     --> : Nat (Min Nat77)
 
 -}
 addN :
-    Nat (N added (Is min To sumMin) x)
+    Nat (ArgN added (Is min To sumMin) x)
     -> Nat (In min max maybeN)
     -> Nat (Min sumMin)
 addN nNatToAdd =
     Internal.add nNatToAdd
 
 
-{-| Subtract an exact `Nat (N ...)`.
+{-| Subtract an exact `Nat (ArgN ...)`.
 
     atLeast7 |> MinNat.subN nat2
     --> : Nat (Min Nat5)
 
 -}
 subN :
-    Nat (N subbed (Is differenceMin To min) x)
+    Nat (ArgN subbed (Is differenceMin To min) x)
     -> Nat (In min max maybeN)
     -> Nat (ValueIn differenceMin max)
 subN nNatToSubtract =
@@ -106,7 +106,7 @@ If you have don't the maximum subtracted value at hand, use [`subLossy`](InNat#s
 -}
 sub :
     Nat (In minSubbed maxSubbed subbedMaybeN)
-    -> Nat (N maxSubbed (Is differenceMin To min) x)
+    -> Nat (ArgN maxSubbed (Is differenceMin To min) x)
     -> Nat (In min max maybeN)
     -> Nat (ValueIn differenceMin max)
 sub inNatToSubtract maxSubtracted =
@@ -119,9 +119,9 @@ sub inNatToSubtract maxSubtracted =
 -- ## compare
 
 
-{-| Compare the `Nat (Min ...)` to a `Nat (N ...)`. Is it `greater`, `less` or `equal`?
+{-| Compare the `Nat (Min ...)` to a `Nat (ArgN ...)`. Is it `greater`, `less` or `equal`?
 
-`min` ensures that the `Nat (N ...)` is greater than the minimum.
+`min` ensures that the `Nat (ArgN ...)` is greater than the minimum.
 
     present =
         Nat.lowerMin nat0
@@ -138,8 +138,8 @@ sub inNatToSubtract maxSubtracted =
 
 -}
 is :
-    Nat (N (Nat1Plus triedMinus1) (Is a To (Nat1Plus triedMinus1PlusA)) x)
-    -> { min : Nat (N min (Is minToTriedMinus1 To triedMinus1) y) }
+    Nat (ArgN (Nat1Plus triedMinus1) (Is a To (Nat1Plus triedMinus1PlusA)) x)
+    -> { min : Nat (ArgN min (Is minToTriedMinus1 To triedMinus1) y) }
     ->
         { equal : () -> result
         , less : Nat (In min triedMinus1PlusA maybeN) -> result
@@ -185,8 +185,8 @@ factorial =
 
 -}
 isAtLeast :
-    Nat (N lowerBound (Is a To (Nat1Plus lowerBoundMinus1PlusA)) x)
-    -> { min : Nat (N min (Is minToTriedMin To lowerBound) y) }
+    Nat (ArgN lowerBound (Is a To (Nat1Plus lowerBoundMinus1PlusA)) x)
+    -> { min : Nat (ArgN min (Is minToTriedMin To lowerBound) y) }
     ->
         { less : Nat (In min lowerBoundMinus1PlusA maybeN) -> result
         , equalOrGreater : Nat (Min lowerBound) -> result
@@ -222,8 +222,8 @@ tryToGoToU18Party =
 
 -}
 isAtMost :
-    Nat (N upperBound (Is a To upperBoundPlusA) x)
-    -> { min : Nat (N min (Is minToAtMostMin To upperBound) y) }
+    Nat (ArgN upperBound (Is a To upperBoundPlusA) x)
+    -> { min : Nat (ArgN min (Is minToAtMostMin To upperBound) y) }
     ->
         { equalOrLess : Nat (In min upperBoundPlusA maybeN) -> result
         , greater : Nat (Min (Nat1Plus upperBound)) -> result

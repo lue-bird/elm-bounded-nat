@@ -1,8 +1,8 @@
 module Nat exposing
     ( Nat
-    , In
+    , In, Only
     , N, Is, To
-    , Min, ValueIn, ValueN, ValueOnly
+    , Min, ValueIn, ValueN
     , abs, range, random
     , intAtLeast, intInRange
     , isIntInRange, isIntAtLeast, theGreater, theSmaller
@@ -32,7 +32,7 @@ module Nat exposing
 
 ### value / return type
 
-@docs Min, ValueIn, ValueN, ValueOnly
+@docs Min, ValueIn, ValueN, Only
 
 
 ## create
@@ -101,7 +101,7 @@ import Typed exposing (Checked, Public, Typed, val2)
     Nat (In (Nat4Plus minMinus4) Nat15 maybeN)
 
     -- An exact number nTo15 away from 15
-    Nat (N n (Is nTo15 To Nat15) x)
+    Nat (ArgN n (Is nTo15 To Nat15) x)
 
     -- any, just >= 0
     Nat range
@@ -208,15 +208,15 @@ type alias ArgOnly n maybeN =
     repeatOnly :
         Nat (ArgOnly n maybeN)
         -> element
-        -> Arr (ValueOnly n) element
+        -> Arr (Only n) element
 
 → A given [`Arr`](https://package.elm-lang.org/packages/lue-bird/elm-typesafe-array/latest/) must have _exactly `n`_ `element`s.
 
-`ValueOnly` is useful for [`Arr`](https://package.elm-lang.org/packages/lue-bird/elm-typesafe-array/latest/)s,
+`Only` is useful for [`Arr`](https://package.elm-lang.org/packages/lue-bird/elm-typesafe-array/latest/)s,
 but you will never need it in combination with `Nat`s.
 
 -}
-type alias ValueOnly n =
+type alias Only n =
     ValueIn n n
 
 
@@ -250,7 +250,7 @@ type alias Is a to b =
 
     addN :
         Nat
-            (N
+            (ArgN
                 added
                 (Is min To sumMin)
                 (Is max To sumMax)
@@ -261,7 +261,7 @@ type alias Is a to b =
 You can just ignore the second difference if you don't need it ([`MinNat.addN`](MinNat#addN)).
 
     addN :
-        Nat (N added (Is min To sumMin) x)
+        Nat (ArgN added (Is min To sumMin) x)
         -> Nat (In min max maybeN)
         -> Nat (Min sumMin)
 
@@ -605,7 +605,7 @@ But once you implement `onlyAtMost18`, you might use the value in `onlyAtMost19`
 
 -}
 restoreMax :
-    Nat (N max (Is a To atLeastMax) x)
+    Nat (ArgN max (Is a To atLeastMax) x)
     -> Nat (In min max maybeN)
     -> Nat (In min atLeastMax maybeN)
 restoreMax =

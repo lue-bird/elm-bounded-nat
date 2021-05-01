@@ -314,8 +314,8 @@ nNatsModule =
         PackageExposedModule
             { moduleComment =
                 \declarations->
-                    [ markdown ("`Nat (N Nat0 ...)` to `Nat (N " ++ String.fromInt lastN ++ " ...)`.")
-                    , markdown "Bigger `Nat (N ...)` s start to slow down compilation, so they are avoided."
+                    [ markdown ("`Nat (ArgN Nat0 ...)` to `Nat (ArgN " ++ String.fromInt lastN ++ " ...)`.")
+                    , markdown "Bigger `Nat (ArgN ...)` s start to slow down compilation, so they are avoided."
                     , markdown "See [`Nat.Bound.N`](Nat-Bound#N), [`Nat.Bound.ValueN`](Nat-Bound#ValueN) & [`NNat`](NNat) for an explanation."
                     , docTagsFrom NNatsValue declarations
                     ]
@@ -358,11 +358,11 @@ typeNatsModule =
                     [ markdown "Express exact natural numbers in a type."
                     , code "onlyExact1 : Nat (ArgOnly Nat1 maybeN) -> Cake"
                     , markdown "- `takesOnlyExact1 nat10` is a compile-time error"
-                    , code "add2 : Nat (ArgOnly n maybeN) -> Nat (ValueOnly (Nat2Plus n))"
-                    , markdown "- `add2 nat2` is of type `Nat (ValueOnly Nat4)`"
+                    , code "add2 : Nat (ArgOnly n maybeN) -> Nat (Only (Nat2Plus n))"
+                    , markdown "- `add2 nat2` is of type `Nat (Only Nat4)`"
                     , markdown "### about a big limitation"
                     , markdown "Sadly, while experimenting with type aliases, I discovered that type aliases can only expand so much."
-                    , code "compilingGetsKilled : Nat (N (Nat100Plus Nat93) x y)"
+                    , code "compilingGetsKilled : Nat (ArgN (Nat100Plus Nat93) x y)"
                     , markdown "If a type alias is not fully expanded after ~192 tries,"
                     , markdown "- the compilation stops"
                     , markdown "- the elm-stuff can corrupt"
