@@ -3,7 +3,7 @@
 Type-safe natural numbers (`>= 0`), ensuring that a `Nat` is in a range _at compile-time_:
 
 ```elm
-toHexChar : Nat (In min Nat15 maybeN) -> Char
+toHexChar : Nat (ArgIn min Nat15 maybeN) -> Char
 ```
 
 **No number below 0 or above 15** can be passed in as an argument!
@@ -16,17 +16,14 @@ elm install lue-bird/elm-bounded-nat
 ```
 
 ```elm
-import Nat exposing
-    ( Nat, In, N, Is, To
-    , In, Min
-    )
+import Nat exposing (Nat, Min, In, N, Is, To, ArgIn)
 import NNats exposing (..)
-    -- (..) = nat0 to nat160
+    -- (..) is nat0 to nat160
 import InNat
 import MinNat
 
 import TypeNats exposing (..)
-    -- (..) = Nat0 to Nat160 & Nat1Plus to Nat160Plus
+    -- (..) is Nat0 to Nat160 & Nat1Plus to Nat160Plus
 
 import Typed exposing (val, val2)
 ```
@@ -44,9 +41,9 @@ This is common, but
 
 ```elm
 rgbPer100 :
-    Nat (In redMin Nat100 redMaybeN)
-    -> Nat (In greenMin Nat100 greenMaybeN)
-    -> Nat (In blueMin Nat100 blueMaybeN)
+    Nat (ArgIn redMin Nat100 redMaybeN)
+    -> Nat (ArgIn greenMin Nat100 greenMaybeN)
+    -> Nat (ArgIn blueMin Nat100 blueMaybeN)
     -> Color
 ```
 - _the one using_ the function must prove that the numbers are actually between 0 and 100
@@ -54,13 +51,13 @@ rgbPer100 :
 
 The type
 ```elm
-Nat (In min Nat100 maybeN)
+Nat (ArgIn min Nat100 maybeN)
 ```
 is saying it wants:
 
 ```
 an integer >= 0                  Nat          
-  in a range                        In       
+  in a range                        ArgIn       
     at least any minimum value        min   
     at most 100                       Nat100
     which might be exact              maybeN
@@ -72,13 +69,12 @@ They can prove it by
 - already knowing
 
 ```elm
-red =
-    rgbPer100 nat100 nat0 nat0 -- 👍
+red = rgbPer100 nat100 nat0 nat0 -- 👍
 
-nat0 : Nat (N Nat0 atLeast0)
+nat0 : Nat (N Nat0 atLeast0 ...)
 -- so it's also between 0 and 0/1/.../100
 
-nat100 : Nat (N Nat0 atLeast0)
+nat100 : Nat (N Nat100 (N100Plus orMore) ...)
 -- so it's also between 100 and 100(/101/...)
 ```
 - checking
@@ -191,7 +187,7 @@ We can do even better!
 We know that `!19` is already greater than the maximum safe `Int` `2^53 - 1`.
 
 ```elm
-safeFactorial : Nat (In min Nat18 maybeN) -> Nat (Min Nat1)
+safeFactorial : Nat (ArgIn min Nat18 maybeN) -> Nat (Min Nat1)
 safeFactorial =
     factorial
 ```
