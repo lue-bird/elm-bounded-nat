@@ -62,7 +62,7 @@ import Typed exposing (val, val2)
 
     between5And15
         |> InNat.atMost nat10 { min = nat5 }
-    --> is of type Nat (ValueIn Nat5 (Nat10Plus a))
+    --> : Nat (ValueIn Nat5 (Nat10Plus a))
 
 `min` ensures that that number is at least the minimum.
 
@@ -72,11 +72,11 @@ atMost :
     -> { min : Nat (N min (Is minToMinNewMax To minNewMax) x) }
     -> Nat (In min max maybeN)
     -> Nat (ValueIn min atLeastNewMax)
-atMost higherBound min =
-    Internal.atMost higherBound min
+atMost higherUpperBound min =
+    Internal.atMost higherUpperBound min
 
 
-{-| If the `Nat (In ...)` is less than a number, return that number instead.
+{-| If the `Nat (In ...)` is less than a `Nat`, return that number instead.
 
     nat5 |> InNat.atLeast nat10
     --> Nat 10
@@ -99,21 +99,21 @@ atLeast lowerBound =
 
 {-| Is the `Nat (In ...)`
 
-  - `equalOrGreater` than a `Nat` or
+  - `equalOrGreater` than a lower bound or
 
   - `less`?
 
-```
-vote : { age : Nat (In (Nat18Plus orOlder) max maybeN) } -> Vote
+`min` ensures that the lower bound is greater than the minimum.
 
-tryToVote =
-    Nat.lowerMin nat0
-        >> InNat.isAtLeast nat18
-            { min = nat0 }
-            { less = Nothing --😓
-            , equalOrGreater = \age -> Just (vote { age = age })
-            }
-```
+    vote : { age : Nat (In (Nat18Plus orOlder) max maybeN) } -> Vote
+
+    tryToVote =
+        Nat.lowerMin nat0
+            >> InNat.isAtLeast nat18
+                { min = nat0 }
+                { less = Nothing --😓
+                , equalOrGreater = \age -> Just (vote { age = age })
+                }
 
 -}
 isAtLeast :
@@ -144,22 +144,22 @@ isAtLeast triedLowerBound min cases =
 
 {-| Is the `Nat (In ...)`
 
-  - `equalOrLess` than a `Nat` or
+  - `equalOrLess` than an upper bound or
 
   - `greater`?
 
-```
-goToU18Party : { age : Nat (In min Nat17 maybeN) } -> List Snack
+`min` ensures that the upper bound is greater than the minimum.
 
-tryToGoToU18Party =
-    Nat.lowerMin nat0
-        >> InNat.isAtMost nat17
-            { min = nat0 }
-            { equalOrLess =
-                \age -> Just (goToU18Party { age = age })
-            , greater = Nothing
-            }
-```
+    goToU18Party : { age : Nat (In min Nat17 maybeN) } -> Snack
+
+    tryToGoToU18Party =
+        Nat.lowerMin nat0
+            >> InNat.isAtMost nat17
+                { min = nat0 }
+                { equalOrLess =
+                    \age -> Just (goToU18Party { age = age })
+                , greater = Nothing
+                }
 
 -}
 isAtMost :
@@ -185,7 +185,8 @@ isAtMost triedUpperBound min cases =
             .greater cases (Internal.newRange inNat)
 
 
-{-| Compare the `Nat (In ...)` to an exact `Nat (N ...)`. Is it `greater`, `less` or `equal`?
+{-| Compare the `Nat (In ...)` to an exact `Nat (N ...)`.
+Is it `greater`, `less` or `equal`?
 
 `min` ensures that the `Nat (N ...)` is greater than the minimum.
 
@@ -193,14 +194,16 @@ isAtMost triedUpperBound min cases =
         Nat.lowerMin nat0
             >> InNat.is nat18
                 { min = nat0 }
-                { less = \age -> appropriateToy { age = age }
-                , greater = \age -> appropriateExperience { age = age }
+                { less = \age -> toy { age = age }
+                , greater = \age -> experience { age = age }
                 , equal = \() -> bigPresent
                 }
 
-    appropriateToy : { age : Nat (In min Nat17 maybeN) } -> Toy
+    toy : { age : Nat (In min Nat17 maybeN) } -> Toy
 
-    appropriateExperience : { age : Nat (In (Nat19Plus orOlder) max maybeN) } -> Experience
+    experience :
+        { age : Nat (In (Nat19Plus orOlder) max maybeN) }
+        -> Experience
 
 -}
 is :
@@ -260,22 +263,22 @@ is tried min cases =
 isInRange :
     Nat
         (N
-            first
-            (Is firstToLast To last)
-            (Is firstA To (Nat1Plus atLeastFirstMinus1))
+            lowerBound
+            (Is lowerBoundToUpperBound To upperBound)
+            (Is lowerBoundA To (Nat1Plus atLeastLowerBoundMinus1))
         )
     ->
         Nat
             (N
-                last
-                (Is lastToMax To max)
-                (Is lastA To atLeastLast)
+                upperBound
+                (Is upperBoundToMax To max)
+                (Is upperBoundA To atLeastUpperBound)
             )
-    -> { min : Nat (N min (Is minToFirst To first) x) }
+    -> { min : Nat (N min (Is minToLowerBound To lowerBound) x) }
     ->
-        { inRange : Nat (In first atLeastLast maybeN) -> result
-        , less : Nat (In min atLeastFirstMinus1 maybeN) -> result
-        , greater : Nat (In (Nat1Plus last) max maybeN) -> result
+        { inRange : Nat (In lowerBound atLeastUpperBound maybeN) -> result
+        , less : Nat (In min atLeastLowerBoundMinus1 maybeN) -> result
+        , greater : Nat (In (Nat1Plus upperBound) max maybeN) -> result
         }
     -> Nat (In min max maybeN)
     -> result
@@ -299,7 +302,7 @@ isInRange lowerBound upperBound min cases =
 
     between3And10
         |> InNat.add between1And12 nat1 nat12
-    --> is of type Nat (ValueIn Nat4 (Nat22Plus a))
+    --> : Nat (ValueIn Nat4 (Nat22Plus a))
 
 -}
 add :
@@ -316,7 +319,7 @@ add inNatToAdd minAdded maxAdded =
 
     between70And100
         |> InNat.addN nat7
-    --> is of type Nat (In Nat77 (Nat107Plus a))
+    --> : Nat (In Nat77 (Nat107Plus a))
 
 -}
 addN :
@@ -338,7 +341,7 @@ The 2 following arguments are
 ```
 between6And12
     |> InNat.sub between1And5 nat1 nat5
---> is of type Nat (ValueIn Nat1 (Nat5Plus a))
+--> : Nat (ValueIn Nat1 (Nat5Plus a))
 ```
 
 -}
@@ -356,7 +359,7 @@ sub inNatToSubtract minSubtracted maxSubtracted =
 
     between7And10
         |> InNat.subN nat7
-    --> is of type Nat (ValueIn Nat0 (Nat3Plus a))
+    --> : Nat (ValueIn Nat0 (Nat3Plus a))
 
 -}
 subN :
@@ -374,7 +377,7 @@ subN nNatToSubtract =
 {-| Convert it to a `Nat (ValueIn min max)`.
 
     nat4 |> InNat.value
-    --> is of type Nat (ValueIn Nat4 (Nat4Plus a))
+    --> : Nat (ValueIn Nat4 (Nat4Plus a))
 
 Example
 

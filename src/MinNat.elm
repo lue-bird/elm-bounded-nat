@@ -56,7 +56,7 @@ import Typed exposing (val)
 {-| Add a `Nat (In ...)`. The second argument is the minimum added value.
 
     atLeast5 |> MinNat.add atLeast2 nat2
-    --> is of type Nat (ValueMin Nat7)
+    --> : Nat (ValueMin Nat7)
 
 -}
 add :
@@ -71,7 +71,7 @@ add inNatToAdd minAdded =
 {-| Add a fixed `Nat (N ...)` value.
 
     atLeast70 |> InNat.addN nat7
-    --> is of type Nat (ValueMin Nat77)
+    --> : Nat (ValueMin Nat77)
 
 -}
 addN :
@@ -85,7 +85,7 @@ addN nNatToAdd =
 {-| Subtract an exact `Nat (N ...)`.
 
     atLeast7 |> MinNat.subN nat2
-    --> is of type Nat (ValueMin Nat5)
+    --> : Nat (ValueMin Nat5)
 
 -}
 subN :
@@ -99,7 +99,7 @@ subN nNatToSubtract =
 {-| Subtract a `Nat (In ...)`. The second argument is the maximum of the subtracted `Nat (In ...)`.
 
     atLeast6 |> MinNat.sub between0And5 nat5
-    --> is of type Nat (ValueMin Nat1)
+    --> : Nat (ValueMin Nat1)
 
 If you have don't the maximum subtracted value at hand, use [`subLossy`](InNat#subLossy).
 
@@ -127,14 +127,14 @@ sub inNatToSubtract maxSubtracted =
         Nat.lowerMin nat0
             >> MinNat.is nat18
                 { min = nat0 }
-                { less = \age -> appropriateToy { age = age }
-                , greater = \age -> appropriateExperience { age = age }
+                { less = \age -> toy { age = age }
+                , greater = \age -> experience { age = age }
                 , equal = \() -> bigPresent
                 }
 
-    appropriateToy : { age : Nat (In Nat0 Nat17 maybeN) } -> Toy
+    toy : { age : Nat (In Nat0 Nat17 maybeN) } -> Toy
 
-    appropriateExperience : { age : Nat (In Nat19 max maybeN) } -> Experience
+    experience : { age : Nat (In Nat19 max maybeN) } -> Experience
 
 -}
 is :
@@ -246,7 +246,7 @@ isAtMost triedUpperBound min cases =
 {-| Convert a `Nat (In min ...)` to a `Nat (ValueMin min)`.
 
     between3And10 |> MinNat.value
-    --> is of type Nat (ValueMin Nat4)
+    --> : Nat (ValueMin Nat4)
 
 There is **only 1 situation you should use this.**
 

@@ -489,10 +489,10 @@ intAtLeast minimum =
 we know that if `a >= 1`, `x * a >= x`.
 
     atLeast5  |> Nat.mul nat2
-    --> Nat 10 of type Nat (ValueMin Nat5)
+    --> Nat 10 : Nat (ValueMin Nat5)
 
     atLeast2 |> Nat.mul nat5
-    --> Nat 10 of type Nat (ValueMin Nat2)
+    --> Nat 10 : Nat (ValueMin Nat2)
 
 The maximum value of both factors can be `Infinity`.
 
@@ -514,7 +514,7 @@ mul natToMultiply =
 ```
 atMost7
     |> Nat.div nat3
---> Nat 2 of type Nat (ValueIn Nat0 (Nat7Plus a))
+--> Nat 2 : Nat (ValueIn Nat0 (Nat7Plus a))
 ```
 
 -}
@@ -533,7 +533,7 @@ div divNat =
 
 ```
 atMost7 |> Nat.remainderBy nat3
---> Nat 1 of type Nat (In Nat0 (Nat7Plus a))
+--> Nat 1 : Nat (In Nat0 (Nat7Plus a))
 ```
 
 -}
@@ -549,10 +549,10 @@ remainderBy divNat =
 We know that if `a >= 1  →  x ^ a >= x`
 
     atLeast5 |> Nat.toPower nat2
-    --> Nat 25 of type Nat (ValueMin Nat5)
+    --> Nat 25 : Nat (ValueMin Nat5)
 
     atLeast2 |> Nat.toPower nat5
-    --> Nat 25 of type Nat (ValueMin Nat2)
+    --> Nat 25 : Nat (ValueMin Nat2)
 
 -}
 toPower :
@@ -625,10 +625,10 @@ restoreMax =
 
 ```
 in6To12 |> Nat.subLossy between1And5
---> is of type Nat (ValueIn Nat0 Nat12)
+--> : Nat (ValueIn Nat0 Nat12)
 
 atLeast6 |> Nat.subLossy between1And5
---> is of type Nat (ValueMin Nat0)
+--> : Nat (ValueMin Nat0)
 ```
 
   - if you know the minimum subtracted value, use [`MinNat.sub`](MinNat#sub).
@@ -651,10 +651,10 @@ subLossy natToSubtract =
   - use `Infinity` as the maximum instead of computing the exact value
 
     atLeast5 |> Nat.addLossy atLeast2
-    --> is of type Nat (ValueMin Nat5)
+    --> : Nat (ValueMin Nat5)
 
     atLeast2 |> Nat.addLossy atLeast5
-    --> is of type Nat (ValueMin Nat2)
+    --> : Nat (ValueMin Nat2)
 
   - if you know the minimum added value, use [`MinNat.add`](MinNat#add).
 
