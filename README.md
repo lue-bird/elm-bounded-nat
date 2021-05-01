@@ -18,7 +18,7 @@ elm install lue-bird/elm-bounded-nat
 ```elm
 import Nat exposing
     ( Nat, In, N, Is, To
-    , ValueIn, ValueMin
+    , ValueIn, Min
     )
 import NNats exposing (..)
     -- (..) = nat0 to nat160
@@ -84,7 +84,7 @@ nat100 : Nat (ValueN Nat0 atLeast0)
 - checking
 
 ```elm
-isUserIntANat : Int -> Maybe (Nat (ValueMin Nat0))
+isUserIntANat : Int -> Maybe (Nat (Min Nat0))
 isUserIntANat =
     Nat.isIntAtLeast nat0
 ```
@@ -128,7 +128,7 @@ type alias Digit =
 The type of a value reflects how much you know.
 
 - `ValueIn`: between a minimum & maximum value
-- `ValueMin`: at least a minimum value
+- `Min`: at least a minimum value
 - `ValueN`: exact value
     - also describes the difference between 2 values
 
@@ -153,7 +153,7 @@ This forms an infinite loop if we call `intFactorial -1`...
 Let's disallow negative numbers here!
 
 ```elm
-factorial : Nat (In min max maybeN) -> Nat (ValueMin Nat1)
+factorial : Nat (In min max maybeN) -> Nat (Min Nat1)
 ```
 Says: for every natural number `n >= 0`, `n! >= 1`.
 ```elm
@@ -165,7 +165,7 @@ factorialHelp =
             \_ -> nat1 |> MinNat.value
         , equalOrGreater =
             \atLeast1 ->
-                -- a Nat (ValueMin Nat1)
+                -- a Nat (Min Nat1)
                 atLeast1
                     |> Nat.mul
                         (factorial
@@ -191,7 +191,7 @@ We can do even better!
 We know that `!19` is already greater than the maximum safe `Int` `2^53 - 1`.
 
 ```elm
-safeFactorial : Nat (In min Nat18 maybeN) -> Nat (ValueMin Nat1)
+safeFactorial : Nat (In min Nat18 maybeN) -> Nat (Min Nat1)
 safeFactorial =
     factorial
 ```
@@ -228,7 +228,7 @@ rgb : Nat (In redMin Nat100 maybeN) -> --...
 `maybeN` says that it _can_ be exact anyway. Or instead of
 
 ```elm
-charFromCode : Nat (ValueMin min) -> Char
+charFromCode : Nat (Min min) -> Char
 ```
 
 which you should also never do, allow `Nat (In min ...)` with any max & `Nat (ValueN ...)` to fit in as well!

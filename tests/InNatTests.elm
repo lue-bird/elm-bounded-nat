@@ -8,7 +8,7 @@ import InNat
 import MinNat
 import MinNatTests
 import NNats exposing (..)
-import Nat exposing (In, Nat, ValueIn, ValueMin)
+import Nat exposing (In, Min, Nat, ValueIn)
 import Test exposing (Test, describe, test)
 import TypeNats exposing (..)
 
@@ -39,7 +39,7 @@ intFactorial x =
         x * intFactorial (x - 1)
 
 
-factorialHelp : Nat (In Nat0 max maybeN) -> Nat (ValueMin Nat1)
+factorialHelp : Nat (In Nat0 max maybeN) -> Nat (Min Nat1)
 factorialHelp =
     MinNat.isAtLeast nat1
         { min = nat0 }
@@ -54,12 +54,12 @@ factorialHelp =
         }
 
 
-factorial : Nat (In min max maybeN) -> Nat (ValueMin Nat1)
+factorial : Nat (In min max maybeN) -> Nat (Min Nat1)
 factorial =
     Nat.lowerMin nat0 >> factorialHelp
 
 
-ultraSafeFactorial : Nat (In min Nat18 maybeN) -> Nat (ValueMin Nat1)
+ultraSafeFactorial : Nat (In min Nat18 maybeN) -> Nat (Min Nat1)
 ultraSafeFactorial =
     MinNatTests.factorial
 

@@ -7,10 +7,10 @@ module MinNat exposing
 
 {-| 2 situations where you use these operations instead of the ones in [`Nat`](Nat) or [`InNat`](InNat):
 
-1.  Your value is of type `Nat (ValueMin ...)`
+1.  Your value is of type `Nat (Min ...)`
 
         nat3 |> Nat.mul nat3
-        --> Nat (ValueMin Nat3)
+        --> Nat (Min Nat3)
 
 2.  The maximum is a type variable
 
@@ -44,7 +44,7 @@ import I as Internal
 import InNat
 import N exposing (Nat1Plus, Nat2Plus)
 import NNats exposing (nat0)
-import Nat exposing (In, Is, N, Nat, To, ValueIn, ValueMin)
+import Nat exposing (In, Is, Min, N, Nat, To, ValueIn)
 import Serialize
 import Typed exposing (val, val2)
 
@@ -56,14 +56,14 @@ import Typed exposing (val, val2)
 {-| Add a `Nat (In ...)`. The second argument is the minimum added value.
 
     atLeast5 |> MinNat.add atLeast2 nat2
-    --> : Nat (ValueMin Nat7)
+    --> : Nat (Min Nat7)
 
 -}
 add :
     Nat (In minAdded maxAdded addedMaybeN)
     -> Nat (N minAdded (Is min To sumMin) x)
     -> Nat (In min max maybeN)
-    -> Nat (ValueMin sumMin)
+    -> Nat (Min sumMin)
 add inNatToAdd minAdded =
     Internal.add inNatToAdd
 
@@ -71,13 +71,13 @@ add inNatToAdd minAdded =
 {-| Add a fixed `Nat (N ...)` value.
 
     atLeast70 |> InNat.addN nat7
-    --> : Nat (ValueMin Nat77)
+    --> : Nat (Min Nat77)
 
 -}
 addN :
     Nat (N added (Is min To sumMin) x)
     -> Nat (In min max maybeN)
-    -> Nat (ValueMin sumMin)
+    -> Nat (Min sumMin)
 addN nNatToAdd =
     Internal.add nNatToAdd
 
@@ -85,7 +85,7 @@ addN nNatToAdd =
 {-| Subtract an exact `Nat (N ...)`.
 
     atLeast7 |> MinNat.subN nat2
-    --> : Nat (ValueMin Nat5)
+    --> : Nat (Min Nat5)
 
 -}
 subN :
@@ -99,7 +99,7 @@ subN nNatToSubtract =
 {-| Subtract a `Nat (In ...)`. The second argument is the maximum of the subtracted `Nat (In ...)`.
 
     atLeast6 |> MinNat.sub between0And5 nat5
-    --> : Nat (ValueMin Nat1)
+    --> : Nat (Min Nat1)
 
 If you have don't the maximum subtracted value at hand, use [`subLossy`](InNat#subLossy).
 
@@ -119,7 +119,7 @@ sub inNatToSubtract maxSubtracted =
 -- ## compare
 
 
-{-| Compare the `Nat (ValueMin ...)` to a `Nat (N ...)`. Is it `greater`, `less` or `equal`?
+{-| Compare the `Nat (Min ...)` to a `Nat (N ...)`. Is it `greater`, `less` or `equal`?
 
 `min` ensures that the `Nat (N ...)` is greater than the minimum.
 
@@ -143,7 +143,7 @@ is :
     ->
         { equal : () -> result
         , less : Nat (In min triedMinus1PlusA maybeN) -> result
-        , greater : Nat (ValueMin (Nat2Plus triedMinus1)) -> result
+        , greater : Nat (Min (Nat2Plus triedMinus1)) -> result
         }
     -> Nat (In min max maybeN)
     -> result
@@ -160,14 +160,14 @@ is tried min cases =
                 .greater cases (minNat |> Internal.newRange)
 
 
-{-| Is the `Nat (ValueMin ...)`
+{-| Is the `Nat (Min ...)`
 
   - `equalOrGreater` than a `Nat` or
 
   - `less`?
 
 ```
-factorial : Nat (In min max maybeN) -> Nat (ValueMin Nat1)
+factorial : Nat (In min max maybeN) -> Nat (Min Nat1)
 factorial =
     Nat.lowerMin nat0
         >> MinNat.isAtLeast nat1
@@ -189,7 +189,7 @@ isAtLeast :
     -> { min : Nat (N min (Is minToTriedMin To lowerBound) y) }
     ->
         { less : Nat (In min lowerBoundMinus1PlusA maybeN) -> result
-        , equalOrGreater : Nat (ValueMin lowerBound) -> result
+        , equalOrGreater : Nat (Min lowerBound) -> result
         }
     -> Nat (In min max maybeN)
     -> result
@@ -202,7 +202,7 @@ isAtLeast triedLowerBound min cases =
             .less cases (minNat |> Internal.newRange)
 
 
-{-| Is the `Nat (ValueMin ...)`
+{-| Is the `Nat (Min ...)`
 
   - `equalOrLess` than a `Nat` or
 
@@ -226,7 +226,7 @@ isAtMost :
     -> { min : Nat (N min (Is minToAtMostMin To upperBound) y) }
     ->
         { equalOrLess : Nat (In min upperBoundPlusA maybeN) -> result
-        , greater : Nat (ValueMin (Nat1Plus upperBound)) -> result
+        , greater : Nat (Min (Nat1Plus upperBound)) -> result
         }
     -> Nat (In min max maybeN)
     -> result
@@ -243,10 +243,10 @@ isAtMost upperBound min cases =
 -- ## drop information
 
 
-{-| Convert a `Nat (In min ...)` to a `Nat (ValueMin min)`.
+{-| Convert a `Nat (In min ...)` to a `Nat (Min min)`.
 
     between3And10 |> MinNat.value
-    --> : Nat (ValueMin Nat4)
+    --> : Nat (Min Nat4)
 
 There is **only 1 situation you should use this.**
 
@@ -256,14 +256,14 @@ To make these the same type.
 
 Elm complains:
 
-> But all the previous elements in the list are: `Nat (ValueMin Nat1)`
+> But all the previous elements in the list are: `Nat (Min Nat1)`
 
     [ atLeast1
     , between1And10 |> MinNat.value
     ]
 
 -}
-value : Nat (In min max maybeN) -> Nat (ValueMin min)
+value : Nat (In min max maybeN) -> Nat (Min min)
 value =
     Internal.newRange
 
@@ -279,7 +279,7 @@ value =
     serializeNaturalNumber :
         Serialize.Codec
             String
-            (Nat (ValueMin Nat0))
+            (Nat (Min Nat0))
     serializeNaturalNumber =
         MinNat.serialize nat0
 
@@ -290,14 +290,14 @@ value =
 
     decode :
         Bytes
-        -> Result (Serialize.Error String) (Nat (ValueMin Nat0))
+        -> Result (Serialize.Error String) (Nat (Min Nat0))
     decode =
         Serialize.decodeFromBytes serializeNaturalNumber
 
 -}
 serialize :
     Nat (In minLowerBound maxLowerBound lowerBoundMaybeN)
-    -> Serialize.Codec String (Nat (ValueMin minLowerBound))
+    -> Serialize.Codec String (Nat (Min minLowerBound))
 serialize lowerBound =
     Serialize.int
         |> Serialize.mapValid

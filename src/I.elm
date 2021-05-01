@@ -76,7 +76,7 @@ type In minimum maximum maybeN
     = In Never
 
 
-type alias ValueMin minimum =
+type alias Min minimum =
     ValueIn minimum Infinity
 
 
@@ -136,7 +136,7 @@ isIntInRange :
     -> Nat (In last maxLast lastMaybeN)
     ->
         { less : () -> result
-        , greater : Nat (ValueMin (Nat1Plus last)) -> result
+        , greater : Nat (Min (Nat1Plus last)) -> result
         , inRange : Nat (ValueIn minFirst maxLast) -> result
         }
     -> Int
@@ -167,7 +167,7 @@ intInRange lowerBound upperBound =
 isIntAtLeast :
     Nat (In min max maybeN)
     -> Int
-    -> Maybe (Nat (ValueMin min))
+    -> Maybe (Nat (Min min))
 isIntAtLeast minimum int =
     if int >= val minimum then
         Just (tag int |> isChecked Nat)
@@ -193,7 +193,7 @@ atLeast lowerBound =
     map (max (val lowerBound)) >> isChecked Nat
 
 
-abs : Int -> Nat (ValueMin Nat0)
+abs : Int -> Nat (Min Nat0)
 abs int =
     Basics.abs int |> tag |> isChecked Nat
 
@@ -223,7 +223,7 @@ random min max =
 mul :
     Nat (In (Nat1Plus minMultipliedMinus1) maxMultiplied multipliedMaybeN)
     -> Nat (In min max maybeN)
-    -> Nat (ValueMin min)
+    -> Nat (Min min)
 mul natToMultiply =
     val2 (*) natToMultiply >> tag >> isChecked Nat
 
@@ -247,7 +247,7 @@ remainderBy divNat =
 toPower :
     Nat (In (Nat1Plus powMinMinus1) powMax powMaybeN)
     -> Nat (In min max maybeN)
-    -> Nat (ValueMin min)
+    -> Nat (Min min)
 toPower power =
     map (\x -> x ^ val power) >> isChecked Nat
 

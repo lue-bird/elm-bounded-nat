@@ -2,7 +2,7 @@ module Nat exposing
     ( Nat
     , In, Only
     , N, Is, To
-    , ValueMin, ValueIn, ValueN, ValueOnly
+    , Min, ValueIn, ValueN, ValueOnly
     , abs, range, random
     , intAtLeast, intInRange
     , isIntInRange, isIntAtLeast, theGreater, theSmaller
@@ -31,7 +31,7 @@ module Nat exposing
 
 ### value / return type
 
-@docs ValueMin, ValueIn, ValueN, ValueOnly
+@docs Min, ValueIn, ValueN, ValueOnly
 
 
 ## create
@@ -77,7 +77,7 @@ import Typed exposing (Checked, Public, Typed, val2)
 ## value / return types
 
     -- >= 4
-    Nat (ValueMin Nat4)
+    Nat (Min Nat4)
 
     -- 2 <= nat <= 12
     Nat (ValueIn Nat2 Nat12)
@@ -175,12 +175,12 @@ This is where to use `Min`.
 
 A number, which is at least 5 is be of type
 
-    Nat (ValueMin Nat5)
+    Nat (Min Nat5)
 
-Every `ValueMin min` is of type `In min ...`.
+Every `Min min` is of type `In min ...`.
 
 -}
-type alias ValueMin minimum =
+type alias Min minimum =
     ValueIn minimum Internal.Infinity
 
 
@@ -264,7 +264,7 @@ You can just ignore the second difference if you don't need it ([`MinNat.addN`](
     addN :
         Nat (N added (Is min To sumMin) x)
         -> Nat (In min max maybeN)
-        -> Nat (ValueMin sumMin)
+        -> Nat (Min sumMin)
 
 -}
 type alias N n asADifference asAnotherDifference =
@@ -302,7 +302,7 @@ Really only use this if you want the absolute value.
 If something like this isn't possible, use [`MinNat.intAtLeast`](MinNat#intAtLeast)!
 
 -}
-abs : Int -> Nat (ValueMin Nat0)
+abs : Int -> Nat (Min Nat0)
 abs int =
     Internal.abs int
 
@@ -313,7 +313,7 @@ abs int =
     from3To10 =
         Nat.range nat3 nat10
 
-    from3ToAtLeast10 : List (Nat (ValueMin Nat3))
+    from3ToAtLeast10 : List (Nat (Min Nat3))
     from3ToAtLeast10 =
         Nat.range nat3 atLeast10
 
@@ -396,7 +396,7 @@ isIntInRange :
     -> Nat (In upperBound upperBoundPlusA upperBoundMaybeN)
     ->
         { less : () -> result
-        , greater : Nat (ValueMin (Nat1Plus upperBound)) -> result
+        , greater : Nat (Min (Nat1Plus upperBound)) -> result
         , inRange : Nat (ValueIn minLowerBound upperBoundPlusA) -> result
         }
     -> Int
@@ -433,7 +433,7 @@ intInRange lowerBound upperBound =
     Internal.intInRange lowerBound upperBound
 
 
-{-| If the `Int >= a minimum`, `Just` the `Nat (ValueMin minimum)`, else `Nothing`.
+{-| If the `Int >= a minimum`, `Just` the `Nat (Min minimum)`, else `Nothing`.
 
     4 |> Nat.isIntAtLeast nat5 --> Nothing
 
@@ -443,12 +443,12 @@ intInRange lowerBound upperBound =
 isIntAtLeast :
     Nat (In min max lowerMaybeN)
     -> Int
-    -> Maybe (Nat (ValueMin min))
+    -> Maybe (Nat (Min min))
 isIntAtLeast minimum int =
     Internal.isIntAtLeast minimum int
 
 
-{-| A `Nat (ValueMin ...)` from an `Int`; if the `Int < minimum`, `minimum` is returned.
+{-| A `Nat (Min ...)` from an `Int`; if the `Int < minimum`, `minimum` is returned.
 
     9 |> Nat.intAtLeast nat3
     --> Nat 9
@@ -474,7 +474,7 @@ If you want to handle the case `< minimum` yourself, use [`Nat.isIntAtLeast`](Na
 intAtLeast :
     Nat (In min max lowerMaybeN)
     -> Int
-    -> Nat (ValueMin min)
+    -> Nat (Min min)
 intAtLeast minimum =
     isIntAtLeast minimum
         >> Maybe.withDefault (Internal.newRange minimum)
@@ -488,10 +488,10 @@ intAtLeast minimum =
 we know that if `a >= 1`, `x * a >= x`.
 
     atLeast5  |> Nat.mul nat2
-    --> Nat 10 : Nat (ValueMin Nat5)
+    --> Nat 10 : Nat (Min Nat5)
 
     atLeast2 |> Nat.mul nat5
-    --> Nat 10 : Nat (ValueMin Nat2)
+    --> Nat 10 : Nat (Min Nat2)
 
 The maximum value of both factors can be `Infinity`.
 
@@ -499,7 +499,7 @@ The maximum value of both factors can be `Infinity`.
 mul :
     Nat (In (Nat1Plus minMultipliedMinus1) maxMultiplied multipliedMaybeN)
     -> Nat (In min max maybeN)
-    -> Nat (ValueMin min)
+    -> Nat (Min min)
 mul natToMultiply =
     Internal.mul natToMultiply
 
@@ -548,16 +548,16 @@ remainderBy divNat =
 We know that if `a >= 1  →  x ^ a >= x`
 
     atLeast5 |> Nat.toPower nat2
-    --> Nat 25 : Nat (ValueMin Nat5)
+    --> Nat 25 : Nat (Min Nat5)
 
     atLeast2 |> Nat.toPower nat5
-    --> Nat 25 : Nat (ValueMin Nat2)
+    --> Nat 25 : Nat (Min Nat2)
 
 -}
 toPower :
     Nat (In (Nat1Plus powMinMinus1) powMax powMaybeN)
     -> Nat (In min max maybeN)
-    -> Nat (ValueMin min)
+    -> Nat (Min min)
 toPower power =
     Internal.toPower power
 
@@ -572,7 +572,7 @@ toPower power =
 
 Elm complains:
 
-> But all the previous elements in the list are: `Nat (ValueMin Nat3)`
+> But all the previous elements in the list are: `Nat (Min Nat3)`
 
     [ atLeast3
     , atLeast4 |> Nat.lowerMin nat3
@@ -627,7 +627,7 @@ in6To12 |> Nat.subLossy between1And5
 --> : Nat (ValueIn Nat0 Nat12)
 
 atLeast6 |> Nat.subLossy between1And5
---> : Nat (ValueMin Nat0)
+--> : Nat (Min Nat0)
 ```
 
   - if you know the minimum subtracted value, use [`MinNat.sub`](MinNat#sub).
@@ -650,10 +650,10 @@ subLossy natToSubtract =
   - use `Infinity` as the maximum instead of computing the exact value
 
     atLeast5 |> Nat.addLossy atLeast2
-    --> : Nat (ValueMin Nat5)
+    --> : Nat (Min Nat5)
 
     atLeast2 |> Nat.addLossy atLeast5
-    --> : Nat (ValueMin Nat2)
+    --> : Nat (Min Nat2)
 
   - if you know the minimum added value, use [`MinNat.add`](MinNat#add).
 
@@ -663,6 +663,6 @@ subLossy natToSubtract =
 addLossy :
     Nat (In minAdded maxAdded addedMaybeN)
     -> Nat (In min max maybeN)
-    -> Nat (ValueMin min)
+    -> Nat (Min min)
 addLossy natToAdd =
     Internal.add natToAdd

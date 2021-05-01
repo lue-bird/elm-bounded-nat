@@ -7,7 +7,7 @@ import Expect
 import InNat
 import MinNat
 import NNats exposing (..)
-import Nat exposing (In, Nat, ValueIn, ValueMin)
+import Nat exposing (In, Min, Nat, ValueIn)
 import Test exposing (Test, describe, test)
 import TypeNats exposing (..)
 import Typed exposing (val)
@@ -36,7 +36,7 @@ intFactorial x =
         x * intFactorial (x - 1)
 
 
-factorialHelp : Nat (In Nat0 max maybeN) -> Nat (ValueMin Nat1)
+factorialHelp : Nat (In Nat0 max maybeN) -> Nat (Min Nat1)
 factorialHelp =
     MinNat.isAtLeast nat1
         { min = nat0 }
@@ -51,12 +51,12 @@ factorialHelp =
         }
 
 
-factorial : Nat (In min max maybeN) -> Nat (ValueMin Nat1)
+factorial : Nat (In min max maybeN) -> Nat (Min Nat1)
 factorial =
     Nat.lowerMin nat0 >> factorialHelp
 
 
-listLength : List a -> Nat (ValueMin Nat0)
+listLength : List a -> Nat (Min Nat0)
 listLength =
     List.foldl
         (\_ ->
@@ -70,26 +70,26 @@ listLength =
 -- type tests
 
 
-testAdd : Nat (ValueMin Nat4)
+testAdd : Nat (Min Nat4)
 testAdd =
     Nat.intAtLeast nat3 7
         |> MinNat.add (Nat.intAtLeast nat1 9) nat1
 
 
-testAddN : Nat (ValueMin Nat15)
+testAddN : Nat (Min Nat15)
 testAddN =
     Nat.intAtLeast nat6 7
         |> MinNat.addN nat9
 
 
-testSubIn : Nat (ValueMin Nat1)
+testSubIn : Nat (Min Nat1)
 testSubIn =
     Nat.intAtLeast nat6 7
         |> MinNat.sub (Nat.intInRange nat1 nat5 4)
             nat5
 
 
-testSubN : Nat (ValueMin Nat7)
+testSubN : Nat (Min Nat7)
 testSubN =
     Nat.intAtLeast nat16 17
         |> MinNat.subN nat9
