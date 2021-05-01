@@ -401,7 +401,7 @@ value =
 -- ## extra
 
 
-{-| A [`Codec`](https://package.elm-lang.org/packages/MartinSStewart/elm-serialize/latest/) to serialize `Nat`s with a lower bound.
+{-| A [`Codec`](https://package.elm-lang.org/packages/MartinSStewart/elm-serialize/latest/) to serialize `Nat`s within a lower & upper bound.
 
     import Serialize
 
@@ -417,11 +417,16 @@ value =
         InNat.value
             >> Serialize.encodeToBytes serializePercent
 
-    decode : Bytes -> Result (Serialize.Error String) (Nat (ValueIn Nat0 (Nat100Plus a)))
+    decode :
+        Bytes
+        ->
+            Result
+                (Serialize.Error String)
+                (Nat (ValueIn Nat0 (Nat100Plus a)))
     decode =
         Serialize.decodeFromBytes serializePercent
 
-For decoded `Int`s lower than minimum expected value, the `Result` is an error message.
+For decoded `Int`s out of the expected bounds, the `Result` is an error message.
 
 -}
 serialize :
