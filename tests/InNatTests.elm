@@ -8,7 +8,7 @@ import InNat
 import MinNat
 import MinNatTests
 import NNats exposing (..)
-import Nat exposing (ArgNat, In, Min, ValueIn)
+import Nat exposing (ArgIn, ArgNat, In, Min)
 import Test exposing (Test, describe, test)
 import TypeNats exposing (..)
 
@@ -39,7 +39,7 @@ intFactorial x =
         x * intFactorial (x - 1)
 
 
-factorialHelp : Nat (In Nat0 max maybeN) -> Nat (Min Nat1)
+factorialHelp : Nat (ArgIn Nat0 max maybeN) -> Nat (Min Nat1)
 factorialHelp =
     MinNat.isAtLeast nat1
         { min = nat0 }
@@ -54,12 +54,12 @@ factorialHelp =
         }
 
 
-factorial : Nat (In min max maybeN) -> Nat (Min Nat1)
+factorial : Nat (ArgIn min max maybeN) -> Nat (Min Nat1)
 factorial =
     Nat.lowerMin nat0 >> factorialHelp
 
 
-ultraSafeFactorial : Nat (In min Nat18 maybeN) -> Nat (Min Nat1)
+ultraSafeFactorial : Nat (ArgIn min Nat18 maybeN) -> Nat (Min Nat1)
 ultraSafeFactorial =
     MinNatTests.factorial
 
@@ -68,34 +68,34 @@ ultraSafeFactorial =
 --
 
 
-testAdd : Nat (ValueIn Nat4 (Nat22Plus a))
+testAdd : Nat (In Nat4 (Nat22Plus a))
 testAdd =
     Nat.intInRange nat3 nat10 7
         |> InNat.add (Nat.intInRange nat1 nat12 9) nat1 nat12
 
 
-testAddN : Nat (ValueIn Nat15 (Nat19Plus a))
+testAddN : Nat (In Nat15 (Nat19Plus a))
 testAddN =
     Nat.intInRange nat6 nat10 7
         |> InNat.addN nat9
 
 
-testSub : Nat (ValueIn Nat1 (Nat9Plus a))
+testSub : Nat (In Nat1 (Nat9Plus a))
 testSub =
     Nat.intInRange nat6 nat10 7
         |> InNat.sub (Nat.intInRange nat1 nat5 4) nat1 nat5
 
 
-testSubN : Nat (ValueIn Nat7 (Nat11Plus a))
+testSubN : Nat (In Nat7 (Nat11Plus a))
 testSubN =
     Nat.intInRange nat16 nat20 17
         |> InNat.subN nat9
 
 
 rgbPer100 :
-    Nat (In redMin Nat100 maybeN)
-    -> Nat (In greenMin Nat100 maybeN)
-    -> Nat (In blueMin Nat100 maybeN)
+    Nat (ArgIn redMin Nat100 maybeN)
+    -> Nat (ArgIn greenMin Nat100 maybeN)
+    -> Nat (ArgIn blueMin Nat100 maybeN)
     -> ()
 rgbPer100 _ _ _ =
     ()

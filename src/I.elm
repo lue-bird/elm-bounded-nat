@@ -1,5 +1,5 @@
 module I exposing
-    ( Differences, In, Infinity, Is, Nat, NatTag, NotN, To, ValueN
+    ( Differences, Infinity, Is, Nat, NatTag, NotN, To, ValueN, ArgIn
     , add, sub, newRange
     , isIntInRange, isIntAtLeast, atLeast, atMost
     , intInRange
@@ -16,7 +16,7 @@ For performance reasons, the name is shortened, so that [`NNats`](NNats)'s compi
 
 ## types
 
-@docs Differences, In, Infinity, Is, Nat, NatTag, NotN, To, ValueN
+@docs Differences, In, Infinity, Is, Nat, NatTag, NotN, To, ValueN, ArgIn
 
 
 ## not fully type-safe
@@ -52,7 +52,6 @@ For performance reasons, the name is shortened, so that [`NNats`](NNats)'s compi
 
 import N exposing (..)
 import Random
-import Serialize
 import Typed exposing (Checked, Public, Typed, isChecked, map, tag, val, val2)
 
 
@@ -72,20 +71,20 @@ type To
     = To Never
 
 
-type In minimum maximum maybeN
-    = In Never
+type ArgIn minimum maximum maybeN
+    = ArgIn Never
 
 
 type alias Min minimum =
-    ValueIn minimum Infinity
+    In minimum Infinity
 
 
 type Infinity
     = Infinity Never
 
 
-type alias ValueIn minimum maximum =
-    In minimum maximum NotN
+type alias In minimum maximum =
+    ArgIn minimum maximum NotN
 
 
 type NotN
@@ -93,10 +92,10 @@ type NotN
 
 
 type alias ValueN n atLeastN asADifference asAnotherDifference =
-    In n atLeastN (Differences asADifference asAnotherDifference)
+    ArgIn n atLeastN (Differences asADifference asAnotherDifference)
 
 
-type alias N n asADifference asAnotherDifference =
+type alias ArgN n asADifference asAnotherDifference =
     ValueN n n asADifference asAnotherDifference
 
 
@@ -132,12 +131,12 @@ newRange =
 
 
 isIntInRange :
-    Nat (In minFirst last firstMaybeN)
-    -> Nat (In last maxLast lastMaybeN)
+    Nat (ArgIn minFirst last firstMaybeN)
+    -> Nat (ArgIn last maxLast lastMaybeN)
     ->
         { less : () -> result
         , greater : Nat (Min (Nat1Plus last)) -> result
-        , inRange : Nat (ValueIn minFirst maxLast) -> result
+        , inRange : Nat (In minFirst maxLast) -> result
         }
     -> Int
     -> result
@@ -153,10 +152,10 @@ isIntInRange lowerBound upperBound cases int =
 
 
 intInRange :
-    Nat (In min firstMax lowerMaybeN)
-    -> Nat (In firstMax max upperMaybeN)
+    Nat (ArgIn min firstMax lowerMaybeN)
+    -> Nat (ArgIn firstMax max upperMaybeN)
     -> Int
-    -> Nat (ValueIn min max)
+    -> Nat (In min max)
 intInRange lowerBound upperBound =
     Basics.min (val upperBound)
         >> Basics.max (val lowerBound)
@@ -165,7 +164,7 @@ intInRange lowerBound upperBound =
 
 
 isIntAtLeast :
-    Nat (In min max maybeN)
+    Nat (ArgIn min max maybeN)
     -> Int
     -> Maybe (Nat (Min min))
 isIntAtLeast minimum int =
@@ -177,18 +176,18 @@ isIntAtLeast minimum int =
 
 
 atMost :
-    Nat (In minNewMax atLeastNewMax newMaxMaybeN)
+    Nat (ArgIn minNewMax atLeastNewMax newMaxMaybeN)
     -> { min : Nat (ArgN min (Is minToMinNewMax To minNewMax) x) }
-    -> Nat (In min max maybeN)
-    -> Nat (ValueIn min atLeastNewMax)
+    -> Nat (ArgIn min max maybeN)
+    -> Nat (In min atLeastNewMax)
 atMost higherBound min =
     map (Basics.min (val higherBound)) >> isChecked Nat
 
 
 atLeast :
-    Nat (In newMin max lowerMaybeN)
-    -> Nat (In min max maybeN)
-    -> Nat (ValueIn newMin max)
+    Nat (ArgIn newMin max lowerMaybeN)
+    -> Nat (ArgIn min max maybeN)
+    -> Nat (In newMin max)
 atLeast lowerBound =
     map (max (val lowerBound)) >> isChecked Nat
 
@@ -199,18 +198,18 @@ abs int =
 
 
 range :
-    Nat (In firstMin lastMin firstMaybeN)
-    -> Nat (In lastMin lastMax lastMaybeN)
-    -> List (Nat (ValueIn firstMin lastMax))
+    Nat (ArgIn firstMin lastMin firstMaybeN)
+    -> Nat (ArgIn lastMin lastMax lastMaybeN)
+    -> List (Nat (In firstMin lastMax))
 range first last =
     val2 List.range first last
         |> List.map (tag >> isChecked Nat)
 
 
 random :
-    Nat (In firstMin lastMin firstMaybeN)
-    -> Nat (In lastMin lastMax lastMaybeN)
-    -> Random.Generator (Nat (ValueIn firstMin lastMax))
+    Nat (ArgIn firstMin lastMin firstMaybeN)
+    -> Nat (ArgIn lastMin lastMax lastMaybeN)
+    -> Random.Generator (Nat (In firstMin lastMax))
 random min max =
     val2 Random.int min max
         |> Random.map (tag >> isChecked Nat)
@@ -221,32 +220,32 @@ random min max =
 
 
 mul :
-    Nat (In (Nat1Plus minMultipliedMinus1) maxMultiplied multipliedMaybeN)
-    -> Nat (In min max maybeN)
+    Nat (ArgIn (Nat1Plus minMultipliedMinus1) maxMultiplied multipliedMaybeN)
+    -> Nat (ArgIn min max maybeN)
     -> Nat (Min min)
 mul natToMultiply =
     val2 (*) natToMultiply >> tag >> isChecked Nat
 
 
 div :
-    Nat (In (Nat1Plus divMinMinus1) divMax divMaybeN)
-    -> Nat (In min max maybeN)
-    -> Nat (ValueIn Nat0 max)
+    Nat (ArgIn (Nat1Plus divMinMinus1) divMax divMaybeN)
+    -> Nat (ArgIn min max maybeN)
+    -> Nat (In Nat0 max)
 div divNat =
     map (\x -> x // val divNat) >> isChecked Nat
 
 
 remainderBy :
-    Nat (In (Nat1Plus divMinMinus1) divMax divMaybeN)
-    -> Nat (In min max maybeN)
-    -> Nat (ValueIn Nat0 max)
+    Nat (ArgIn (Nat1Plus divMinMinus1) divMax divMaybeN)
+    -> Nat (ArgIn min max maybeN)
+    -> Nat (In Nat0 max)
 remainderBy divNat =
     val2 Basics.remainderBy divNat >> tag >> isChecked Nat
 
 
 toPower :
-    Nat (In (Nat1Plus powMinMinus1) powMax powMaybeN)
-    -> Nat (In min max maybeN)
+    Nat (ArgIn (Nat1Plus powMinMinus1) powMax powMaybeN)
+    -> Nat (ArgIn min max maybeN)
     -> Nat (Min min)
 toPower power =
     map (\x -> x ^ val power) >> isChecked Nat

@@ -18,7 +18,7 @@ elm install lue-bird/elm-bounded-nat
 ```elm
 import Nat exposing
     ( Nat, In, N, Is, To
-    , ValueIn, Min
+    , In, Min
     )
 import NNats exposing (..)
     -- (..) = nat0 to nat160
@@ -122,12 +122,12 @@ You might be able to do anything with this `Int` value, but you lost useful info
 toDigit : Char -> Maybe Digit
 
 type alias Digit =
-    Nat (ValueIn Nat0 Nat9)
+    Nat (In Nat0 Nat9)
 ```
 
 The type of a value reflects how much you know.
 
-- `ValueIn`: between a minimum & maximum value
+- `In`: between a minimum & maximum value
 - `Min`: at least a minimum value
 - `ValueN`: exact value
     - also describes the difference between 2 values
@@ -204,7 +204,7 @@ No extra work.
 - keep _as much type information as possible_ and drop it only where you need to.
 ```elm
 squares2To10 =
-    -- every Nat is ValueIn Nat2 (Nat10Plus a)
+    -- every Nat is In Nat2 (Nat10Plus a)
     Nat.range nat2 nat10
         |> List.map
             (Nat.toPower nat2
