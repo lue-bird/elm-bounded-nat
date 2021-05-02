@@ -127,3 +127,7 @@ Corrected forgotten `maybeN`s & `min`s that were set to an exact value in doc.
 
 - added `Arg-` prefix in front of `in` & `Only` & `N`
 - removed `Value-` prefix for `-N` & `-Only` & `-In` & `-Min`
+
+## 10.0.0
+
+- gave `Nat.remainderBy`'s return type a smaller range
