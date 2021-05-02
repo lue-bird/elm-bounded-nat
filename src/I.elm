@@ -1,5 +1,5 @@
 module I exposing
-    ( Differences, Infinity, Is, NatTag, NotN, To, N, ArgIn
+    ( Differences, Infinity, Is, Nat, NatTag, NotN, To, N, ArgIn
     , add, sub, newRange
     , isIntInRange, isIntAtLeast, atLeast, atMost
     , intInRange
