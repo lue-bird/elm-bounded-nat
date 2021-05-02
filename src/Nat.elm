@@ -173,7 +173,7 @@ This is where to use `Min`.
 
     abs : Int -> Nat (Min Nat0)
 
-A number, which is at least 5 is be of type
+A number >= 5 for example:
 
     Nat (Min Nat5)
 
@@ -181,7 +181,7 @@ Every `Min min` is of type `ArgIn min ...`.
 
 -}
 type alias Min minimum =
-    In minimum (Nat160Plus Internal.EvenMore)
+    In minimum Internal.Infinity
 
 
 {-| Expect an exact number.
@@ -278,7 +278,7 @@ type alias N n atLeastN asADifference asAnotherDifference =
     ArgIn n atLeastN (Internal.Differences asADifference asAnotherDifference)
 
 
-{-| The absolute value of an `Int`, which is `>= Nat0`.
+{-| The absolute value of an `Int`, which is `>= 0`.
 
     Nat.abs 16 --> Nat 16
 
@@ -526,18 +526,20 @@ div divNat =
 {-| The remainder after division.
 
   - `% 0` is impossible
-  - `x % d` is at most `x`
+  - `x % d` is at most `d`
 
 ```
 atMost7 |> Nat.remainderBy nat3
---> Nat 1 : Nat (ArgIn Nat0 (Nat7Plus a))
+--> Nat 1 : Nat (ArgIn Nat0 (Nat3Plus a))
 ```
+
+In theory, `x % d` should be at most `d - 1`, but this can't be expressed well by the type.
 
 -}
 remainderBy :
     Nat (ArgIn (Nat1Plus divMinMinus1) divMax divMaybeN)
     -> Nat (ArgIn min max maybeN)
-    -> Nat (In Nat0 max)
+    -> Nat (In Nat0 divMax)
 remainderBy divNat =
     Internal.remainderBy divNat
 

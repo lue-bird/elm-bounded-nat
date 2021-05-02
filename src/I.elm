@@ -1,5 +1,5 @@
 module I exposing
-    ( Differences, EvenMore, Is, Nat, NatTag, NotN, To, N, ArgIn
+    ( Differences, Infinity, Is, NatTag, NotN, To, N, ArgIn
     , add, sub, newRange
     , isIntInRange, isIntAtLeast, atLeast, atMost
     , intInRange
@@ -16,7 +16,7 @@ For performance reasons, the names are shortened, so that [`NNats`](NNats)'s com
 
 ## types
 
-@docs Differences, In, EvenMore, Is, Nat, NatTag, NotN, To, N, ArgIn
+@docs Differences, Infinity, Is, Nat, NatTag, NotN, To, N, ArgIn
 
 
 ## not fully type-safe
@@ -76,11 +76,11 @@ type ArgIn minimum maximum maybeN
 
 
 type alias Min minimum =
-    In minimum (Nat160Plus EvenMore)
+    In minimum Infinity
 
 
-type EvenMore
-    = EvenMore Never
+type Infinity
+    = Infinity Never
 
 
 type alias In minimum maximum =
@@ -238,7 +238,7 @@ div divNat =
 remainderBy :
     Nat (ArgIn (Nat1Plus divMinMinus1) divMax divMaybeN)
     -> Nat (ArgIn min max maybeN)
-    -> Nat (In Nat0 max)
+    -> Nat (In Nat0 divMax)
 remainderBy divNat =
     val2 Basics.remainderBy divNat >> tag >> isChecked Nat
 
