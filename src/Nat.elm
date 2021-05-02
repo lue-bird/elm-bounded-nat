@@ -66,7 +66,7 @@ module Nat exposing
 -}
 
 import I as Internal exposing (NatTag)
-import N exposing (Nat0, Nat1Plus)
+import N exposing (Nat0, Nat160Plus, Nat1Plus)
 import Random
 import Typed exposing (Checked, Public, Typed, val2)
 
@@ -181,7 +181,7 @@ Every `Min min` is of type `ArgIn min ...`.
 
 -}
 type alias Min minimum =
-    In minimum Internal.Infinity
+    In minimum (Nat160Plus Internal.EvenMore)
 
 
 {-| Expect an exact number.

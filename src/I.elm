@@ -1,5 +1,5 @@
 module I exposing
-    ( Differences, Infinity, Is, Nat, NatTag, NotN, To, N, ArgIn
+    ( Differences, EvenMore, Is, Nat, NatTag, NotN, To, N, ArgIn
     , add, sub, newRange
     , isIntInRange, isIntAtLeast, atLeast, atMost
     , intInRange
@@ -16,7 +16,7 @@ For performance reasons, the names are shortened, so that [`NNats`](NNats)'s com
 
 ## types
 
-@docs Differences, In, Infinity, Is, Nat, NatTag, NotN, To, N, ArgIn
+@docs Differences, In, EvenMore, Is, Nat, NatTag, NotN, To, N, ArgIn
 
 
 ## not fully type-safe
@@ -76,11 +76,11 @@ type ArgIn minimum maximum maybeN
 
 
 type alias Min minimum =
-    In minimum Infinity
+    In minimum (Nat160Plus EvenMore)
 
 
-type Infinity
-    = Infinity Never
+type EvenMore
+    = EvenMore Never
 
 
 type alias In minimum maximum =
