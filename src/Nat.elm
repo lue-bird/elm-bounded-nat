@@ -401,14 +401,14 @@ rejectOrAcceptUserInt 0
 
 -}
 isIntInRange :
-    Nat (ArgIn minLowerBound upperBound lowerBoundMaybeN)
-    -> Nat (ArgIn upperBound upperBoundPlusA upperBoundMaybeN)
+    Nat (ArgIn minLowerBound minUpperBound lowerBoundMaybeN)
+    -> Nat (ArgIn minUpperBound maxUpperBound upperBoundMaybeN)
     -> Int
     ->
         BelowOrInOrAboveRange
             ()
-            (Nat (In minLowerBound upperBoundPlusA))
-            (Nat (Min (Nat1Plus upperBound)))
+            (Nat (In minLowerBound maxUpperBound))
+            (Nat (Min (Nat1Plus maxUpperBound)))
 isIntInRange lowerBound upperBound int =
     Internal.isIntInRange lowerBound upperBound int
         |> fromInternalBelowOrInOrAboveRange
@@ -650,26 +650,62 @@ fromInternalBelowOrInOrAboveRange compared =
             AboveRange gt
 
 
-{-| -}
+{-| The result of comparing a `Nat` to another `Nat`.
+
+  - `EqualOrGreater`: >= that `Nat`
+
+  - `Below`: < that `Nat`
+
+Values exist for each condition.
+
+-}
 type BelowOrAtLeast below equalOrGreater
     = Below below
     | EqualOrGreater equalOrGreater
 
 
-{-| -}
+{-| The result of comparing a `Nat` to another `Nat`.
+
+  - `EqualOrLess`: <= that `Nat`
+
+  - `Above`: > that `Nat`
+
+Values exist for each condition.
+
+-}
 type AtMostOrAbove equalOrLess above
     = EqualOrLess equalOrLess
     | Above above
 
 
-{-| -}
+{-| The result of comparing a `Nat` to another `Nat`.
+
+  - `Equal` to that `Nat`
+
+  - `Less` than that `Nat`
+
+  - `Greater` than that `Nat`
+
+Values exist for each condition.
+
+-}
 type LessOrEqualOrGreater less equal greater
     = Less less
     | Equal equal
     | Greater greater
 
 
-{-| -}
+{-| The result of comparing a `Nat` to a range from a lower to an upper bound.
+
+  - `InRange`
+
+  - `AboveRange`: greater than the upper bound
+
+  - `BelowRange`: less than the lower bound?
+
+Values exist for each condition.
+
+-}
 type BelowOrInOrAboveRange below inRange above
     = BelowRange below
     | InRange inRange
@@ -677,7 +713,7 @@ type BelowOrInOrAboveRange below inRange above
 
 
 
--- ### I don't know if either operation is really needed
+-- ## I don't know if either operation is really needed
 
 
 {-| Subtract a `Nat (ArgIn ..)` without calculating

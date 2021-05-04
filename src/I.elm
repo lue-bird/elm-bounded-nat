@@ -143,7 +143,7 @@ isIntInRange :
         BelowOrInOrAboveRange
             ()
             (Nat (In minLowerBound maxUpperBound))
-            (Nat (Min (Nat1Plus minUpperBound)))
+            (Nat (Min (Nat1Plus maxUpperBound)))
 isIntInRange lowerBound upperBound int =
     if int < val lowerBound then
         BelowRange ()
