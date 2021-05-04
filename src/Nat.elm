@@ -9,6 +9,7 @@ module Nat exposing
     , toPower, remainderBy, mul, div
     , lowerMin
     , restoreMax
+    , AtMostOrAbove(..), BelowOrAtLeast(..), BelowOrInOrAboveRange(..), LessOrEqualOrGreater(..)
     )
 
 {-|
@@ -63,10 +64,15 @@ module Nat exposing
 
 @docs restoreMax
 
+
+# comparison
+
+@docs AtMostOrAbove, BelowOrAtLeast, BelowOrInOrAboveRange, LessOrEqualOrGreater
+
 -}
 
 import I as Internal exposing (NatTag)
-import N exposing (Nat0, Nat160Plus, Nat1Plus)
+import N exposing (Nat0, Nat1Plus)
 import Random
 import Typed exposing (Checked, Public, Typed, val2)
 
@@ -611,6 +617,36 @@ restoreMax :
     -> Nat (ArgIn min atLeastMax maybeN)
 restoreMax =
     \_ -> Internal.newRange
+
+
+
+-- ## comparison
+
+
+{-| -}
+type BelowOrAtLeast below equalOrGreater
+    = Below below
+    | EqualOrGreater equalOrGreater
+
+
+{-| -}
+type AtMostOrAbove equalOrLess above
+    = EqualOrLess equalOrLess
+    | Above above
+
+
+{-| -}
+type LessOrEqualOrGreater less equal greater
+    = Less less
+    | Equal equal
+    | Greater greater
+
+
+{-| -}
+type BelowOrInOrAboveRange below inRange above
+    = BelowRange below
+    | InRange inRange
+    | AboveRange above
 
 
 

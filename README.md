@@ -153,31 +153,25 @@ factorial : Nat (ArgIn min max maybeN) -> Nat (Min Nat1)
 ```
 Says: for every natural number `n >= 0`, `n! >= 1`.
 ```elm
-factorialHelp =
-    MinNat.isAtLeast nat1
-        { min = nat0 } -- the minimum of the x
-        { less =
-            -- x < 1 ? → then 1
-            \_ -> nat1 |> MinNat.value
-        , equalOrGreater =
-            \atLeast1 ->
-                -- a Nat (Min Nat1)
-                atLeast1
-                    |> Nat.mul
+factorial =
+    let
+        factorialBody x =
+            case x |> MinNat.isAtLeast nat1 { min = nat0 } of
+                Nat.Below _ ->
+                    MinNat.value nat1
+
+                Nat.EqualOrGreater atLeast1 ->
+                    -- atLeast1 is a Nat (Min Nat1)
+                    Nat.mul atLeast1
                         (factorial
                             (atLeast1 |> MinNat.subN nat1)
-                            -- we can subtract 1 👍
+                            -- so we can subtract 1
                         )
-        }
-```
-As the minimum is allowed to be anything `>= 0`:
-```elm
-factorial =
-    Nat.lowerMin nat0
-        >> factorialHelp
-```
+    in
+    Nat.lowerMin nat0 >> factorialBody
 
-→ `factorial nat4 --> Nat 24`
+factorial nat4 --> Nat 24
+```
 
 → There is no way to put a negative number in.
 
@@ -200,12 +194,12 @@ No extra work.
 - keep _as much type information as possible_ and drop it only where you need to.
 ```elm
 squares2To10 =
-    -- every Nat is In Nat2 (Nat10Plus a)
     Nat.range nat2 nat10
+        -- more info than List.range 2 10
+        -- → every Nat is In Nat2 (Nat10Plus a)
         |> List.map
             (Nat.toPower nat2
-            -- we can't compute the exact minimum & maximum
-            -- but we know it's at least Nat2
+                -- we still know it's >= 2
             )
 ```
 - keep your _function annotations as general as possible_
@@ -213,12 +207,12 @@ squares2To10 =
 Instead of accepting only exact values
 
 ```elm
-rgb : Nat (N red (Is redTo100 To Nat100) x) -> --...
+rgb : Nat (ArgN red (Is redTo100 To Nat100) x) -> --...
 ```
 accept values that are somewhere in a range.
 
 ```elm
-rgb : Nat (In redMin Nat100 maybeN) -> --...
+rgb : Nat (ArgIn redMin Nat100 maybeN) -> --...
 ```
 
 `maybeN` says that it _can_ be exact anyway. Or instead of

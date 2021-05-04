@@ -1,4 +1,4 @@
-module MinNatTests exposing (factorial, suite)
+module MinNatTests exposing (suite)
 
 {-| Especially type tests.
 -}
@@ -16,44 +16,18 @@ import Typed exposing (val)
 suite : Test
 suite =
     describe "MinNat"
-        [ test "factorial"
+        [ test "list length"
             (\() ->
-                factorial nat4
+                listLength [ 1, 2, 3, 4 ]
                     |> val
-                    |> Expect.equal 24
+                    |> Expect.equal 4
+            )
+        , test "ultraSafeFactorial"
+            (\() ->
+                ultraSafeFactorial nat4
+                    |> Expect.equal (nat24 |> MinNat.value |> Nat.lowerMin nat1)
             )
         ]
-
-
-{-| recurses indefinitely for negative integers
--}
-intFactorial : Int -> Int
-intFactorial x =
-    if x == 0 then
-        1
-
-    else
-        x * intFactorial (x - 1)
-
-
-factorialHelp : Nat (ArgIn Nat0 max maybeN) -> Nat (Min Nat1)
-factorialHelp =
-    MinNat.isAtLeast nat1
-        { min = nat0 }
-        { less = \_ -> nat1 |> MinNat.value
-        , equalOrGreater =
-            \atLeast1 ->
-                atLeast1
-                    |> Nat.mul
-                        (factorial
-                            (atLeast1 |> MinNat.subN nat1)
-                        )
-        }
-
-
-factorial : Nat (ArgIn min max maybeN) -> Nat (Min Nat1)
-factorial =
-    Nat.lowerMin nat0 >> factorialHelp
 
 
 listLength : List a -> Nat (Min Nat0)
@@ -67,7 +41,38 @@ listLength =
 
 
 
--- type tests
+--recurses idefinitely for negative integers
+
+
+intFactorial : Int -> Int
+intFactorial x =
+    if x == 0 then
+        1
+
+    else
+        x * intFactorial (x - 1)
+
+
+factorial : Nat (ArgIn min max maybeN) -> Nat (Min Nat1)
+factorial =
+    let
+        factorialHelp x =
+            case x |> MinNat.isAtLeast nat1 { min = nat0 } of
+                Nat.Below _ ->
+                    MinNat.value nat1
+
+                Nat.EqualOrGreater atLeast1 ->
+                    Nat.mul atLeast1
+                        (factorial
+                            (atLeast1 |> MinNat.subN nat1)
+                        )
+    in
+    Nat.lowerMin nat0 >> factorialHelp
+
+
+ultraSafeFactorial : Nat (ArgIn min Nat18 maybeN) -> Nat (Min Nat1)
+ultraSafeFactorial =
+    factorial
 
 
 testAdd : Nat (Min Nat4)
@@ -98,5 +103,5 @@ testSubN =
 testLowerMin : List (Nat (In Nat3 (Nat4Plus a)))
 testLowerMin =
     [ nat3 |> InNat.value
-    , nat4 |> InNat.value |> Nat.lowerMin nat3
+    , nat4 |> Nat.lowerMin nat3
     ]

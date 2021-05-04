@@ -5,8 +5,6 @@ module InNatTests exposing (suite)
 
 import Expect
 import InNat
-import MinNat
-import MinNatTests
 import NNats exposing (..)
 import Nat exposing (ArgIn, In, Min, Nat)
 import Test exposing (Test, describe, test)
@@ -16,52 +14,7 @@ import TypeNats exposing (..)
 suite : Test
 suite =
     describe "InNat"
-        [ describe "recursive"
-            [ test "ultraSafeFactorial"
-                (\() ->
-                    ultraSafeFactorial nat4
-                        |> Expect.equal (nat24 |> MinNat.value |> Nat.lowerMin nat1)
-                )
-            ]
-        ]
-
-
-
---recurses idefinitely for negative integers
-
-
-intFactorial : Int -> Int
-intFactorial x =
-    if x == 0 then
-        1
-
-    else
-        x * intFactorial (x - 1)
-
-
-factorialHelp : Nat (ArgIn Nat0 max maybeN) -> Nat (Min Nat1)
-factorialHelp =
-    MinNat.isAtLeast nat1
-        { min = nat0 }
-        { less = \_ -> nat1 |> MinNat.value
-        , equalOrGreater =
-            \atLeast1 ->
-                atLeast1
-                    |> Nat.mul
-                        (factorial
-                            (atLeast1 |> MinNat.subN nat1)
-                        )
-        }
-
-
-factorial : Nat (ArgIn min max maybeN) -> Nat (Min Nat1)
-factorial =
-    Nat.lowerMin nat0 >> factorialHelp
-
-
-ultraSafeFactorial : Nat (ArgIn min Nat18 maybeN) -> Nat (Min Nat1)
-ultraSafeFactorial =
-    MinNatTests.factorial
+        []
 
 
 

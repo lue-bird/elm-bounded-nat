@@ -25,9 +25,9 @@ suite =
         ]
 
 
-testAddN =
+testAdd =
     nat7 |> NNat.add ( nat9, nat9 )
 
 
-testSubN =
+testSub =
     nat17 |> NNat.sub ( nat9, nat9 )

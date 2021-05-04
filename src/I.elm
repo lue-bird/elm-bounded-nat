@@ -108,7 +108,7 @@ type D aDifference bDifference
 
 
 
--- ## not fully type-safe
+-- ## not type-safe
 
 
 add : Nat addedRange -> Nat range -> Nat sumRange

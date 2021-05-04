@@ -44,7 +44,7 @@ import I as Internal
 import InNat
 import N exposing (Nat1Plus, Nat2Plus)
 import NNats exposing (nat0)
-import Nat exposing (ArgIn, ArgN, In, Is, Min, Nat, To)
+import Nat exposing (ArgIn, ArgN, AtMostOrAbove(..), BelowOrAtLeast(..), In, Is, LessOrEqualOrGreater(..), Min, Nat, To)
 import Serialize
 import Typed exposing (val, val2)
 
@@ -119,18 +119,23 @@ sub inNatToSubtract maxSubtracted =
 -- ## compare
 
 
-{-| Compare the `Nat (Min ...)` to a `Nat (ArgN ...)`. Is it `greater`, `less` or `equal`?
+{-| Compare the `Nat` to a `Nat (ArgN ...)`. Is it `Greater`, `Less` or `Equal`?
 
 `min` ensures that the `Nat (ArgN ...)` is greater than the minimum.
 
-    present =
-        Nat.lowerMin nat0
-            >> MinNat.is nat18
-                { min = nat0 }
-                { less = \age -> toy { age = age }
-                , greater = \age -> experience { age = age }
-                , equal = \() -> bigPresent
-                }
+    giveAPresent { age } =
+        case
+            (age |> Nat.lowerMin nat0)
+                |> MinNat.is nat18 { min = nat0 }
+        of
+            Nat.Less age ->
+                toy { age = age }
+
+            Nat.Greater age ->
+                experience { age = age }
+
+            Nat.Equal () ->
+                bigPresent
 
     toy : { age : Nat (ArgIn Nat0 Nat17 maybeN) } -> Toy
 
@@ -140,103 +145,104 @@ sub inNatToSubtract maxSubtracted =
 is :
     Nat (ArgN (Nat1Plus triedMinus1) (Is a To (Nat1Plus triedMinus1PlusA)) x)
     -> { min : Nat (ArgN min (Is minToTriedMinus1 To triedMinus1) y) }
-    ->
-        { equal : () -> result
-        , less : Nat (ArgIn min triedMinus1PlusA maybeN) -> result
-        , greater : Nat (Min (Nat2Plus triedMinus1)) -> result
-        }
     -> Nat (ArgIn min max maybeN)
-    -> result
-is tried min cases =
+    ->
+        LessOrEqualOrGreater
+            (Nat (ArgIn min triedMinus1PlusA maybeN))
+            ()
+            (Nat (Min (Nat2Plus triedMinus1)))
+is valueToCompareAgainst min =
     \minNat ->
-        case val2 compare minNat tried of
-            EQ ->
-                .equal cases ()
-
+        case val2 compare minNat valueToCompareAgainst of
             LT ->
-                .less cases (minNat |> Internal.newRange)
+                Less (Internal.newRange minNat)
+
+            EQ ->
+                Equal ()
 
             GT ->
-                .greater cases (minNat |> Internal.newRange)
+                Greater (Internal.newRange minNat)
 
 
-{-| Is the `Nat (Min ...)`
+{-| Is the `Nat`
 
-  - `equalOrGreater` than a `Nat` or
+  - `EqualOrGreater` than a `Nat` or
 
-  - `less`?
+  - `Below` a lower bound?
 
 ```
 factorial : Nat (ArgIn min max maybeN) -> Nat (Min Nat1)
 factorial =
-    Nat.lowerMin nat0
-        >> MinNat.isAtLeast nat1
-            { min = nat0 }
-            { less = \_ -> nat1 |> MinNat.value
-            , equalOrGreater =
-                \atLeast1 ->
-                    atLeast1
-                        |> Nat.mul
-                            (factorial
-                                (atLeast1 |> MinNat.subN nat1)
-                            )
-            }
+    let
+        factorialBody x =
+            case x |> MinNat.isAtLeast nat1 { min = nat0 } of
+                Nat.Below _ ->
+                    MinNat.value nat1
+
+                Nat.EqualOrGreater atLeast1 ->
+                    Nat.mul atLeast1
+                        (factorial
+                            (atLeast1 |> MinNat.subN nat1)
+                        )
+    in
+    Nat.lowerMin nat0 >> factorialBody
 ```
 
 -}
 isAtLeast :
     Nat (ArgN lowerBound (Is a To (Nat1Plus lowerBoundMinus1PlusA)) x)
     -> { min : Nat (ArgN min (Is minToTriedMin To lowerBound) y) }
-    ->
-        { less : Nat (ArgIn min lowerBoundMinus1PlusA maybeN) -> result
-        , equalOrGreater : Nat (Min lowerBound) -> result
-        }
     -> Nat (ArgIn min max maybeN)
-    -> result
-isAtLeast triedLowerBound min cases =
+    ->
+        BelowOrAtLeast
+            (Nat (ArgIn min lowerBoundMinus1PlusA maybeN))
+            (Nat (Min lowerBound))
+isAtLeast lowerBound min =
     \minNat ->
-        if val2 (>=) minNat triedLowerBound then
-            .equalOrGreater cases (minNat |> Internal.newRange)
+        if val2 (>=) minNat lowerBound then
+            EqualOrGreater (Internal.newRange minNat)
 
         else
-            .less cases (minNat |> Internal.newRange)
+            Below (Internal.newRange minNat)
 
 
-{-| Is the `Nat (Min ...)`
+{-| Is the `Nat`
 
-  - `equalOrLess` than a `Nat` or
+  - `EqualOrLess` than a `Nat` or
 
-  - `greater`?
+  - `Above`?
 
 ```
-goToU18Party : { age : Nat (ArgIn min Nat17 maybeN) } -> List Snack
+goToU18Party : { age : Nat (ArgIn min Nat17 maybeN) } -> Snack
 
-tryToGoToU18Party =
-    Nat.lowerMin nat0
-        >> MinNat.isAtMost nat17
-            { min = nat0 }
-            { equalOrLess = \age -> Just (goToU18Party { age = age })
-            , greater = Nothing
-            }
+tryToGoToU18Party { age } =
+    case
+        (age |> Nat.lowerMin nat0)
+            |> MinNat.isAtMost nat17 { min = nat0 }
+    of
+        EqualOrLess age ->
+            Just (goToU18Party { age = age })
+
+        Greater _ ->
+            Nothing
 ```
 
 -}
 isAtMost :
     Nat (ArgN upperBound (Is a To upperBoundPlusA) x)
     -> { min : Nat (ArgN min (Is minToAtMostMin To upperBound) y) }
-    ->
-        { equalOrLess : Nat (ArgIn min upperBoundPlusA maybeN) -> result
-        , greater : Nat (Min (Nat1Plus upperBound)) -> result
-        }
     -> Nat (ArgIn min max maybeN)
-    -> result
-isAtMost upperBound min cases =
+    ->
+        AtMostOrAbove
+            (Nat (ArgIn min upperBoundPlusA maybeN))
+            (Nat (Min (Nat1Plus upperBound)))
+isAtMost upperBound min =
     \minNat ->
         if val2 (<=) minNat upperBound then
-            .equalOrLess cases (minNat |> Internal.newRange)
+            EqualOrLess (Internal.newRange minNat)
 
         else
-            .greater cases (minNat |> Internal.newRange)
+            Above (Internal.newRange minNat)
 
 
 
