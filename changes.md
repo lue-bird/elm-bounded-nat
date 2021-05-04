@@ -1,5 +1,7 @@
 # changelog
 
+> The first few changes are still from the old package `indique/elm-bounded-nat`. [Jump to the new package `lue-bird/elm-bounded-nat`](##1.0.0)
+
 ## 9.0.0
 
 - added `Infinity` to say: no upper maximum
@@ -131,3 +133,15 @@ Corrected forgotten `maybeN`s & `min`s that were set to an exact value in doc.
 ## 10.0.0
 
 - gave `Nat.remainderBy`'s return type a smaller range
+
+## 11.0.0
+
+  - comparisons now return a union type, replacing the pattern
+    ```elm
+    { case1 : ... -> result, case2 : ... -> result } -> ... -> result
+    ```
+    with
+    ```elm
+    ... -> Case1Or2 ... ...
+    ```
+    in `InNat`, `MinNat` & `Nat`
