@@ -271,7 +271,7 @@ Elm complains:
 -}
 value : Nat (ArgIn min max maybeN) -> Nat (Min min)
 value =
-    Internal.newRange
+    Internal.minValue
 
 
 
