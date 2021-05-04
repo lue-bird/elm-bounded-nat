@@ -145,3 +145,8 @@ Corrected forgotten `maybeN`s & `min`s that were set to an exact value in doc.
     ... -> Case1Or2 ... ...
     ```
     in `InNat`, `MinNat` & `Nat`
+
+## 12.0.0
+
+- fix type of the `AboveRange` part of the return type of `Nat.isIntInRange`
+- add documentation to the comparison result types
