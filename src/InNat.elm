@@ -444,16 +444,15 @@ serialize :
 serialize lowerBound upperBound =
     Serialize.int
         |> Serialize.mapValid
-            (Internal.isIntInRange
-                lowerBound
-                upperBound
-                { less =
-                    \() ->
+            (\int ->
+                case int |> Nat.isIntInRange lowerBound upperBound of
+                    BelowRange () ->
                         Err "Int was less than the expected minimum"
-                , greater =
-                    \_ ->
-                        Err "Int was greatrer than the expected maximum"
-                , inRange = Ok
-                }
+
+                    AboveRange _ ->
+                        Err "Int was greater than the expected maximum"
+
+                    InRange inRange ->
+                        Ok inRange
             )
             val

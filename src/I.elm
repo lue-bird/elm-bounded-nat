@@ -1,12 +1,12 @@
 module I exposing
     ( Differences, Infinity, Is, Nat, NatTag, NotN, To, N, ArgIn
-    , add, sub, newRange
     , isIntInRange, isIntAtLeast, atLeast, atMost
-    , intInRange
+    , BelowOrInOrAboveRange(..)
     , mul, toPower, remainderBy, div
-    , random, range
+    , abs, random, range
+    , minValue
+    , add, sub, newRange
     , nat0, nat1, nat10, nat100, nat101, nat102, nat103, nat104, nat105, nat106, nat107, nat108, nat109, nat11, nat110, nat111, nat112, nat113, nat114, nat115, nat116, nat117, nat118, nat119, nat12, nat120, nat121, nat122, nat123, nat124, nat125, nat126, nat127, nat128, nat129, nat13, nat130, nat131, nat132, nat133, nat134, nat135, nat136, nat137, nat138, nat139, nat14, nat140, nat141, nat142, nat143, nat144, nat145, nat146, nat147, nat148, nat149, nat15, nat150, nat151, nat152, nat153, nat154, nat155, nat156, nat157, nat158, nat159, nat16, nat160, nat17, nat18, nat19, nat2, nat20, nat21, nat22, nat23, nat24, nat25, nat26, nat27, nat28, nat29, nat3, nat30, nat31, nat32, nat33, nat34, nat35, nat36, nat37, nat38, nat39, nat4, nat40, nat41, nat42, nat43, nat44, nat45, nat46, nat47, nat48, nat49, nat5, nat50, nat51, nat52, nat53, nat54, nat55, nat56, nat57, nat58, nat59, nat6, nat60, nat61, nat62, nat63, nat64, nat65, nat66, nat67, nat68, nat69, nat7, nat70, nat71, nat72, nat73, nat74, nat75, nat76, nat77, nat78, nat79, nat8, nat80, nat81, nat82, nat83, nat84, nat85, nat86, nat87, nat88, nat89, nat9, nat90, nat91, nat92, nat93, nat94, nat95, nat96, nat97, nat98, nat99
-    , abs
     )
 
 {-| The internals of this package. Only this package can mark `Int`s as `Nat`s.
@@ -19,19 +19,14 @@ For performance reasons, the names are shortened, so that [`NNats`](NNats)'s com
 @docs Differences, Infinity, Is, Nat, NatTag, NotN, To, N, ArgIn
 
 
-## not fully type-safe
-
-@docs add, sub, newRange
-
-
 ## compare
 
 @docs isIntInRange, isIntAtLeast, atLeast, atMost
 
 
-## clamp
+### comparison result
 
-@docs intInRange
+@docs BelowOrInOrAboveRange
 
 
 ## modify
@@ -39,9 +34,19 @@ For performance reasons, the names are shortened, so that [`NNats`](NNats)'s com
 @docs mul, toPower, remainderBy, div
 
 
-## other
+## create
 
-@docs random, range
+@docs abs, random, range
+
+
+## drop information
+
+@docs minValue
+
+
+## not type-safe
+
+@docs add, sub, newRange
 
 
 ## NNats
@@ -131,36 +136,23 @@ newRange =
 
 
 isIntInRange :
-    Nat (ArgIn minFirst last firstMaybeN)
-    -> Nat (ArgIn last maxLast lastMaybeN)
-    ->
-        { less : () -> result
-        , greater : Nat (Min (Nat1Plus last)) -> result
-        , inRange : Nat (In minFirst maxLast) -> result
-        }
+    Nat (ArgIn minLowerBound minUpperBound lowerBoundMaybeN)
+    -> Nat (ArgIn minUpperBound maxUpperBound upperBoundMaybeN)
     -> Int
-    -> result
-isIntInRange lowerBound upperBound cases int =
+    ->
+        BelowOrInOrAboveRange
+            ()
+            (Nat (In minLowerBound maxUpperBound))
+            (Nat (Min (Nat1Plus minUpperBound)))
+isIntInRange lowerBound upperBound int =
     if int < val lowerBound then
-        .less cases ()
+        BelowRange ()
 
     else if int > val upperBound then
-        .greater cases (tag int |> isChecked Nat)
+        AboveRange (tag int |> isChecked Nat)
 
     else
-        .inRange cases (tag int |> isChecked Nat)
-
-
-intInRange :
-    Nat (ArgIn min firstMax lowerMaybeN)
-    -> Nat (ArgIn firstMax max upperMaybeN)
-    -> Int
-    -> Nat (In min max)
-intInRange lowerBound upperBound =
-    Basics.min (val upperBound)
-        >> Basics.max (val lowerBound)
-        >> tag
-        >> isChecked Nat
+        InRange (tag int |> isChecked Nat)
 
 
 isIntAtLeast :
@@ -190,6 +182,20 @@ atLeast :
     -> Nat (In newMin max)
 atLeast lowerBound =
     map (max (val lowerBound)) >> isChecked Nat
+
+
+
+-- ### comparison result
+
+
+type BelowOrInOrAboveRange below inRange above
+    = BelowRange below
+    | InRange inRange
+    | AboveRange above
+
+
+
+-- ## create
 
 
 abs : Int -> Nat (Min Nat0)
@@ -249,6 +255,15 @@ toPower :
     -> Nat (Min min)
 toPower power =
     map (\x -> x ^ val power) >> isChecked Nat
+
+
+
+-- ## drop information
+
+
+minValue : Nat (ArgIn min max maybeN) -> Nat (Min min)
+minValue =
+    newRange
 
 
 

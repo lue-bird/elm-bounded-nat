@@ -6,10 +6,10 @@ module Nat exposing
     , abs, range, random
     , intAtLeast, intInRange
     , isIntInRange, isIntAtLeast, theGreater, theSmaller
+    , AtMostOrAbove(..), BelowOrAtLeast(..), BelowOrInOrAboveRange(..), LessOrEqualOrGreater(..)
     , toPower, remainderBy, mul, div
     , lowerMin
     , restoreMax
-    , AtMostOrAbove(..), BelowOrAtLeast(..), BelowOrInOrAboveRange(..), LessOrEqualOrGreater(..)
     )
 
 {-|
@@ -50,6 +50,11 @@ module Nat exposing
 @docs isIntInRange, isIntAtLeast, theGreater, theSmaller
 
 
+### comparison result
+
+@docs AtMostOrAbove, BelowOrAtLeast, BelowOrInOrAboveRange, LessOrEqualOrGreater
+
+
 # modify
 
 @docs toPower, remainderBy, mul, div
@@ -63,11 +68,6 @@ module Nat exposing
 # restore information
 
 @docs restoreMax
-
-
-# comparison
-
-@docs AtMostOrAbove, BelowOrAtLeast, BelowOrInOrAboveRange, LessOrEqualOrGreater
 
 -}
 
@@ -376,19 +376,24 @@ theSmaller a b =
 
 {-| Compared to a range from a lower to an upper bound, is the `Int`
 
-  - `inRange`
+  - `InRange`
 
-  - `greater` than the upper bound or
+  - `AboveRange`: greater than the upper bound or
 
-  - `less` than the lower bound?
+  - `BelowRange`: less than the lower bound?
 
 ```
-rejectOrAcceptUserInt =
-    Nat.isIntInRange nat1 nat100
-        { less = Err "must be >= 1"
-        , greater = \_-> Err "must be <= 100"
-        , inRange = Ok
-        }
+rejectOrAcceptUserInt int =
+    case int |> Nat.isIntInRange nat1 nat100 of
+        InRange inRange ->
+            Ok inRange
+
+        BelowRange () ->
+            Err "must be >= 1"
+
+        AboveRange _ ->
+            Err "must be <= 100"
+
 
 rejectOrAcceptUserInt 0
 --> Err "must be >= 1"
@@ -398,15 +403,15 @@ rejectOrAcceptUserInt 0
 isIntInRange :
     Nat (ArgIn minLowerBound upperBound lowerBoundMaybeN)
     -> Nat (ArgIn upperBound upperBoundPlusA upperBoundMaybeN)
-    ->
-        { less : () -> result
-        , greater : Nat (Min (Nat1Plus upperBound)) -> result
-        , inRange : Nat (In minLowerBound upperBoundPlusA) -> result
-        }
     -> Int
-    -> result
-isIntInRange lowerBound upperBound cases int =
-    Internal.isIntInRange lowerBound upperBound cases int
+    ->
+        BelowOrInOrAboveRange
+            ()
+            (Nat (In minLowerBound upperBoundPlusA))
+            (Nat (Min (Nat1Plus upperBound)))
+isIntInRange lowerBound upperBound int =
+    Internal.isIntInRange lowerBound upperBound int
+        |> fromInternalBelowOrInOrAboveRange
 
 
 {-| A `Nat (In ...)` from an `Int`, **clamped** between a minimum & maximum.
@@ -415,26 +420,31 @@ isIntInRange lowerBound upperBound cases int =
   - if the `Int > maximum`, `maximum` is returned
 
 ```
-clampBetween3And12 =
-    Nat.intInRange nat3 nat12
+9 |> Nat.intInRange nat3 nat12 --> Nat 9
 
-9 |> clampBetween3And12 --> Nat 9
+0 |> Nat.intInRange nat3 nat12 --> Nat 3
 
-0 |> clampBetween3And12 --> Nat 3
-
-99 |> clampBetween3And12 --> Nat 12
+99 |> Nat.intInRange nat3 nat12 --> Nat 12
 ```
 
 If you want to handle the cases `< minimum` & `> maximum` explicitly, use [`isIntInRange`](InNat#isIntInRange).
 
 -}
 intInRange :
-    Nat (ArgIn min lowerBoundMax lowerMaybeN)
-    -> Nat (ArgIn lowerBoundMax max upperMaybeN)
+    Nat (ArgIn minLowerBound minUpperBound lowerBoundMaybeN)
+    -> Nat (ArgIn minUpperBound maxUpperBound upperBoundMaybeN)
     -> Int
-    -> Nat (In min max)
-intInRange lowerBound upperBound =
-    Internal.intInRange lowerBound upperBound
+    -> Nat (In minLowerBound maxUpperBound)
+intInRange lowerBound upperBound int =
+    case isIntInRange lowerBound upperBound int of
+        InRange inRange ->
+            inRange
+
+        BelowRange _ ->
+            lowerBound |> Internal.newRange
+
+        AboveRange _ ->
+            upperBound |> lowerMin lowerBound
 
 
 {-| If the `Int >= a minimum`, `Just` the `Nat (Min minimum)`, else `Nothing`.
@@ -470,7 +480,7 @@ But avoid it if you can do better, like
                 MinNat.addN nat1
                     >> Nat.lowerMin nat0
             )
-            (nat0 |> MinNat.value)
+            (MinNat.value nat0)
 
 If you want to handle the case `< minimum` yourself, use [`Nat.isIntAtLeast`](Nat#isIntAtLeast).
 
@@ -481,7 +491,7 @@ intAtLeast :
     -> Nat (Min min)
 intAtLeast minimum =
     isIntAtLeast minimum
-        >> Maybe.withDefault (Internal.newRange minimum)
+        >> Maybe.withDefault (Internal.minValue minimum)
 
 
 
@@ -621,6 +631,23 @@ restoreMax =
 
 
 -- ## comparison
+
+
+{-| **Should not be exposed**
+-}
+fromInternalBelowOrInOrAboveRange :
+    Internal.BelowOrInOrAboveRange lt inRange gt
+    -> BelowOrInOrAboveRange lt inRange gt
+fromInternalBelowOrInOrAboveRange compared =
+    case compared of
+        Internal.BelowRange lt ->
+            BelowRange lt
+
+        Internal.InRange inRange ->
+            InRange inRange
+
+        Internal.AboveRange gt ->
+            AboveRange gt
 
 
 {-| -}
