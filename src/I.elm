@@ -169,10 +169,18 @@ isIntAtLeast minimum int =
 
 atMost :
     Nat (ArgIn minNewMax atLeastNewMax newMaxMaybeN)
-    -> { min : Nat (ArgN min (Is minToMinNewMax To minNewMax) x) }
+    ->
+        { lowest :
+            Nat
+                (ArgN
+                    lowest
+                    (Is lowestToMin To min)
+                    (Is minToMinNewMax To minNewMax)
+                )
+        }
     -> Nat (ArgIn min max maybeN)
-    -> Nat (In min atLeastNewMax)
-atMost higherBound min =
+    -> Nat (In lowest atLeastNewMax)
+atMost higherBound lowest =
     map (Basics.min (val higherBound)) >> isChecked Nat
 
 

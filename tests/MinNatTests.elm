@@ -55,19 +55,20 @@ intFactorial x =
 
 factorial : Nat (ArgIn min max maybeN) -> Nat (Min Nat1)
 factorial =
-    let
-        factorialHelp x =
-            case x |> MinNat.isAtLeast nat1 { min = nat0 } of
-                Nat.Below _ ->
-                    MinNat.value nat1
+    factorialBody
 
-                Nat.EqualOrGreater atLeast1 ->
-                    Nat.mul atLeast1
-                        (factorial
-                            (atLeast1 |> MinNat.subN nat1)
-                        )
-    in
-    Nat.lowerMin nat0 >> factorialHelp
+
+factorialBody : Nat (ArgIn min max maybeN) -> Nat (Min Nat1)
+factorialBody x =
+    case x |> MinNat.isAtLeast nat1 { lowest = nat0 } of
+        Nat.Below _ ->
+            MinNat.value nat1
+
+        Nat.EqualOrGreater atLeast1 ->
+            Nat.mul atLeast1
+                (factorial
+                    (atLeast1 |> MinNat.subN nat1)
+                )
 
 
 ultraSafeFactorial : Nat (ArgIn min Nat18 maybeN) -> Nat (Min Nat1)
