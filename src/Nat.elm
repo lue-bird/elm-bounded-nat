@@ -1,8 +1,8 @@
 module Nat exposing
     ( Nat
-    , ArgIn, ArgOnly
-    , ArgN, Is, To
-    , Min, In, N, Only
+    , Min, In, Only
+    , N, Is, To
+    , ArgIn, ArgN
     , abs, range, random
     , intAtLeast, intInRange
     , isIntInRange, isIntAtLeast, theGreater, theSmaller
@@ -20,19 +20,22 @@ module Nat exposing
 # bounds
 
 
-## argument type
-
-@docs ArgIn, ArgOnly
-
-
-### N
-
-@docs ArgN, Is, To
-
-
 ## value / return type
 
-@docs Min, In, N, Only
+
+### storage types
+
+@docs Min, In, Only
+
+
+### n
+
+@docs N, Is, To
+
+
+## argument types
+
+@docs ArgIn, ArgN
 
 
 # create
@@ -80,24 +83,7 @@ import Typed exposing (Checked, Public, Typed, val2)
 {-| A **bounded** natural number (`>= 0`).
 
 
-## value / return types
-
-    -- >= 4
-    Nat (Min Nat4)
-
-    -- 2 <= nat <= 12
-    Nat (In Nat2 Nat12)
-
-    -- = 3, & 3, described as a difference
-    Nat
-        (N Nat3
-            (Nat3Plus more)
-            (Is a To (Nat3Plus a))
-            (Is b To (Nat3Plus b))
-        )
-
-
-## function argument types
+### argument types
 
     -- >= 4
     Nat (ArgIn (Nat4Plus minMinus4) max maybeN)
@@ -110,6 +96,29 @@ import Typed exposing (Checked, Public, Typed, val2)
 
     -- any, just >= 0
     Nat range
+
+
+### value / return types
+
+
+#### storage types
+
+    -- >= 4
+    Nat (Min Nat4)
+
+    -- 2 <= nat <= 12
+    Nat (In Nat2 Nat12)
+
+
+#### n
+
+    -- = 3, & 3, described as a difference
+    Nat
+        (N Nat3
+            (Nat3Plus more)
+            (Is a To (Nat3Plus a))
+            (Is b To (Nat3Plus b))
+        )
 
 -}
 type alias Nat range =
@@ -192,33 +201,19 @@ type alias Min minimum =
 
 {-| Expect an exact number.
 
-Only useful as an **argument** / storage type.
+Only useful as an **argument** / storage type in combination with [`Arr`](https://package.elm-lang.org/packages/lue-bird/elm-typesafe-array/latest/)s,
+not with `Nat`s.
 
-Every `ArgIn NatXYZ (NatXYZPlus a) maybeN` is a `ArgOnly NatXYZ maybeN`.
+    byte : Arr (Only Nat8) Bit -> Byte
 
-    byte : Arr (ArgOnly Nat8 maybeN) Bit -> Byte
+→ A given [`Arr`](https://package.elm-lang.org/packages/lue-bird/elm-typesafe-array/latest/) must have _exactly 8_ `Bit`s.
 
-→ A given [`Arr`](https://package.elm-lang.org/packages/lue-bird/elm-typesafe-array/latest/) must have _exact 8_ `Bit`s.
+    type alias TicTacToeBoard =
+        Arr
+            (Only Nat3)
+            (Arr (Only Nat3) TicTacToField)
 
-`ArgOnly` is useful for [`Arr`](https://package.elm-lang.org/packages/lue-bird/elm-typesafe-array/latest/)s,
-but you will never need it in combination with `Nat`s.
-
--}
-type alias ArgOnly n maybeN =
-    ArgIn n n maybeN
-
-
-{-| Just the exact number.
-
-    repeatOnly :
-        Nat (ArgOnly n maybeN)
-        -> element
-        -> Arr (Only n) element
-
-→ A given [`Arr`](https://package.elm-lang.org/packages/lue-bird/elm-typesafe-array/latest/) must have _exactly `n`_ `element`s.
-
-`Only` is useful for [`Arr`](https://package.elm-lang.org/packages/lue-bird/elm-typesafe-array/latest/)s,
-but you will never need it in combination with `Nat`s.
+→ A given [`Arr`](https://package.elm-lang.org/packages/lue-bird/elm-typesafe-array/latest/) must have _exactly `3 x 3`_ `TicTacToeField`s.
 
 -}
 type alias Only n =
