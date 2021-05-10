@@ -154,3 +154,6 @@ Corrected forgotten `maybeN`s & `min`s that were set to an exact value in doc.
 ## 13.0.0
 
 - removed `ArgOnly`
+- made `Nat.lowerMin natX` before `|> ...Nat.is... { min = natX }` redundant by replacing `min` with `{ lowest }` which can be <=, not = the minimum. Changed functions:
+  - `InNat`: `isAtLeast`, `is`, `isAtMost`, `isInRange`, `atMost`
+  - `MinNat`: `isAtLeast`, `is`, `isAtMost`
