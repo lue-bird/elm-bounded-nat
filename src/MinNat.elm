@@ -182,7 +182,6 @@ is valueToCompareAgainst lowest =
                 MinNat.value nat1
 
             Nat.EqualOrGreater atLeast1 ->
-                -- atLeast1 is a Nat (Min Nat1)
                 Nat.mul atLeast1
                     (factorial
                         (atLeast1 |> MinNat.subN nat1)
@@ -214,23 +213,17 @@ isAtLeast lowerBound lowest =
             Below (Internal.newRange minNat)
 
 
-{-| Is the `Nat`
+{-| Is the `Nat` `AtMostOrAbove` a given number?
 
-  - `EqualOrLess` than a `Nat` or
+    goToU18Party : { age : Nat (ArgIn min Nat17 maybeN) } -> Snack
 
-  - `Above`?
+    tryToGoToU18Party { age } =
+        case age |> MinNat.isAtMost nat17 { lowest = nat0 } of
+            EqualOrLess age ->
+                Just (goToU18Party { age = age })
 
-```
-goToU18Party : { age : Nat (ArgIn min Nat17 maybeN) } -> Snack
-
-tryToGoToU18Party { age } =
-    case age |> MinNat.isAtMost nat17 { lowest = nat0 } of
-        EqualOrLess age ->
-            Just (goToU18Party { age = age })
-
-        Greater _ ->
-            Nothing
-```
+            Greater _ ->
+                Nothing
 
 -}
 isAtMost :
