@@ -150,25 +150,24 @@ Let's disallow negative numbers here!
 
 ```elm
 factorial : Nat (ArgIn min max maybeN) -> Nat (Min Nat1)
+factorial =
+    factorialBody
 ```
 Says: for every natural number `n >= 0`, `n! >= 1`.
 ```elm
-factorial =
-    let
-        factorialBody x =
-            case x |> MinNat.isAtLeast nat1 { min = nat0 } of
-                Nat.Below _ ->
-                    MinNat.value nat1
+factorialBody : -- as in factorial
+factorialBody =
+    case x |> MinNat.isAtLeast nat1 { lowest = nat0 } of
+        Nat.Below _ ->
+            MinNat.value nat1
 
-                Nat.EqualOrGreater atLeast1 ->
-                    -- atLeast1 is a Nat (Min Nat1)
-                    Nat.mul atLeast1
-                        (factorial
-                            (atLeast1 |> MinNat.subN nat1)
-                            -- so we can subtract 1
-                        )
-    in
-    Nat.lowerMin nat0 >> factorialBody
+        Nat.EqualOrGreater atLeast1 ->
+            -- atLeast1 is a Nat (Min Nat1)
+            Nat.mul atLeast1
+                (factorial
+                    (atLeast1 |> MinNat.subN nat1)
+                    -- so we can subtract 1
+                )
 
 factorial nat4 --> Nat 24
 ```
@@ -177,8 +176,10 @@ factorial nat4 --> Nat 24
 
 → We have the extra promise, that every result is `>= 1`
 
-We can do even better!
-We know that `!19` is already greater than the maximum safe `Int` `2^53 - 1`.
+By the way, we need `factorial` & `factorialBody` because of a [compiler bug](https://github.com/elm/compiler/issues/2180).
+
+But we can do even better!
+`!19` is already > the maximum safe `Int` `2^53 - 1`.
 
 ```elm
 safeFactorial : Nat (ArgIn min Nat18 maybeN) -> Nat (Min Nat1)
@@ -227,10 +228,10 @@ which you should also never do, allow `Nat (In min ...)` with any max & `Nat (N 
 charFromCode : Nat (ArgIn min max maybeN) -> Char
 ```
 
-Take a look at [`elm-typesafe-array`][bounded-array] to see a lot of this in action!
+Take a look at [`elm-typesafe-array`][typesafe-array] to see a lot of this in action!
 
 You get to know that
-- a `Nat (In ...)` is very useful as an index
-- `Nat.Bound`s can describe amounts well
+- a `Nat (ArgIn ...)` is very useful as an index
+- `In`, `Min`, `Only` can also describe the array length
 
-[bounded-array]: https://package.elm-lang.org/packages/lue-bird/elm-typesafe-array/latest/
+[typesafe-array]: https://package.elm-lang.org/packages/lue-bird/elm-typesafe-array/latest/
