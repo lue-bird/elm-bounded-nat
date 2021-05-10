@@ -150,3 +150,7 @@ Corrected forgotten `maybeN`s & `min`s that were set to an exact value in doc.
 
 - fix type of the `AboveRange` part of the return type of `Nat.isIntInRange`
 - add documentation to the comparison result types
+
+## 13.0.0
+
+- removed `ArgOnly`
