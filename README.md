@@ -1,9 +1,9 @@
 ## elm-bounded-nat
 
-Type-safe natural numbers (`>= 0`), ensuring that a `Nat` is in a range _at compile-time_:
+Type-safe natural numbers → >= 0 can ensure that a `Nat` is in a given range _at compile-time_.
 
 ```elm
-toHexChar : Nat (ArgIn min Nat15 maybeN) -> Char
+toHexChar : Nat (ArgIn min_ Nat15 ifN_) -> Char
 ```
 
 **No number below 0 or above 15** can be passed in as an argument!
@@ -41,9 +41,9 @@ This is common, but
 
 ```elm
 rgbPer100 :
-    Nat (ArgIn redMin Nat100 redMaybeN)
-    -> Nat (ArgIn greenMin Nat100 greenMaybeN)
-    -> Nat (ArgIn blueMin Nat100 blueMaybeN)
+    Nat (ArgIn redMin_ Nat100 redIfN_)
+    -> Nat (ArgIn greenMin_ Nat100 greenIfN_)
+    -> Nat (ArgIn blueMin_ Nat100 blueIfN_)
     -> Color
 ```
 - _the one using_ the function must prove that the numbers are actually between 0 and 100
@@ -51,38 +51,38 @@ rgbPer100 :
 
 The type
 ```elm
-Nat (ArgIn min Nat100 maybeN)
+Nat (ArgIn min_ Nat100 ifN_)
 ```
 is saying it wants:
 
 ```
 an integer >= 0                  Nat          
   in a range                        ArgIn       
-    at least any minimum value        min   
+    at least any minimum value        min_
     at most 100                       Nat100
-    which might be exact              maybeN
+    which might be exact              ifN_
 ```
 
 
 They can prove it by
 
-- already knowing
+- using exact values
 
 ```elm
 red = rgbPer100 nat100 nat0 nat0 -- 👍
 
-nat0 : Nat (N Nat0 atLeast0 ...)
--- so it's also between 0 and 0/1/.../100
+nat0 : Nat (N Nat0 atLeast0_ ...)
+-- between 0 and 0/1/.../100(/101/...)
 
-nat100 : Nat (N Nat100 (N100Plus orMore) ...)
--- so it's also between 100 and 100(/101/...)
+nat100 : Nat (N Nat100 (N100Plus orMore_) ...)
+-- between 100 and 100(/101/...)
 ```
-- checking
+- handling the possibility that a number isn't in the expected range
 
 ```elm
-isUserIntANat : Int -> Maybe (Nat (Min Nat0))
-isUserIntANat =
-    Nat.isIntAtLeast nat0
+toPositive : Int -> Maybe (Nat (Min Nat1))
+toPositive =
+    Nat.isIntAtLeast nat1
 ```
 - clamping
 
@@ -112,7 +112,7 @@ toDigit : Char -> Maybe Int
 You might be able to do anything with this `Int` value, but you lost useful information.
 
 - Can the result even be negative?
-- Could the number have multiple digits?
+- Can the result even have multiple digits?
 
 ```elm
 toDigit : Char -> Maybe Digit
@@ -149,7 +149,7 @@ This forms an infinite loop if we call `intFactorial -1`...
 Let's disallow negative numbers here!
 
 ```elm
-factorial : Nat (ArgIn min max maybeN) -> Nat (Min Nat1)
+factorial : Nat (ArgIn min_ max_ ifN_) -> Nat (Min Nat1)
 factorial =
     factorialBody
 ```
@@ -165,7 +165,7 @@ factorialBody =
             -- atLeast1 is a Nat (Min Nat1)
             Nat.mul atLeast1
                 (factorial
-                    (atLeast1 |> MinNat.subN nat1)
+                    (atLeast1 |> MinNat.sub nat1)
                     -- so we can subtract 1
                 )
 
@@ -176,13 +176,13 @@ factorial nat4 --> Nat 24
 
 → We have the extra promise, that every result is `>= 1`
 
-By the way, we need `factorial` & `factorialBody` because of a [compiler bug](https://github.com/elm/compiler/issues/2180).
+Sadly, we need seperate `factorial` & `factorialBody` because of a [compiler bug](https://github.com/elm/compiler/issues/2180).
 
 But we can do even better!
 `!19` is already > the maximum safe `Int` `2^53 - 1`.
 
 ```elm
-safeFactorial : Nat (ArgIn min Nat18 maybeN) -> Nat (Min Nat1)
+safeFactorial : Nat (ArgIn min_ Nat18 ifN_) -> Nat (Min Nat1)
 safeFactorial =
     factorial
 ```
@@ -197,7 +197,7 @@ No extra work.
 squares2To10 =
     Nat.range nat2 nat10
         -- more info than List.range 2 10
-        -- → every Nat is In Nat2 (Nat10Plus a)
+        -- → every Nat is In Nat2 (Nat10Plus a_)
         |> List.map
             (Nat.toPower nat2
                 -- we still know it's >= 2
@@ -208,24 +208,24 @@ squares2To10 =
 Instead of accepting only exact values
 
 ```elm
-rgb : Nat (ArgN red (Is redTo100 To Nat100) x) -> --...
+rgb : Nat (N red_ atLeastRed_ (Is redTo100_ To Nat100) redIs_) -> --...
 ```
 accept values that are somewhere in a range.
 
 ```elm
-rgb : Nat (ArgIn redMin Nat100 maybeN) -> --...
+rgb : Nat (ArgIn redMin_ Nat100 ifN_) -> --...
 ```
 
-`maybeN` says that it _can_ be exact anyway. Or instead of
+`ifN_` says that it _can_ be exact anyway. Or instead of
 
 ```elm
-charFromCode : Nat (Min min) -> Char
+charFromCode : Nat (Min min_) -> Char
 ```
 
 which you should also never do, allow `Nat (In min ...)` with any max & `Nat (N ...)` to fit in as well!
 
 ```elm
-charFromCode : Nat (ArgIn min max maybeN) -> Char
+charFromCode : Nat (ArgIn min_ max_ ifN_) -> Char
 ```
 
 Take a look at [`elm-typesafe-array`][typesafe-array] to see a lot of this in action!

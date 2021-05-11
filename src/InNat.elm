@@ -1,16 +1,16 @@
 module InNat exposing
     ( atMost, atLeast
     , is, isInRange, isAtLeast, isAtMost
-    , addN, subN, add, sub
+    , add, sub, addIn, subIn
     , value
     , serialize
     )
 
-{-| Operations when you know the `maximum` of the `Nat (ArgIn minimum maximum maybeN)`.
+{-| Operations when you know the `maximum` of the `Nat (ArgIn minimum maximum ifN_)`.
 
 For example for the argument in
 
-    toHexChar : Nat (ArgIn min Nat15 maybeN) -> Char
+    toHexChar : Nat (ArgIn min_ Nat15 ifN_) -> Char
 
 you should use `InNat` operations.
 
@@ -32,7 +32,7 @@ If the maximum isn't known, use the operations in `MinNat`.
 
 # modify
 
-@docs addN, subN, add, sub
+@docs add, sub, addIn, subIn
 
 
 # drop information
@@ -48,7 +48,7 @@ If the maximum isn't known, use the operations in `MinNat`.
 
 import I as Internal
 import N exposing (Nat1Plus, Nat2Plus)
-import Nat exposing (ArgIn, ArgN, AtMostOrAbove(..), BelowOrAtLeast(..), BelowOrInOrAboveRange(..), In, Is, LessOrEqualOrGreater(..), Nat, To)
+import Nat exposing (ArgIn, AtMostOrAbove(..), BelowOrAtLeast(..), BelowOrInOrAboveRange(..), In, Is, LessOrEqualOrGreater(..), N, Nat, To)
 import Serialize
 import Typed exposing (val, val2)
 
@@ -62,23 +62,24 @@ import Typed exposing (val, val2)
 
     between5And15
         |> InNat.atMost nat10 { lowest = nat5 }
-    --> : Nat (In Nat5 (Nat10Plus a))
+    --> : Nat (In Nat5 (Nat10Plus a_))
 
 `lowest` can be a number <= the minimum.
 
 -}
 atMost :
-    Nat (ArgIn minNewMax atLeastNewMax newMaxMaybeN)
+    Nat (ArgIn minNewMax atLeastNewMax newMaxIfN_)
     ->
         { lowest :
             Nat
-                (ArgN
+                (N
                     lowest
-                    (Is lowestToMin To min)
-                    (Is lowestToMinNewMax To minNewMax)
+                    atLeastLowest_
+                    (Is lowestToMin_ To min)
+                    (Is lowestToMinNewMax_ To minNewMax)
                 )
         }
-    -> Nat (ArgIn min max maybeN)
+    -> Nat (ArgIn min max ifN_)
     -> Nat (In lowest atLeastNewMax)
 atMost higherUpperBound lowest =
     Internal.atMost higherUpperBound lowest
@@ -94,8 +95,8 @@ atMost higherUpperBound lowest =
 
 -}
 atLeast :
-    Nat (ArgIn newMin max lowerMaybeN)
-    -> Nat (ArgIn min max maybeN)
+    Nat (ArgIn newMin max lowerIfN_)
+    -> Nat (ArgIn min_ max ifN_)
     -> Nat (In newMin max)
 atLeast lowerBound =
     Internal.atLeast lowerBound
@@ -110,7 +111,7 @@ atLeast lowerBound =
 `lowest` can be a number <= the minimum.
 
     vote :
-        { age : Nat (ArgIn (Nat18Plus orOlder) max maybeN) }
+        { age : Nat (ArgIn (Nat18Plus orOlder) max ifN_) }
         -> Vote
 
     tryToVote { age } =
@@ -125,21 +126,23 @@ atLeast lowerBound =
 -}
 isAtLeast :
     Nat
-        (ArgN
+        (N
             lowerBound
-            (Is a To (Nat1Plus atLeastLowerBoundMinus1))
-            (Is atLeastRange To max)
+            (Nat1Plus atLeastLowerBoundMinus1)
+            (Is atLeastRange_ To max)
+            is_
         )
     ->
         { lowest :
             Nat
-                (ArgN
+                (N
                     lowest
+                    atLeastLowest
                     (Is lowestToMin To min)
-                    (Is (Nat1Plus lowestToLowerBound) To lowerBound)
+                    (Is (Nat1Plus lowestToLowerBound_) To lowerBound)
                 )
         }
-    -> Nat (ArgIn min max maybeN)
+    -> Nat (ArgIn min max ifN_)
     ->
         BelowOrAtLeast
             (Nat (In lowest atLeastLowerBoundMinus1))
@@ -157,7 +160,7 @@ isAtLeast lowerBound lowest =
 
 `lowest` can be a number <= the minimum.
 
-    goToU18Party : { age : Nat (ArgIn min Nat17 maybeN) } -> Snack
+    goToU18Party : { age : Nat (ArgIn min Nat17 ifN_) } -> Snack
 
     tryToGoToU18Party { age } =
         case age |> InNat.isAtMost nat17 { lowest = nat0 } of
@@ -170,21 +173,23 @@ isAtLeast lowerBound lowest =
 -}
 isAtMost :
     Nat
-        (ArgN
+        (N
             upperBound
-            (Is a To atLeastUpperBound)
-            (Is (Nat1Plus greaterRange) To max)
+            atLeastUpperBound
+            (Is (Nat1Plus greaterRange_) To max)
+            is_
         )
     ->
         { lowest :
             Nat
-                (ArgN
+                (N
                     lowest
-                    (Is lowestToMin To min)
-                    (Is minToUpperBound To upperBound)
+                    atLeastLowest_
+                    (Is lowestToMin_ To min)
+                    (Is minToUpperBound_ To upperBound)
                 )
         }
-    -> Nat (ArgIn min max maybeN)
+    -> Nat (ArgIn min max ifN_)
     ->
         AtMostOrAbove
             (Nat (In lowest atLeastUpperBound))
@@ -213,30 +218,32 @@ isAtMost upperBound lowest =
             Nat.Equal () ->
                 bigPresent
 
-    toy : { age : Nat (ArgIn min Nat17 maybeN) } -> Toy
+    toy : { age : Nat (ArgIn min Nat17 ifN_) } -> Toy
 
     experience :
-        { age : Nat (ArgIn (Nat19Plus orOlder) max maybeN) }
+        { age : Nat (ArgIn (Nat19Plus orOlder) max ifN_) }
         -> Experience
 
 -}
 is :
     Nat
-        (ArgN
+        (N
             value
-            (Is valueToMax To max)
-            (Is a To (Nat1Plus atLeastValueMinus1))
+            (Nat1Plus atLeastValueMinus1)
+            (Is valueToMax_ To max)
+            is_
         )
     ->
         { lowest :
             Nat
-                (ArgN
+                (N
                     lowest
-                    (Is lowestToMin To min)
-                    (Is minToValue To value)
+                    atLeastLowest_
+                    (Is lowestToMin_ To min)
+                    (Is minToValue_ To value)
                 )
         }
-    -> Nat (ArgIn min max maybeN)
+    -> Nat (ArgIn min max ifN_)
     ->
         LessOrEqualOrGreater
             (Nat (In lowest atLeastValueMinus1))
@@ -276,28 +283,31 @@ is valueToCompareAgainst lowest =
 -}
 isInRange :
     Nat
-        (ArgN
+        (N
             lowerBound
-            (Is lowerBoundToUpperBound To upperBound)
-            (Is lowerBoundA To (Nat1Plus atLeastLowerBoundMinus1))
+            (Nat1Plus atLeastLowerBoundMinus1)
+            (Is lowerBoundToUpperBound_ To upperBound)
+            lowerBoundIs_
         )
     ->
         Nat
-            (ArgN
+            (N
                 upperBound
-                (Is upperBoundToMax To max)
-                (Is upperBoundA To atLeastUpperBound)
+                atLeastUpperBound
+                (Is upperBoundToMax_ To max)
+                upperBoundIs_
             )
     ->
         { lowest :
             Nat
-                (ArgN
+                (N
                     lowest
-                    (Is lowestToMin To min)
-                    (Is minToLowerBound To lowerBound)
+                    atLeastLowest_
+                    (Is lowestToMin_ To min)
+                    (Is minToLowerBound_ To lowerBound)
                 )
         }
-    -> Nat (ArgIn min max maybeN)
+    -> Nat (ArgIn min max ifN_)
     ->
         BelowOrInOrAboveRange
             (Nat (In lowest atLeastLowerBoundMinus1))
@@ -319,41 +329,55 @@ isInRange lowerBound upperBound lowest =
 -- ## modify
 
 
-{-| Add a `Nat (ArgIn ...)`.
+{-| Add a `Nat (In ...)`.
 
-    between3And10
-        |> InNat.add between1And12 nat1 nat12
-    --> : Nat (In Nat4 (Nat22Plus a))
+The first 2 arguments are
+
+  - the minimum added value
+
+  - the maximum added value
+
+```
+between3And10
+    |> InNat.addIn nat1 nat12 between1And12
+--> : Nat (In Nat4 (Nat22Plus a_))
+```
 
 -}
-add :
-    Nat (ArgIn minAdded maxAdded addedMaybeMax)
-    -> Nat (ArgN minAdded (Is min To sumMin) x)
-    -> Nat (ArgN maxAdded (Is max To sumMax) y)
-    -> Nat (ArgIn min max maybeN)
+addIn :
+    Nat (N minAdded atLeastMinAdded_ (Is min To sumMin) minAddedIs_)
+    -> Nat (N maxAdded atLeastMaxAdded_ (Is max To sumMax) maxAddedIs_)
+    -> Nat (ArgIn minAdded maxAdded addedIfN_)
+    -> Nat (ArgIn min max ifN_)
     -> Nat (In sumMin sumMax)
-add inNatToAdd minAdded maxAdded =
+addIn minAdded maxAdded inNatToAdd =
     Internal.add inNatToAdd
 
 
-{-| Add a `Nat (ArgN ...)`.
+{-| Add a `Nat (N ...)`.
 
     between70And100
-        |> InNat.addN nat7
-    --> : Nat (In Nat77 (Nat107Plus a))
+        |> InNat.add nat7
+    --> : Nat (In Nat77 (Nat107Plus a_))
 
 -}
-addN :
-    Nat (ArgN added (Is min To sumMin) (Is max To sumMax))
-    -> Nat (ArgIn min max maybeN)
+add :
+    Nat
+        (N
+            added
+            atLeastAdded_
+            (Is min To sumMin)
+            (Is max To sumMax)
+        )
+    -> Nat (ArgIn min max ifN_)
     -> Nat (In sumMin sumMax)
-addN nNatToAdd =
+add nNatToAdd =
     Internal.add nNatToAdd
 
 
 {-| Subtract a `Nat (ArgIn ...)`.
 
-The 2 following arguments are
+The first 2 arguments are
 
   - the minimum subtracted value
 
@@ -361,33 +385,52 @@ The 2 following arguments are
 
 ```
 between6And12
-    |> InNat.sub between1And5 nat1 nat5
---> : Nat (In Nat1 (Nat5Plus a))
+    |> InNat.subIn nat1 nat5 between1And5
+--> : Nat (In Nat1 (Nat5Plus a_))
 ```
 
 -}
-sub :
-    Nat (ArgIn minSubbed maxSubbed subbedMaybeN)
-    -> Nat (ArgN minSubbed (Is differenceMax To max) x)
-    -> Nat (ArgN maxSubbed (Is differenceMin To min) y)
-    -> Nat (ArgIn min max maybeN)
+subIn :
+    Nat
+        (N
+            minSubbed
+            atLeastMinSubbed_
+            (Is differenceMax To max)
+            minSubbedIs_
+        )
+    ->
+        Nat
+            (N
+                maxSubbed
+                atLeastMaxSubbed_
+                (Is differenceMin To min)
+                maxSubbedIs_
+            )
+    -> Nat (ArgIn minSubbed maxSubbed subbedIfN_)
+    -> Nat (ArgIn min max ifN_)
     -> Nat (In differenceMin differenceMax)
-sub inNatToSubtract minSubtracted maxSubtracted =
+subIn minSubtracted maxSubtracted inNatToSubtract =
     Internal.sub inNatToSubtract
 
 
-{-| Subtract an exact `Nat (ArgN ...)` value.
+{-| Subtract an exact `Nat (N ...)` value.
 
     between7And10
-        |> InNat.subN nat7
-    --> : Nat (In Nat0 (Nat3Plus a))
+        |> InNat.sub nat7
+    --> : Nat (In Nat0 (Nat3Plus a_))
 
 -}
-subN :
-    Nat (ArgN sub (Is differenceMin To min) (Is differenceMax To max))
-    -> Nat (ArgIn min max maybeN)
+sub :
+    Nat
+        (N
+            subbed_
+            atLeastSubbed_
+            (Is differenceMin To min)
+            (Is differenceMax To max)
+        )
+    -> Nat (ArgIn min max ifN_)
     -> Nat (In differenceMin differenceMax)
-subN nNatToSubtract =
+sub nNatToSubtract =
     Internal.sub nNatToSubtract
 
 
@@ -398,7 +441,7 @@ subN nNatToSubtract =
 {-| Convert it to a `Nat (In min max)`.
 
     InNat.value nat4
-    --> : Nat (In Nat4 (Nat4Plus a))
+    --> : Nat (In Nat4 (Nat4Plus a_))
 
 Example
 
@@ -413,7 +456,7 @@ Elm complains:
     ]
 
 -}
-value : Nat (ArgIn min max maybeN) -> Nat (In min max)
+value : Nat (ArgIn min max ifN_) -> Nat (In min max)
 value =
     Internal.newRange
 
@@ -429,11 +472,11 @@ value =
     serializePercent :
         Serialize.Codec
             String
-            (Nat (In Nat0 (Nat100Plus a)))
+            (Nat (In Nat0 (Nat100Plus a_)))
     serializePercent =
         InNat.serialize nat0 nat100
 
-    encode : Nat (ArgIn min Nat100 maybeN) -> Bytes
+    encode : Nat (ArgIn min_ Nat100 ifN_) -> Bytes
     encode =
         InNat.value
             >> Serialize.encodeToBytes serializePercent
@@ -443,7 +486,7 @@ value =
         ->
             Result
                 (Serialize.Error String)
-                (Nat (In Nat0 (Nat100Plus a)))
+                (Nat (In Nat0 (Nat100Plus a_)))
     decode =
         Serialize.decodeFromBytes serializePercent
 
@@ -451,8 +494,8 @@ For decoded `Int`s out of the expected bounds, the `Result` is an error message.
 
 -}
 serialize :
-    Nat (ArgIn minLowerBound maxLowerBound lowerBoundMaybeN)
-    -> Nat (ArgIn maxLowerBound maxUpperBound upperBoundMaybeN)
+    Nat (ArgIn minLowerBound maxLowerBound lowerBoundIfN_)
+    -> Nat (ArgIn maxLowerBound maxUpperBound upperBoundIfN_)
     -> Serialize.Codec String (Nat (In minLowerBound maxUpperBound))
 serialize lowerBound upperBound =
     Serialize.int

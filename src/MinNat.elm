@@ -1,6 +1,6 @@
 module MinNat exposing
     ( is, isAtLeast, isAtMost
-    , subN, add, sub, addN
+    , sub, add, subMax, addMin
     , value
     , serialize
     )
@@ -14,7 +14,7 @@ module MinNat exposing
 
 2.  The maximum is a type variable
 
-        divideBy : Nat (ArgIn (Nat1Plus minMinus1) max maybeN) -> --...
+        divideBy : Nat (ArgIn (Nat1Plus minMinus1) max ifN_) -> --...
         divideBy atLeast1 =
             --...
 
@@ -26,7 +26,7 @@ module MinNat exposing
 
 # modify
 
-@docs subN, add, sub, addN
+@docs sub, add, subMax, addMin
 
 
 # drop information
@@ -44,7 +44,7 @@ import I as Internal
 import InNat
 import N exposing (Nat1Plus, Nat2Plus)
 import NNats exposing (nat0)
-import Nat exposing (ArgIn, ArgN, AtMostOrAbove(..), BelowOrAtLeast(..), In, Is, LessOrEqualOrGreater(..), Min, Nat, To)
+import Nat exposing (ArgIn, AtMostOrAbove(..), BelowOrAtLeast(..), In, Is, LessOrEqualOrGreater(..), Min, N, Nat, To)
 import Serialize
 import Typed exposing (val, val2)
 
@@ -53,66 +53,71 @@ import Typed exposing (val, val2)
 -- ## modify
 
 
-{-| Add a `Nat (ArgIn ...)`. The second argument is the minimum added value.
+{-| Add a `Nat (In ...)`. The second argument is the minimum added value.
 
-    atLeast5 |> MinNat.add atLeast2 nat2
+    atLeast5 |> MinNat.addMin nat2 atLeast2
     --> : Nat (Min Nat7)
 
 -}
-add :
-    Nat (ArgIn minAdded maxAdded addedMaybeN)
-    -> Nat (ArgN minAdded (Is min To sumMin) x)
-    -> Nat (ArgIn min max maybeN)
+addMin :
+    Nat (N minAdded atLeastMinAdded_ (Is min To sumMin) is_)
+    -> Nat (ArgIn minAdded maxAdded addedIfN_)
+    -> Nat (ArgIn min max ifN_)
     -> Nat (Min sumMin)
-add inNatToAdd minAdded =
+addMin minAdded inNatToAdd =
     Internal.add inNatToAdd
 
 
-{-| Add a fixed `Nat (ArgN ...)` value.
+{-| Add a fixed `Nat (N ...)` value.
 
-    atLeast70 |> InNat.addN nat7
+    atLeast70 |> InNat.add nat7
     --> : Nat (Min Nat77)
 
 -}
-addN :
-    Nat (ArgN added (Is min To sumMin) x)
-    -> Nat (ArgIn min max maybeN)
+add :
+    Nat (N added_ atLeastAdded_ (Is min To sumMin) is_)
+    -> Nat (ArgIn min max ifN_)
     -> Nat (Min sumMin)
-addN nNatToAdd =
+add nNatToAdd =
     Internal.add nNatToAdd
 
 
-{-| Subtract an exact `Nat (ArgN ...)`.
+{-| Subtract an exact `Nat (N ...)`.
 
-    atLeast7 |> MinNat.subN nat2
+    atLeast7 |> MinNat.sub nat2
     --> : Nat (Min Nat5)
 
 -}
-subN :
-    Nat (ArgN subbed (Is differenceMin To min) x)
-    -> Nat (ArgIn min max maybeN)
+sub :
+    Nat (N subbed_ atLeastSubbed_ (Is differenceMin To min) is_)
+    -> Nat (ArgIn min max ifN_)
     -> Nat (In differenceMin max)
-subN nNatToSubtract =
+sub nNatToSubtract =
     Internal.sub nNatToSubtract
 
 
-{-| Subtract a `Nat (ArgIn ...)`. The second argument is the maximum of the subtracted `Nat (ArgIn ...)`.
+{-| Subtract a `Nat (In ...)`. The second argument is the maximum of the subtracted `Nat`.
 
-    atLeast6 |> MinNat.sub between0And5 nat5
+    atLeast6 |> MinNat.subMax nat5 between0And5
     --> : Nat (Min Nat1)
 
-If you have don't the maximum subtracted value at hand, use [`subLossy`](InNat#subLossy).
-
 -}
-sub :
-    Nat (ArgIn minSubbed maxSubbed subbedMaybeN)
-    -> Nat (ArgN maxSubbed (Is differenceMin To min) x)
-    -> Nat (ArgIn min max maybeN)
+subMax :
+    Nat
+        (N
+            maxSubbed
+            atLeastMaxSubbed_
+            (Is differenceMin To min)
+            is_
+        )
+    -> Nat (ArgIn minSubbed maxSubbed subbedIfN_)
+    -> Nat (ArgIn min max ifN_)
     -> Nat (In differenceMin max)
-sub inNatToSubtract maxSubtracted =
-    InNat.sub (inNatToSubtract |> Nat.lowerMin nat0)
+subMax maxSubtracted inNatToSubtract =
+    InNat.subIn
         nat0
         maxSubtracted
+        (inNatToSubtract |> Nat.lowerMin nat0)
 
 
 
@@ -134,23 +139,30 @@ sub inNatToSubtract maxSubtracted =
             Nat.Equal () ->
                 bigPresent
 
-    toy : { age : Nat (ArgIn Nat0 Nat17 maybeN) } -> Toy
+    toy : { age : Nat (ArgIn Nat0 Nat17 ifN_) } -> Toy
 
-    experience : { age : Nat (ArgIn Nat19 max maybeN) } -> Experience
+    experience : { age : Nat (ArgIn Nat19 max ifN_) } -> Experience
 
 -}
 is :
-    Nat (ArgN (Nat1Plus valueMinus1) (Is a To (Nat1Plus valueMinus1PlusA)) x)
+    Nat
+        (N
+            (Nat1Plus valueMinus1)
+            (Nat1Plus valueMinus1PlusA)
+            isA_
+            isB_
+        )
     ->
         { lowest :
             Nat
-                (ArgN
+                (N
                     lowest
-                    (Is lowestToMin To min)
-                    (Is minToValueMinus1 To valueMinus1)
+                    atLeastLowest_
+                    (Is lowestToMin_ To min)
+                    (Is minToValueMinus1_ To valueMinus1)
                 )
         }
-    -> Nat (ArgIn min max maybeN)
+    -> Nat (ArgIn min max_ ifN_)
     ->
         LessOrEqualOrGreater
             (Nat (In lowest valueMinus1PlusA))
@@ -171,7 +183,7 @@ is valueToCompareAgainst lowest =
 
 {-| Is the `Nat` `BelowOrAtLeast` a given number?
 
-    factorial : Nat (ArgIn min max maybeN) -> Nat (Min Nat1)
+    factorial : Nat (ArgIn min max ifN_) -> Nat (Min Nat1)
     factorial =
         factorialBody
 
@@ -184,25 +196,32 @@ is valueToCompareAgainst lowest =
             Nat.EqualOrGreater atLeast1 ->
                 Nat.mul atLeast1
                     (factorial
-                        (atLeast1 |> MinNat.subN nat1)
+                        (atLeast1 |> MinNat.sub nat1)
                     )
 
 -}
 isAtLeast :
-    Nat (ArgN lowerBound (Is a To (Nat1Plus lowerBoundMinus1PlusA)) x)
+    Nat
+        (N
+            lowerBound
+            (Nat1Plus atLeastLowerBoundMinus1)
+            isA_
+            isB_
+        )
     ->
         { lowest :
             Nat
-                (ArgN
+                (N
                     lowest
-                    (Is lowestToMin To min)
-                    (Is lowestToLowerBound To lowerBound)
+                    atLeastLowest_
+                    (Is lowestToMin_ To min)
+                    (Is lowestToLowerBound_ To lowerBound)
                 )
         }
-    -> Nat (ArgIn min max maybeN)
+    -> Nat (ArgIn min max ifN_)
     ->
         BelowOrAtLeast
-            (Nat (In lowest lowerBoundMinus1PlusA))
+            (Nat (In lowest atLeastLowerBoundMinus1))
             (Nat (Min lowerBound))
 isAtLeast lowerBound lowest =
     \minNat ->
@@ -215,7 +234,7 @@ isAtLeast lowerBound lowest =
 
 {-| Is the `Nat` `AtMostOrAbove` a given number?
 
-    goToU18Party : { age : Nat (ArgIn min Nat17 maybeN) } -> Snack
+    goToU18Party : { age : Nat (ArgIn min Nat17 ifN_) } -> Snack
 
     tryToGoToU18Party { age } =
         case age |> MinNat.isAtMost nat17 { lowest = nat0 } of
@@ -227,20 +246,21 @@ isAtLeast lowerBound lowest =
 
 -}
 isAtMost :
-    Nat (ArgN upperBound (Is a To upperBoundPlusA) x)
+    Nat (N upperBound atLeastUpperBound isA_ isB_)
     ->
         { lowest :
             Nat
-                (ArgN
+                (N
                     lowest
-                    (Is lowestToMin To min)
-                    (Is minToAtMostMin To upperBound)
+                    atLeastLowest_
+                    (Is lowestToMin_ To min)
+                    (Is minToAtMostMin_ To upperBound)
                 )
         }
-    -> Nat (ArgIn min max maybeN)
+    -> Nat (ArgIn min max ifN_)
     ->
         AtMostOrAbove
-            (Nat (In lowest upperBoundPlusA))
+            (Nat (In lowest atLeastUpperBound))
             (Nat (Min (Nat1Plus upperBound)))
 isAtMost upperBound lowest =
     \minNat ->
@@ -275,7 +295,7 @@ Elm complains:
     ]
 
 -}
-value : Nat (ArgIn min max maybeN) -> Nat (Min min)
+value : Nat (ArgIn min max_ ifN_) -> Nat (Min min)
 value =
     Internal.minValue
 
@@ -295,7 +315,7 @@ value =
     serializeNaturalNumber =
         MinNat.serialize nat0
 
-    encode : Nat (ArgIn min max maybeN) -> Bytes
+    encode : Nat (ArgIn min max ifN_) -> Bytes
     encode =
         MinNat.value
             >> Serialize.encodeToBytes serializeNaturalNumber
@@ -308,12 +328,13 @@ value =
 
 -}
 serialize :
-    Nat (ArgIn minLowerBound maxLowerBound lowerBoundMaybeN)
+    Nat (ArgIn minLowerBound maxLowerBound_ lowerBoundIfN_)
     -> Serialize.Codec String (Nat (Min minLowerBound))
 serialize lowerBound =
     Serialize.int
         |> Serialize.mapValid
             (Internal.isIntAtLeast lowerBound
-                >> Result.fromMaybe "Int was less than the required minimum"
+                >> Result.fromMaybe
+                    "Int was less than the required minimum"
             )
             val

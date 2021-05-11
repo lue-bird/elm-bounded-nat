@@ -21,34 +21,34 @@ suite =
 --
 
 
-testAdd : Nat (In Nat4 (Nat22Plus a))
-testAdd =
+testAddIn : Nat (In Nat4 (Nat22Plus a_))
+testAddIn =
     Nat.intInRange nat3 nat10 7
-        |> InNat.add (Nat.intInRange nat1 nat12 9) nat1 nat12
+        |> InNat.addIn nat1 nat12 (Nat.intInRange nat1 nat12 9)
 
 
-testAddN : Nat (In Nat15 (Nat19Plus a))
-testAddN =
+testAdd : Nat (In Nat15 (Nat19Plus a_))
+testAdd =
     Nat.intInRange nat6 nat10 7
-        |> InNat.addN nat9
+        |> InNat.add nat9
 
 
-testSub : Nat (In Nat1 (Nat9Plus a))
+testSubIn : Nat (In Nat1 (Nat9Plus a_))
+testSubIn =
+    Nat.intInRange nat6 nat10 7
+        |> InNat.subIn nat1 nat5 (Nat.intInRange nat1 nat5 4)
+
+
+testSub : Nat (In Nat7 (Nat11Plus a_))
 testSub =
-    Nat.intInRange nat6 nat10 7
-        |> InNat.sub (Nat.intInRange nat1 nat5 4) nat1 nat5
-
-
-testSubN : Nat (In Nat7 (Nat11Plus a))
-testSubN =
     Nat.intInRange nat16 nat20 17
-        |> InNat.subN nat9
+        |> InNat.sub nat9
 
 
 rgbPer100 :
-    Nat (ArgIn redMin Nat100 maybeN)
-    -> Nat (ArgIn greenMin Nat100 maybeN)
-    -> Nat (ArgIn blueMin Nat100 maybeN)
+    Nat (ArgIn redMin_ Nat100 ifN_)
+    -> Nat (ArgIn greenMin_ Nat100 ifN_)
+    -> Nat (ArgIn blueMin_ Nat100 ifN_)
     -> ()
 rgbPer100 _ _ _ =
     ()

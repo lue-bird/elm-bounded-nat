@@ -34,7 +34,7 @@ listLength : List a -> Nat (Min Nat0)
 listLength =
     List.foldl
         (\_ ->
-            MinNat.addN nat1
+            MinNat.add nat1
                 >> Nat.lowerMin nat0
         )
         (nat0 |> MinNat.value)
@@ -53,12 +53,12 @@ intFactorial x =
         x * intFactorial (x - 1)
 
 
-factorial : Nat (ArgIn min max maybeN) -> Nat (Min Nat1)
+factorial : Nat (ArgIn min_ max_ ifN_) -> Nat (Min Nat1)
 factorial =
     factorialBody
 
 
-factorialBody : Nat (ArgIn min max maybeN) -> Nat (Min Nat1)
+factorialBody : Nat (ArgIn min_ max_ ifN_) -> Nat (Min Nat1)
 factorialBody x =
     case x |> MinNat.isAtLeast nat1 { lowest = nat0 } of
         Nat.Below _ ->
@@ -67,41 +67,40 @@ factorialBody x =
         Nat.EqualOrGreater atLeast1 ->
             Nat.mul atLeast1
                 (factorial
-                    (atLeast1 |> MinNat.subN nat1)
+                    (atLeast1 |> MinNat.sub nat1)
                 )
 
 
-ultraSafeFactorial : Nat (ArgIn min Nat18 maybeN) -> Nat (Min Nat1)
+ultraSafeFactorial : Nat (ArgIn min_ Nat18 ifN_) -> Nat (Min Nat1)
 ultraSafeFactorial =
     factorial
 
 
-testAdd : Nat (Min Nat4)
-testAdd =
+testAddMin : Nat (Min Nat4)
+testAddMin =
     Nat.intAtLeast nat3 7
-        |> MinNat.add (Nat.intAtLeast nat1 9) nat1
+        |> MinNat.addMin nat1 (Nat.intAtLeast nat1 9)
 
 
-testAddN : Nat (Min Nat15)
-testAddN =
+testAdd : Nat (Min Nat15)
+testAdd =
     Nat.intAtLeast nat6 7
-        |> MinNat.addN nat9
+        |> MinNat.add nat9
 
 
 testSubIn : Nat (Min Nat1)
 testSubIn =
     Nat.intAtLeast nat6 7
-        |> MinNat.sub (Nat.intInRange nat1 nat5 4)
-            nat5
+        |> MinNat.subMax nat5 (Nat.intInRange nat1 nat5 4)
 
 
 testSubN : Nat (Min Nat7)
 testSubN =
     Nat.intAtLeast nat16 17
-        |> MinNat.subN nat9
+        |> MinNat.sub nat9
 
 
-testLowerMin : List (Nat (In Nat3 (Nat4Plus a)))
+testLowerMin : List (Nat (In Nat3 (Nat4Plus a_)))
 testLowerMin =
     [ nat3 |> InNat.value
     , nat4 |> Nat.lowerMin nat3

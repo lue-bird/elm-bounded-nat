@@ -170,7 +170,7 @@ update msg model =
         DownloadModulesAtTime time ->
             ( model
             , File.Download.bytes
-                "elm-nArrays-modules.zip"
+                "elm-bounded-nat modules.zip"
                 "application/zip"
                 (let
                     toZipEntry moduleFile =
@@ -238,7 +238,7 @@ nAnn : Int  -> Elm.CodeGen.TypeAnnotation
 nAnn n =
     typed "N"
         [ natXAnn n
-        , natXPlusAnn n (typeVar "orMore")
+        , natXPlusAnn n (typeVar "more_")
         , isAnn n "a"
         , isAnn n "b"
         ]
@@ -314,9 +314,9 @@ nNatsModule =
         PackageExposedModule
             { moduleComment =
                 \declarations->
-                    [ markdown ("`Nat (ArgN Nat0 ...)` to `Nat (ArgN " ++ String.fromInt lastN ++ " ...)`.")
-                    , markdown "Bigger `Nat (ArgN ...)` s start to slow down compilation, so they are avoided."
-                    , markdown "See [`Nat.Bound.N`](Nat-Bound#N), [`Nat.Bound.N`](Nat-Bound#N) & [`NNat`](NNat) for an explanation."
+                    [ markdown ("`Nat (N Nat0 ...)` to `Nat (N Nat" ++ String.fromInt lastN ++ " ...)`.")
+                    , markdown "Bigger `Nat (N ...)` s start to slow down compilation, so they are avoided."
+                    , markdown "See [`Nat.N`](Nat#N), [`Nat.N`](Nat#N) & [`NNat`](NNat) for an explanation."
                     , docTagsFrom NNatsValue declarations
                     ]
             }
@@ -356,13 +356,13 @@ typeNatsModule =
             { moduleComment =
                 \declarations ->
                     [ markdown "Express exact natural numbers in a type."
-                    , code "onlyExact1 : Nat (ArgOnly Nat1 maybeN) -> Cake"
+                    , code "onlyExact1 : Nat (ArgIn min Nat1 ifN_) -> Cake"
                     , markdown "- `takesOnlyExact1 nat10` is a compile-time error"
-                    , code "add2 : Nat (ArgOnly n maybeN) -> Nat (Only (Nat2Plus n))"
-                    , markdown "- `add2 nat2` is of type `Nat (Only Nat4)`"
+                    , code "add2 : Nat (ArgIn min max ifN_) -> Nat (In (Nat2Plus min) (Nat4Plus max))"
+                    , markdown "- `add2 nat2` is of type `Nat (In Nat4 (Nat4Plus a_))`"
                     , markdown "### about a big limitation"
                     , markdown "Sadly, while experimenting with type aliases, I discovered that type aliases can only expand so much."
-                    , code "compilingGetsKilled : Nat (ArgN (Nat100Plus Nat93) x y)"
+                    , code "compilingGetsKilled : Nat (N (Nat100Plus Nat93) is_0 is_1)"
                     , markdown "If a type alias is not fully expanded after ~192 tries,"
                     , markdown "- the compilation stops"
                     , markdown "- the elm-stuff can corrupt"

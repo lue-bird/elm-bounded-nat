@@ -10,10 +10,10 @@ module NNat exposing (add, sub)
 -}
 
 import I as Internal
-import Nat exposing (ArgN, Is, N, Nat, To)
+import Nat exposing (Is, N, Nat, To)
 
 
-{-| The `Nat (N ...)` plus another `Nat (ArgN ...)`. Give the added value twice as a tuple.
+{-| The `Nat (N ...)` plus another `Nat (N ...)`. Give the added value twice as a tuple.
 
     nat6 |> NNat.add ( nat5, nat5 )
     --> Nat 11
@@ -38,10 +38,11 @@ This is only rarely useful, as you shouldn't
 
 -}
 add :
-    ( Nat (ArgN added (Is n To sum) (Is atLeastN To atLeastSum))
+    ( Nat (N added atLeastFirstAdded_ (Is n To sum) (Is atLeastN To atLeastSum))
     , Nat
-        (ArgN
+        (N
             added
+            atLeastSecondAdded_
             (Is aPlusN To aPlusSum)
             (Is bPlusN To bPlusSum)
         )
@@ -52,14 +53,14 @@ add nNatToAdd =
     Internal.add (nNatToAdd |> Tuple.first)
 
 
-{-| The `Nat (N ...)` plus another `Nat (ArgN ...)`. Give the subtracted value twice as a tuple.
+{-| The `Nat (N ...)` plus another `Nat (N ...)`. Give the subtracted value twice as a tuple.
 
     nat6 |> NNat.sub ( nat5, nat5 )
     --> Nat 1
     --> : Nat
-    -->     (ArgN Nat1
-    -->         (Is a To Nat1Plus a)
-    -->         (Is b To Nat1Plus b)
+    -->     (N Nat1 (Nat1Plus orMore_)
+    -->         (Is a To (Nat1Plus a))
+    -->         (Is b To (Nat1Plus b))
     -->     )
 
 This is only rarely useful, as you shouldn't
@@ -76,10 +77,17 @@ This is only rarely useful, as you shouldn't
 
 -}
 sub :
-    ( Nat (ArgN subbed (Is difference To n) (Is atLeastDifference To atLeastN))
-    , Nat
-        (ArgN
+    ( Nat
+        (N
             subbed
+            atLeastFirstSubbed_
+            (Is difference To n)
+            (Is atLeastDifference To atLeastN)
+        )
+    , Nat
+        (N
+            subbed
+            atLeastSecondSubbed_
             (Is aPlusDifference To aPlusN)
             (Is bPlusDifference To bPlusN)
         )

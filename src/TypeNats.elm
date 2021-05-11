@@ -42,22 +42,22 @@ module TypeNats exposing
 
 {-| Express exact natural numbers in a type.
 
-    onlyExact1 : Nat (ArgOnly Nat1 maybeN) -> Cake
+    onlyExact1 : Nat (ArgIn min Nat1 ifN_) -> Cake
 
   - `takesOnlyExact1 nat10` is a compile-time error
 
 ```
-add2 : Nat (ArgOnly n maybeN) -> Nat (Only (Nat2Plus n))
+add2 : Nat (ArgIn min max ifN_) -> Nat (In (Nat2Plus min) (Nat4Plus max))
 ```
 
-  - `add2 nat2` is of type `Nat (Only Nat4)`
+  - `add2 nat2` is of type `Nat (In Nat4 (Nat4Plus a_))`
 
 
 ### about a big limitation
 
 Sadly, while experimenting with type aliases, I discovered that type aliases can only expand so much.
 
-    compilingGetsKilled : Nat (ArgN (Nat100Plus Nat93) x y)
+    compilingGetsKilled : Nat (N (Nat100Plus Nat93) isA_ isB_)
 
 If a type alias is not fully expanded after ~192 tries,
 
