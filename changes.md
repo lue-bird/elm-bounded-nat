@@ -157,3 +157,15 @@ Corrected forgotten `maybeN`s & `min`s that were set to an exact value in doc.
 - made `Nat.lowerMin natX` before `|> ...Nat.is... { min = natX }` redundant by replacing `min` with `{ lowest }` which can be <=, not = the minimum. Changed functions:
   - `InNat`: `isAtLeast`, `is`, `isAtMost`, `isInRange`, `atMost`
   - `MinNat`: `isAtLeast`, `is`, `isAtMost`
+
+## 14.0.0
+
+- removed `ArgN`
+  - used `N` where `ArgN` was used previously
+- renamed & changed the argument order in `InArr.add x addedMin addedMax` to `addIn addedMin addedMax x`
+- renamed & changed the argument order in `InArr.sub x subbedMin subbedMax` to `addIn subbedMin subbedMax x`
+- renamed & changed the argument order in `MinArr.add x addedMin` to `addMin addedMin x`
+- renamed & changed the argument order in `MinArr.sub x subbedMax` to `subMax subbedMax x`
+- renamed `addN` in `InArr` & `MinArr` to `add`
+- renamed `subN` in `InArr` & `MinArr` to `sub`
+- added "_" after unused type variables
