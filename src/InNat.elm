@@ -215,7 +215,7 @@ isAtMost upperBound lowest =
             Nat.Greater age ->
                 experience { age = age }
 
-            Nat.Equal () ->
+            Nat.Equal _ ->
                 bigPresent
 
     toy : { age : Nat (ArgIn min Nat17 ifN_) } -> Toy
@@ -228,10 +228,10 @@ isAtMost upperBound lowest =
 is :
     Nat
         (N
-            value
-            (Nat1Plus atLeastValueMinus1)
+            (Nat1Plus valueMinus1)
+            atLeastValue
+            (Is a_ To (Nat1Plus atLeastValueMinus1))
             (Is valueToMax_ To max)
-            is_
         )
     ->
         { lowest :
@@ -240,20 +240,20 @@ is :
                     lowest
                     atLeastLowest_
                     (Is lowestToMin_ To min)
-                    (Is minToValue_ To value)
+                    (Is minToValue_ To (Nat1Plus valueMinus1))
                 )
         }
     -> Nat (ArgIn min max ifN_)
     ->
         LessOrEqualOrGreater
             (Nat (In lowest atLeastValueMinus1))
-            ()
+            (Nat (In (Nat1Plus valueMinus1) atLeastValue))
             (Nat (In (Nat2Plus valueMinus1) max))
 is valueToCompareAgainst lowest =
     \inNat ->
         case val2 compare inNat valueToCompareAgainst of
             EQ ->
-                Equal ()
+                Equal (valueToCompareAgainst |> value)
 
             GT ->
                 Greater (Internal.newRange inNat)

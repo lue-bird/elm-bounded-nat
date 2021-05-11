@@ -136,7 +136,7 @@ subMax maxSubtracted inNatToSubtract =
             Nat.Greater age ->
                 experience { age = age }
 
-            Nat.Equal () ->
+            Nat.Equal _ ->
                 bigPresent
 
     toy : { age : Nat (ArgIn Nat0 Nat17 ifN_) } -> Toy
@@ -148,9 +148,9 @@ is :
     Nat
         (N
             (Nat1Plus valueMinus1)
-            (Nat1Plus valueMinus1PlusA)
-            isA_
-            isB_
+            atLeastValue
+            (Is a_ To (Nat1Plus atLeastValueMinus1))
+            is_
         )
     ->
         { lowest :
@@ -165,8 +165,8 @@ is :
     -> Nat (ArgIn min max_ ifN_)
     ->
         LessOrEqualOrGreater
-            (Nat (In lowest valueMinus1PlusA))
-            ()
+            (Nat (In lowest atLeastValueMinus1))
+            (Nat (In (Nat1Plus valueMinus1) atLeastValue))
             (Nat (Min (Nat2Plus valueMinus1)))
 is valueToCompareAgainst lowest =
     \minNat ->
@@ -175,7 +175,7 @@ is valueToCompareAgainst lowest =
                 Less (Internal.newRange minNat)
 
             EQ ->
-                Equal ()
+                Equal (valueToCompareAgainst |> InNat.value)
 
             GT ->
                 Greater (Internal.newRange minNat)
