@@ -598,22 +598,20 @@ You should design type annotations as general as possible.
 
     onlyAtMost18 : Nat (ArgIn min Nat18 ifN_)
 
-    onlyAtMost18 between3And8 --fine
+    onlyAtMost18 between3And8 -- fine
 
 But once you implement `onlyAtMost18`, you might use the value in `onlyAtMost19`.
 
     onlyAtMost18 value =
-        -- onlyAtMost19 value --error :(
+        -- onlyAtMost19 value -- error
         onlyAtMost19
-            (value |> Nat.restoreMax nat18 {- works :) -})
-
-[`lowerMin`](Nat#lowerMin) is also handy in those situations.
+            (value |> Nat.restoreMax nat18)
 
 -}
 restoreMax :
-    Nat (N max atLeastMax isA_ isB_)
-    -> Nat (ArgIn min max ifN_)
-    -> Nat (ArgIn min atLeastMax ifN_)
+    Nat (ArgIn max newMax newMaxIfN_)
+    -> Nat (ArgIn min max ifN)
+    -> Nat (ArgIn min newMax ifN)
 restoreMax =
     \_ -> Internal.newRange
 
