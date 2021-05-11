@@ -169,3 +169,8 @@ Corrected forgotten `maybeN`s & `min`s that were set to an exact value in doc.
 - renamed `addN` in `InArr` & `MinArr` to `add`
 - renamed `subN` in `InArr` & `MinArr` to `sub`
 - added "_" after unused type variables
+
+## 15.0.0
+
+- replaced `Nat.restoreMax`'s argument type `Nat (N currentMax max ...)` with `Nat (In currentMax max)`
+- replaced result `()` from equal comparison with `In value atLeastValue` in `InNat.is` & `MinNat.is`
