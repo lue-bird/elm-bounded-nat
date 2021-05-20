@@ -22,9 +22,6 @@ module Nat exposing
 
 ## value / return type
 
-
-### storage types
-
 @docs Min, In, Only
 
 
@@ -101,6 +98,17 @@ import Typed exposing (Checked, Public, Typed, val2)
     Nat (Min Nat4)
 
     -- 2 <= nat <= 12
+    Nat (In Nat2 (Nat12Plus a_))
+
+
+### storage types
+
+Like what to store in the `Model` for example.
+
+    -- >= 4
+    Nat (Min Nat4)
+
+    -- 2 <= nat <= 12
     Nat (In Nat2 Nat12)
 
 
@@ -115,7 +123,7 @@ import Typed exposing (Checked, Public, Typed, val2)
         )
 
     -- An exact number nTo15 away from 15
-    Nat (N n atLeastN_ (Is nTo15_ To Nat15) is_)
+    Nat (N n atLeastN_ (Is nTo15 To Nat15) is_)
 
 -}
 type alias Nat range =
@@ -126,7 +134,7 @@ type alias Nat range =
 -- ## bounds
 
 
-{-| `In minimum maximum`: A value somewhere within a minimum & maximum. We don't know the exact value, though.
+{-| `In minimum maximum`: A value somewhere within a `minimum` & `maximum`. We don't know the exact value, though.
 
        ↓ minimum   ↓ maximum
     ⨯ [✓ ✓ ✓ ✓ ✓ ✓ ✓] ⨯ ⨯ ⨯...
@@ -142,14 +150,14 @@ type alias In minimum maximum =
     ArgIn minimum maximum Internal.NotN
 
 
-{-| `ArgIn minimum maximum ifN_`: Somewhere within a minimum & maximum.
+{-| `ArgIn minimum maximum ifN_`: An argument somewhere within a `minimum` & `maximum`.
 
        ↓ minimum   ↓ maximum
     ⨯ [✓ ✓ ✓ ✓ ✓ ✓ ✓] ⨯ ⨯ ⨯...
 
-Note: maximum >= minimum for every existing `Nat (ArgIn min max ...)`:
+Note: `max` >= `min` for every existing `Nat (ArgIn min max ...)`:
 
-    percent : Nat (ArgIn min Nat100 ifN_) -> Percent
+    percent : Nat (ArgIn min_ Nat100 ifN_) -> Percent
 
 → `min <= Nat100`
 
@@ -160,13 +168,13 @@ If you want a number where you just care about the minimum, leave the `max` as a
 
 Any natural number:
 
-    Nat (ArgIn min max ifN_)
+    Nat (ArgIn min_ max_ ifN_)
 
 A number, at least 5:
 
-    Nat (ArgIn (Nat5Plus minMinus5) max ifN_)
+    Nat (ArgIn (Nat5Plus minMinus5_) max_ ifN_)
 
-  - `max` could be a maximum value if there is one
+  - `max_` could be a maximum value if there is one
 
   - `ifN_` could contain extra information if the argument is a `Nat (N ...)`
 
@@ -189,7 +197,7 @@ A number >= 5 for example:
 
     Nat (Min Nat5)
 
-Every `Min min` is of type `ArgIn min ...`.
+Every `Min min` is of type `In min`.
 
 -}
 type alias Min minimum =
@@ -198,7 +206,7 @@ type alias Min minimum =
 
 {-| Expect an exact number.
 
-Only useful as an **argument** / storage type in combination with [`Arr`](https://package.elm-lang.org/packages/lue-bird/elm-typesafe-array/latest/)s,
+Only useful as an **argument & storage** type in combination with [`Arr`](https://package.elm-lang.org/packages/lue-bird/elm-typesafe-array/latest/)s,
 not with `Nat`s.
 
     byte : Arr (Only Nat8) Bit -> Byte
@@ -210,7 +218,7 @@ not with `Nat`s.
             (Only Nat3)
             (Arr (Only Nat3) TicTacToField)
 
-→ A given [`Arr`](https://package.elm-lang.org/packages/lue-bird/elm-typesafe-array/latest/) must have _exactly `3 x 3`_ `TicTacToeField`s.
+→ A given [`Arr`](https://package.elm-lang.org/packages/lue-bird/elm-typesafe-array/latest/) must have _exactly 3 by 3_ `TicTacToeField`s.
 
 -}
 type alias Only n =
@@ -231,6 +239,7 @@ type alias To =
 {-| `Is a To b`: an exact value as the diffference `b - a`.
 
     N Nat5
+        (Nat5Plus a_)
         (Is myAge To sistersAge)
         (Is mothersAge To fathersAge)
 
@@ -302,7 +311,7 @@ abs int =
     Internal.abs int
 
 
-{-| `Nat (In ...)`s from a first to last value.
+{-| `Nat`s from a first to last value.
 
     Nat.range nat3 nat10
     --> : List (Nat (In Nat3 (Nat10Plus a_)))
@@ -312,7 +321,7 @@ abs int =
 
 The resulting `List` always has >= 1 element.
 
-With [Arr.nats](https://package.elm-lang.org/packages/lue-bird/elm-typesafe-array/latest/Arr#nats) the type even knows the length! Try it.
+With [nats in typesafe-array](https://package.elm-lang.org/packages/lue-bird/elm-typesafe-array/latest/Arr#nats) the type even knows the length! Try it.
 
 -}
 range :
