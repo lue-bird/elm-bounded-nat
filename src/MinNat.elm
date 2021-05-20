@@ -53,7 +53,7 @@ import Typed exposing (val, val2)
 -- ## modify
 
 
-{-| Add a `Nat (In ...)`. The second argument is the minimum added value.
+{-| Add a `Nat` that isn't a `Nat (N ...)`. The second argument is the minimum added value.
 
     atLeast5 |> MinNat.addMin nat2 atLeast2
     --> : Nat (Min Nat7)
@@ -61,17 +61,19 @@ import Typed exposing (val, val2)
 -}
 addMin :
     Nat (N minAdded atLeastMinAdded_ (Is min To sumMin) is_)
-    -> Nat (ArgIn minAdded maxAdded addedIfN_)
-    -> Nat (ArgIn min max ifN_)
+    -> Nat (ArgIn minAdded maxAdded_ addedIfN_)
+    -> Nat (ArgIn min max_ ifN_)
     -> Nat (Min sumMin)
 addMin minAdded inNatToAdd =
     Internal.add inNatToAdd
 
 
-{-| Add a fixed `Nat (N ...)` value.
+{-| Add an exact `Nat (N ...)` value.
 
     atLeast70 |> InNat.add nat7
     --> : Nat (Min Nat77)
+
+Use [addMin](MinNat#addMin) if you want to add a `Nat` that isn't a `Nat (N ...)`.
 
 -}
 add :
@@ -87,6 +89,8 @@ add nNatToAdd =
     atLeast7 |> MinNat.sub nat2
     --> : Nat (Min Nat5)
 
+Use [subMax](MinNat#subMax) if you want to subtract a `Nat` that isn't a `Nat (N ...)`.
+
 -}
 sub :
     Nat (N subbed_ atLeastSubbed_ (Is differenceMin To min) is_)
@@ -96,7 +100,7 @@ sub nNatToSubtract =
     Internal.sub nNatToSubtract
 
 
-{-| Subtract a `Nat (In ...)`. The second argument is the maximum of the subtracted `Nat`.
+{-| Subtract a `Nat` that isn't a `Nat (N ...)`. The second argument is the maximum of the subtracted `Nat`.
 
     atLeast6 |> MinNat.subMax nat5 between0And5
     --> : Nat (Min Nat1)
@@ -150,7 +154,7 @@ is :
             (Nat1Plus valueMinus1)
             atLeastValue
             (Is a_ To (Nat1Plus atLeastValueMinus1))
-            is_
+            valueIs_
         )
     ->
         { lowest :
@@ -183,7 +187,7 @@ is valueToCompareAgainst lowest =
 
 {-| Is the `Nat` `BelowOrAtLeast` a given number?
 
-    factorial : Nat (ArgIn min max ifN_) -> Nat (Min Nat1)
+    factorial : Nat (ArgIn min_ max_ ifN_) -> Nat (Min Nat1)
     factorial =
         factorialBody
 
@@ -202,11 +206,10 @@ is valueToCompareAgainst lowest =
 -}
 isAtLeast :
     Nat
-        (N
-            lowerBound
-            (Nat1Plus atLeastLowerBoundMinus1)
-            isA_
-            isB_
+        (ArgIn
+            minLowerBound
+            (Nat1Plus maxLowerBoundMinus1)
+            ifN_
         )
     ->
         { lowest :
@@ -215,14 +218,14 @@ isAtLeast :
                     lowest
                     atLeastLowest_
                     (Is lowestToMin_ To min)
-                    (Is lowestToLowerBound_ To lowerBound)
+                    (Is lowestToLowerBound_ To minLowerBound)
                 )
         }
     -> Nat (ArgIn min max ifN_)
     ->
         BelowOrAtLeast
-            (Nat (In lowest atLeastLowerBoundMinus1))
-            (Nat (Min lowerBound))
+            (Nat (In lowest maxLowerBoundMinus1))
+            (Nat (Min minLowerBound))
 isAtLeast lowerBound lowest =
     \minNat ->
         if val2 (>=) minNat lowerBound then
@@ -234,7 +237,7 @@ isAtLeast lowerBound lowest =
 
 {-| Is the `Nat` `AtMostOrAbove` a given number?
 
-    goToU18Party : { age : Nat (ArgIn min Nat17 ifN_) } -> Snack
+    goToU18Party : { age : Nat (ArgIn min_ Nat17 ifN_) } -> Snack
 
     tryToGoToU18Party { age } =
         case age |> MinNat.isAtMost nat17 { lowest = nat0 } of
@@ -246,7 +249,7 @@ isAtLeast lowerBound lowest =
 
 -}
 isAtMost :
-    Nat (N upperBound atLeastUpperBound isA_ isB_)
+    Nat (ArgIn minUpperBound maxUpperBound ifN_)
     ->
         { lowest :
             Nat
@@ -254,14 +257,14 @@ isAtMost :
                     lowest
                     atLeastLowest_
                     (Is lowestToMin_ To min)
-                    (Is minToAtMostMin_ To upperBound)
+                    (Is minToAtMostMin_ To minUpperBound)
                 )
         }
     -> Nat (ArgIn min max ifN_)
     ->
         AtMostOrAbove
-            (Nat (In lowest atLeastUpperBound))
-            (Nat (Min (Nat1Plus upperBound)))
+            (Nat (In lowest maxUpperBound))
+            (Nat (Min (Nat1Plus minUpperBound)))
 isAtMost upperBound lowest =
     \minNat ->
         if val2 (<=) minNat upperBound then
@@ -333,8 +336,14 @@ serialize :
 serialize lowerBound =
     Serialize.int
         |> Serialize.mapValid
-            (Internal.isIntAtLeast lowerBound
-                >> Result.fromMaybe
-                    "Int was less than the required minimum"
+            (\decodedInt ->
+                decodedInt
+                    |> Internal.isIntAtLeast lowerBound
+                    |> Result.fromMaybe
+                        ("The int "
+                            ++ String.fromInt decodedInt
+                            ++ " was less than the required minimum "
+                            ++ String.fromInt (val lowerBound)
+                        )
             )
             val
