@@ -179,3 +179,7 @@ Corrected forgotten `maybeN`s & `min`s that were set to an exact value in doc.
 ## 16.0.0
 
 - `MinNat.isAtLeast` & `MinNat.isAtMost` can now compare to a `Nat (ArgIn ...)` instead of a `Nat (N ...)`
+
+## 17.0.0
+
+- corrected `MinNat.isAtLeast` & `MinNat.isAtMost` `ifN_` usage
