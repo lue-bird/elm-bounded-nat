@@ -175,3 +175,7 @@ Corrected forgotten `maybeN`s & `min`s that were set to an exact value in doc.
 - replaced `Nat.restoreMax`'s argument type `Nat (N currentMax max ...)` with `Nat (In currentMax max)`
 - fix a bug in the result type of `InNat.is`
 - replaced result `()` from equal comparison with `In value atLeastValue` in `InNat.is` & `MinNat.is`
+
+## 16.0.0
+
+- `MinNat.isAtLeast` & `MinNat.isAtMost` can now compare to a `Nat (ArgIn ...)` instead of a `Nat (N ...)`
