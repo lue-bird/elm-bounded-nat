@@ -329,7 +329,7 @@ isInRange lowerBound upperBound lowest =
 -- ## modify
 
 
-{-| Add a `Nat (In ...)`.
+{-| Add a `Nat` that isn't a `Nat (N ...)`.
 
 The first 2 arguments are
 
@@ -360,6 +360,8 @@ addIn minAdded maxAdded inNatToAdd =
         |> InNat.add nat7
     --> : Nat (In Nat77 (Nat107Plus a_))
 
+Use [addIn](InNat#addIn) if you want to add a `Nat` that isn't a `Nat (N ...)`.
+
 -}
 add :
     Nat
@@ -375,7 +377,7 @@ add nNatToAdd =
     Internal.add nNatToAdd
 
 
-{-| Subtract a `Nat (ArgIn ...)`.
+{-| Subtract a `Nat` taht isn't a `Nat (N ...)`.
 
 The first 2 arguments are
 
@@ -418,6 +420,8 @@ subIn minSubtracted maxSubtracted inNatToSubtract =
     between7And10
         |> InNat.sub nat7
     --> : Nat (In Nat0 (Nat3Plus a_))
+
+Use [subIn](InNat#subIn) if you want to subtract a `Nat` that isn't a `Nat (N ...)`.
 
 -}
 sub :
