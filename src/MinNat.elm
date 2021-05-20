@@ -209,7 +209,7 @@ isAtLeast :
         (ArgIn
             minLowerBound
             (Nat1Plus maxLowerBoundMinus1)
-            ifN_
+            lowerBoundIfN_
         )
     ->
         { lowest :
@@ -218,10 +218,10 @@ isAtLeast :
                     lowest
                     atLeastLowest_
                     (Is lowestToMin_ To min)
-                    (Is lowestToLowerBound_ To minLowerBound)
+                    (Is lowestToMinLowerBound_ To minLowerBound)
                 )
         }
-    -> Nat (ArgIn min max ifN_)
+    -> Nat (ArgIn min max_ ifN_)
     ->
         BelowOrAtLeast
             (Nat (In lowest maxLowerBoundMinus1))
@@ -249,7 +249,7 @@ isAtLeast lowerBound lowest =
 
 -}
 isAtMost :
-    Nat (ArgIn minUpperBound maxUpperBound ifN_)
+    Nat (ArgIn minUpperBound maxUpperBound upperBoundIfN_)
     ->
         { lowest :
             Nat
