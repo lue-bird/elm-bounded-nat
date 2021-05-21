@@ -1,5 +1,5 @@
 module MinNat exposing
-    ( is, isAtLeast, isAtMost
+    ( is, isAtLeast, isAtMost, atLeast
     , sub, add, subMax, addMin
     , value
     , serialize
@@ -21,7 +21,7 @@ module MinNat exposing
 
 # compare
 
-@docs is, isAtLeast, isAtMost
+@docs is, isAtLeast, isAtMost, atLeast
 
 
 # modify
@@ -50,7 +50,7 @@ import Typed exposing (val, val2)
 
 
 
--- ## modify
+-- # modify
 
 
 {-| Add a `Nat` that isn't a `Nat (N ...)`. The second argument is the minimum added value.
@@ -125,7 +125,7 @@ subMax maxSubtracted inNatToSubtract =
 
 
 
--- ## compare
+-- # compare
 
 
 {-| Is the `Nat` `LessOrEqualOrGreater` than a given number?
@@ -272,6 +272,23 @@ isAtMost upperBound lowest =
 
         else
             Above (Internal.newRange minNat)
+
+
+{-| Return the given number if the `Nat` is less.
+
+    nat5 |> MinNat.atLeast nat10
+    --> Nat 10 : Nat (Min Nat10)
+
+    atLeast5 |> MinNat.atLeast nat10
+    --> : Nat (Min Nat10)
+
+-}
+atLeast :
+    Nat (ArgIn minNewMin newMin_ lowerIfN_)
+    -> Nat (ArgIn min_ max_ ifN_)
+    -> Nat (Min minNewMin)
+atLeast lowerBound =
+    value >> Internal.atLeast (value lowerBound)
 
 
 
