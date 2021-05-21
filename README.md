@@ -36,7 +36,7 @@ rgb : Float -> Float -> Float -> Color
 ```
 
 This is common, but
-- _the one implementing_ the function has to handle the case where a value is not between 0 and 1
+- _the one implementing_ the function has to handle the cases where a value is not between 0 and 1
 - the _type_ doesn't tell us that a `Float` between 0 & 1 is wanted
 
 ```elm
@@ -228,7 +228,7 @@ which you should also never do, allow `Nat (In min ...)` with any max & `Nat (N 
 charFromCode : Nat (ArgIn min_ max_ ifN_) -> Char
 ```
 
-Take a look at [`elm-typesafe-array`][typesafe-array] to see a lot of this in action!
+Take a look at [`typesafe-array`][typesafe-array] to see a lot of this in action!
 
 You get to know that
 - a `Nat (ArgIn ...)` is very useful as an index
