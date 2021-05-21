@@ -1,6 +1,5 @@
 module InNat exposing
-    ( atMost, atLeast
-    , is, isInRange, isAtLeast, isAtMost
+    ( is, isInRange, isAtLeast, isAtMost, atLeast
     , add, sub, addIn, subIn
     , value
     , serialize
@@ -14,20 +13,12 @@ For example for the argument in
 
 you should use `InNat` operations.
 
-If the maximum isn't known, use the operations in `MinNat`.
+If the maximum isn't known, use the operations in [`MinNat`](MinNat).
 
 
-# create
+# compare
 
-
-## clamp
-
-@docs atMost, atLeast
-
-
-## compare
-
-@docs is, isInRange, isAtLeast, isAtMost
+@docs is, isInRange, isAtLeast, isAtMost, atLeast
 
 
 # modify
@@ -55,55 +46,7 @@ import Typed exposing (val, val2)
 
 
 -- ## create
--- ### clamp
-
-
-{-| **Cap** the `Nat` to at most a number.
-
-    between5And15
-        |> InNat.atMost nat10 { lowest = nat5 }
-    --> : Nat (In Nat5 (Nat10Plus a_))
-
-`lowest` can be a number <= the minimum.
-
--}
-atMost :
-    Nat (ArgIn minNewMax atLeastNewMax newMaxIfN_)
-    ->
-        { lowest :
-            Nat
-                (N
-                    lowest
-                    atLeastLowest_
-                    (Is lowestToMin_ To min)
-                    (Is lowestToMinNewMax_ To minNewMax)
-                )
-        }
-    -> Nat (ArgIn min max ifN_)
-    -> Nat (In lowest atLeastNewMax)
-atMost higherUpperBound lowest =
-    Internal.atMost higherUpperBound lowest
-
-
-{-| If the `Nat` is less than a `Nat`, return that number instead.
-
-    nat5 |> InNat.atLeast nat10
-    --> Nat 10
-
-    nat15 |> InNat.atLeast nat10
-    --> Nat 15
-
--}
-atLeast :
-    Nat (ArgIn newMin max lowerIfN_)
-    -> Nat (ArgIn min_ max ifN_)
-    -> Nat (In newMin max)
-atLeast lowerBound =
-    Internal.atLeast lowerBound
-
-
-
--- ## compare
+-- ### compare
 
 
 {-| Is the `Nat` `BelowOrAtLeast` as big as a given number?
@@ -323,6 +266,27 @@ isInRange lowerBound upperBound lowest =
 
         else
             InRange (Internal.newRange inNat)
+
+
+
+-- ### clamp
+
+
+{-| Return the given number if the `Nat` is less.
+
+    between5And9 |> InNat.atLeast nat10
+    --> Nat 10 : Nat (In Nat10 (Nat10Plus a_))
+
+    nat15 |> InNat.atLeast nat10
+    --> Nat 15
+
+-}
+atLeast :
+    Nat (ArgIn minNewMin max lowerIfN_)
+    -> Nat (ArgIn min_ max ifN_)
+    -> Nat (In minNewMin max)
+atLeast lowerBound =
+    Internal.atLeast lowerBound
 
 
 

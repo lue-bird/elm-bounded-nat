@@ -4,7 +4,7 @@ module Nat exposing
     , N, Is, To
     , ArgIn
     , abs, range, random
-    , intAtLeast, intInRange
+    , intAtLeast, intInRange, atMost
     , isIntInRange, isIntAtLeast, theGreater, theSmaller
     , AtMostOrAbove(..), BelowOrAtLeast(..), BelowOrInOrAboveRange(..), LessOrEqualOrGreater(..)
     , toPower, remainderBy, mul, div
@@ -42,7 +42,7 @@ module Nat exposing
 
 ## clamp
 
-@docs intAtLeast, intInRange
+@docs intAtLeast, intInRange, atMost
 
 
 ## compare
@@ -498,6 +498,36 @@ intAtLeast :
 intAtLeast minimum =
     isIntAtLeast minimum
         >> Maybe.withDefault (Internal.minValue minimum)
+
+
+{-| **Cap** the `Nat` to at most a number.
+
+    between5And15
+        |> Nat.atMost nat10 { lowest = nat5 }
+    --> : Nat (In Nat5 (Nat10Plus a_))
+
+    atLeast5 |> Nat.atMost nat10 { lowest = nat5 }
+    --> : Nat (In Nat5 (Nat10Plus a_))
+
+`lowest` can be a number <= the minimum.
+
+-}
+atMost :
+    Nat (ArgIn minNewMax maxNewMax newMaxIfN_)
+    ->
+        { lowest :
+            Nat
+                (N
+                    lowest
+                    atLeastLowest_
+                    (Is lowestToMin_ To min)
+                    (Is lowestToMinNewMax_ To minNewMax)
+                )
+        }
+    -> Nat (ArgIn min max_ ifN_)
+    -> Nat (In lowest maxNewMax)
+atMost higherUpperBound lowest =
+    Internal.atMost higherUpperBound lowest
 
 
 
