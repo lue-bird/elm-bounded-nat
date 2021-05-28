@@ -188,3 +188,8 @@ Corrected forgotten `maybeN`s & `min`s that were set to an exact value in doc.
 
 - moved `atMost` from `InNat` to `Nat`
 - added `MinNat.atLeast`
+
+## 19.0.0
+
+- renamed `Nat.restoreMax` to `max`
+- renamed `Nat.lowerMin` to `min`
