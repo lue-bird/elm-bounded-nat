@@ -121,7 +121,7 @@ subMax maxSubtracted inNatToSubtract =
     InNat.subIn
         nat0
         maxSubtracted
-        (inNatToSubtract |> Nat.lowerMin nat0)
+        (inNatToSubtract |> Nat.min nat0)
 
 
 

@@ -8,8 +8,8 @@ module Nat exposing
     , isIntInRange, isIntAtLeast, theGreater, theSmaller
     , AtMostOrAbove(..), BelowOrAtLeast(..), BelowOrInOrAboveRange(..), LessOrEqualOrGreater(..)
     , toPower, remainderBy, mul, div
-    , lowerMin
-    , restoreMax
+    , min
+    , max
     )
 
 {-|
@@ -62,12 +62,12 @@ module Nat exposing
 
 # drop information
 
-@docs lowerMin
+@docs min
 
 
 # restore information
 
-@docs restoreMax
+@docs max
 
 -}
 
@@ -299,7 +299,7 @@ Really only use this if you want the absolute value.
         List.foldl
             (\_ ->
                 MinNat.add nat1
-                    >> Nat.lowerMin nat0
+                    >> Nat.min nat0
             )
             (nat0 |> MinNat.value)
 
@@ -342,15 +342,15 @@ random :
     Nat (ArgIn lowerBoundMin upperBoundMin lowerBoundIfN_)
     -> Nat (ArgIn upperBoundMin upperBoundMax upperBoundIfN_)
     -> Random.Generator (Nat (In lowerBoundMin upperBoundMax))
-random min max =
-    Internal.random min max
+random lowest highest =
+    Internal.random lowest highest
 
 
 {-| The greater of 2 `Nat`s.
 
     Nat.theGreater
         between1And3
-        (atLeast4 |> Nat.lowerMin nat1)
+        (atLeast4 |> Nat.min nat1)
     --> : Nat (Min Nat1)
 
 -}
@@ -367,7 +367,7 @@ theGreater a b =
 
     Nat.theSmaller
         (nat3 |> MinNat.value)
-        (atLeast4 |> Nat.lowerMin nat3)
+        (atLeast4 |> Nat.min nat3)
     --> Nat 3 : Nat (Min Nat3)
 
 -}
@@ -448,7 +448,7 @@ intInRange lowerBound upperBound int =
             lowerBound |> Internal.newRange
 
         AboveRange _ ->
-            upperBound |> lowerMin lowerBound
+            upperBound |> min lowerBound
 
 
 {-| If the `Int >= a minimum`, `Just` the `Nat (Min minimum)`, else `Nothing`.
@@ -484,7 +484,7 @@ But avoid it if you can do better, like
         List.foldl
             (\_ ->
                 MinNat.add nat1
-                    >> Nat.lowerMin nat0
+                    >> Nat.min nat0
             )
             (MinNat.value nat0)
 
@@ -619,15 +619,15 @@ Elm complains:
 > But all the previous elements in the list are: `Nat (Min Nat3)`
 
     [ atLeast3
-    , atLeast4 |> Nat.lowerMin nat3
+    , atLeast4 |> Nat.min nat3
     ]
 
 -}
-lowerMin :
-    Nat (ArgIn lowerMin min lowerIfN_)
+min :
+    Nat (ArgIn newMin min lowerIfN_)
     -> Nat (ArgIn min max ifN_)
-    -> Nat (In lowerMin max)
-lowerMin =
+    -> Nat (In newMin max)
+min =
     \_ -> Internal.newRange
 
 
@@ -643,15 +643,14 @@ But once you implement `onlyAtMost18`, you might use the value in `onlyAtMost19`
 
     onlyAtMost18 value =
         -- onlyAtMost19 value -- error
-        onlyAtMost19
-            (value |> Nat.restoreMax nat18)
+        onlyAtMost19 (value |> Nat.max nat18)
 
 -}
-restoreMax :
+max :
     Nat (ArgIn max newMax newMaxIfN_)
     -> Nat (ArgIn min max ifN)
     -> Nat (ArgIn min newMax ifN)
-restoreMax =
+max =
     \_ -> Internal.newRange
 
 
