@@ -25,7 +25,7 @@ suite =
         , test "ultraSafeFactorial"
             (\() ->
                 ultraSafeFactorial nat4
-                    |> Expect.equal (nat24 |> MinNat.value |> Nat.lowerMin nat1)
+                    |> Expect.equal (nat24 |> MinNat.value |> Nat.min nat1)
             )
         ]
 
@@ -35,7 +35,7 @@ listLength =
     List.foldl
         (\_ ->
             MinNat.add nat1
-                >> Nat.lowerMin nat0
+                >> Nat.min nat0
         )
         (nat0 |> MinNat.value)
 
@@ -103,5 +103,5 @@ testSubN =
 testLowerMin : List (Nat (In Nat3 (Nat4Plus a_)))
 testLowerMin =
     [ nat3 |> InNat.value
-    , nat4 |> Nat.lowerMin nat3
+    , nat4 |> Nat.min nat3
     ]
