@@ -78,7 +78,7 @@ Use [addMin](MinNat#addMin) if you want to add a `Nat` that isn't a `Nat (N ...)
 -}
 add :
     Nat (N added_ atLeastAdded_ (Is min To sumMin) is_)
-    -> Nat (ArgIn min max ifN_)
+    -> Nat (ArgIn min max_ ifN_)
     -> Nat (Min sumMin)
 add nNatToAdd =
     Internal.add nNatToAdd
@@ -114,14 +114,14 @@ subMax :
             (Is differenceMin To min)
             is_
         )
-    -> Nat (ArgIn minSubbed maxSubbed subbedIfN_)
+    -> Nat (ArgIn minSubbed_ maxSubbed subbedIfN_)
     -> Nat (ArgIn min max ifN_)
     -> Nat (In differenceMin max)
 subMax maxSubtracted inNatToSubtract =
     InNat.subIn
         nat0
         maxSubtracted
-        (inNatToSubtract |> Nat.min nat0)
+        (inNatToSubtract |> Nat.lowerMin nat0)
 
 
 
@@ -260,7 +260,7 @@ isAtMost :
                     (Is minToAtMostMin_ To minUpperBound)
                 )
         }
-    -> Nat (ArgIn min max ifN_)
+    -> Nat (ArgIn min max_ ifN_)
     ->
         AtMostOrAbove
             (Nat (In lowest maxUpperBound))

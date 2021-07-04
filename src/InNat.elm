@@ -80,8 +80,8 @@ isAtLeast :
             Nat
                 (N
                     lowest
-                    atLeastLowest
-                    (Is lowestToMin To min)
+                    atLeastLowest_
+                    (Is lowestToMin_ To min)
                     (Is (Nat1Plus lowestToLowerBound_) To lowerBound)
                 )
         }
@@ -330,7 +330,7 @@ Use [addIn](InNat#addIn) if you want to add a `Nat` that isn't a `Nat (N ...)`.
 add :
     Nat
         (N
-            added
+            added_
             atLeastAdded_
             (Is min To sumMin)
             (Is max To sumMax)

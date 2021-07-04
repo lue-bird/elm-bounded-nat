@@ -46,9 +46,9 @@ testSub =
 
 
 rgbPer100 :
-    Nat (ArgIn redMin_ Nat100 ifN_)
-    -> Nat (ArgIn greenMin_ Nat100 ifN_)
-    -> Nat (ArgIn blueMin_ Nat100 ifN_)
+    Nat (ArgIn rMin_ Nat100 ifRN_)
+    -> Nat (ArgIn gMin_ Nat100 ifGN_)
+    -> Nat (ArgIn bMin_ Nat100 ifBN_)
     -> ()
 rgbPer100 _ _ _ =
     ()
