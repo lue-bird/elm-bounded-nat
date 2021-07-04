@@ -238,7 +238,7 @@ nAnn : Int  -> Elm.CodeGen.TypeAnnotation
 nAnn n =
     typed "N"
         [ natXAnn n
-        , natXPlusAnn n (typeVar "more_")
+        , natXPlusAnn n (typeVar "a_")
         , isAnn n "a"
         , isAnn n "b"
         ]
@@ -514,7 +514,7 @@ view { nNatsModuleShownOrFolded, typeNatsModuleShownOrFolded, iValuesShownOrFold
                         , ( typeNatsModuleShownOrFolded
                           , ( "TypeNats", TypeNats )
                           )
-                        , ( typeNatsModuleShownOrFolded
+                        , ( iValuesShownOrFolded
                           , ( "values in I", IValues )
                           )
                         ]
