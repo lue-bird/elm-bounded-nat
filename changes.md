@@ -191,5 +191,4 @@ Corrected forgotten `maybeN`s & `min`s that were set to an exact value in doc.
 
 ## 19.0.0
 
-- renamed `Nat.restoreMax` to `max`
-- renamed `Nat.lowerMin` to `min`
+- used custom serialize errors instead of directly converting every error to a `String`
