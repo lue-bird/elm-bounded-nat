@@ -1,6 +1,6 @@
-## elm-bounded-nat
+## bounded-nat
 
-Type-safe natural numbers → >= 0 can ensure that a `Nat` is in a given range _at compile-time_.
+Type-safe natural numbers (>= 0) can ensure that a `Nat` is in a given range _at compile-time_.
 
 ```elm
 toHexChar : Nat (ArgIn min_ Nat15 ifN_) -> Char
@@ -16,14 +16,14 @@ elm install lue-bird/elm-bounded-nat
 ```
 
 ```elm
-import Nat exposing (Nat, Min, In, N, Is, To, ArgIn)
-import NNats exposing (..)
-    -- (..) is nat0 to nat160
+import Nat exposing (Nat, Min, In, ArgIn)
 import InNat
 import MinNat
+import NNats exposing (..)
+    -- nat0 to nat160
 
 import TypeNats exposing (..)
-    -- (..) is Nat0 to Nat160 & Nat1Plus to Nat160Plus
+    -- Nat0 to Nat160 & Nat1Plus to Nat160Plus
 
 import Typed exposing (val, val2)
 ```
@@ -41,9 +41,9 @@ This is common, but
 
 ```elm
 rgbPer100 :
-    Nat (ArgIn redMin_ Nat100 redIfN_)
-    -> Nat (ArgIn greenMin_ Nat100 greenIfN_)
-    -> Nat (ArgIn blueMin_ Nat100 blueIfN_)
+    Nat (ArgIn rMin_ Nat100 rIfN_)
+    -> Nat (ArgIn gMin_ Nat100 gIfN_)
+    -> Nat (ArgIn bMin_ Nat100 bIfN_)
     -> Color
 ```
 - _the one using_ the function must prove that the numbers are actually between 0 and 100
@@ -55,13 +55,13 @@ Nat (ArgIn min_ Nat100 ifN_)
 ```
 is saying it wants:
 
-```
-an integer >= 0                  Nat          
-  in a range                        ArgIn       
-    at least any minimum value        min_
-    at most 100                       Nat100
-    which might be exact              ifN_
-```
+an integer >= 0: `Nat` 
+
+- in a range: `ArgIn`
+    - at least 0 → any minimum value: `min_`
+    - at most 100: `Nat100`
+    - which might be exact: `ifN_`
+
 
 
 They can prove it by
@@ -70,12 +70,6 @@ They can prove it by
 
 ```elm
 red = rgbPer100 nat100 nat0 nat0 -- 👍
-
-nat0 : Nat (N Nat0 atLeast0_ ...)
--- between 0 and 0/1/.../100(/101/...)
-
-nat100 : Nat (N Nat100 (N100Plus orMore_) ...)
--- between 100 and 100(/101/...)
 ```
 - handling the possibility that a number isn't in the expected range
 
@@ -123,10 +117,10 @@ type alias Digit =
 
 The type of a value reflects how much you know.
 
-- `In`: between a minimum & maximum value
-- `Min`: at least a minimum value
-- `N`: exact value
-    - also describes the difference between 2 values
+- between a minimum & maximum value: `In`
+- at least a minimum value: `Min`
+- exact value: `N`
+    - can describe the difference between 2 values → useful for adding/subtracting/...
 
 
 &emsp;
@@ -176,7 +170,7 @@ factorial nat4 --> Nat 24
 
 → We have the extra promise, that every result is `>= 1`
 
-Sadly, we need seperate `factorial` & `factorialBody` because of a [compiler bug](https://github.com/elm/compiler/issues/2180).
+Sadly, we need separate `factorial` & `factorialBody` because there's [no support for polymorphic recursion](https://github.com/elm/compiler/issues/2180).
 
 But we can do even better!
 `!19` is already > the maximum safe `Int` `2^53 - 1`.
@@ -208,15 +202,15 @@ squares2To10 =
 Instead of accepting only exact values
 
 ```elm
-rgb : Nat (N red_ atLeastRed_ (Is redTo100_ To Nat100) redIs_) -> --...
+rgb : Nat (N r_ atLeastR_ (Is rTo100_ To Nat100) rIs_) -> --...
 ```
 accept values that are somewhere in a range.
 
 ```elm
-rgb : Nat (ArgIn redMin_ Nat100 ifN_) -> --...
+rgb : Nat (ArgIn rMin_ Nat100 rIfN_) -> --...
 ```
 
-`ifN_` says that it _can_ be exact anyway. Or instead of
+`rIfN_` says that it _can_ be exact anyway. Or instead of
 
 ```elm
 charFromCode : Nat (Min min_) -> Char
@@ -228,7 +222,7 @@ which you should also never do, allow `Nat (In min ...)` with any max & `Nat (N 
 charFromCode : Nat (ArgIn min_ max_ ifN_) -> Char
 ```
 
-Take a look at [`typesafe-array`][typesafe-array] to see a lot of this in action!
+Take a **look at [`typesafe-array`][typesafe-array]** to see a lot of this in action!
 
 You get to know that
 - a `Nat (ArgIn ...)` is very useful as an index

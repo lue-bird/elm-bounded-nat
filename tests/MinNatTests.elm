@@ -40,10 +40,8 @@ listLength =
         (nat0 |> MinNat.value)
 
 
-
---recurses idefinitely for negative integers
-
-
+{-| recurses idefinitely for negative integers
+-}
 intFactorial : Int -> Int
 intFactorial x =
     if x == 0 then
@@ -91,7 +89,8 @@ testAdd =
 testSubIn : Nat (Min Nat1)
 testSubIn =
     Nat.intAtLeast nat6 7
-        |> MinNat.subMax nat5 (Nat.intInRange nat1 nat5 4)
+        |> MinNat.subMax nat5
+            (Nat.intInRange nat1 nat5 4)
 
 
 testSubN : Nat (Min Nat7)
