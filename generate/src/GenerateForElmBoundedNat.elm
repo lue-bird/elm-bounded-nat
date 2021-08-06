@@ -1,16 +1,16 @@
 module GenerateForElmBoundedNat exposing (main)
 
 {-| Helps you generate the source code of the modules
-- [`NNat`](NNat)
-- [`TypeNats`](TypeNats)
+
+  - [`NNat`](NNat)
+  - [`TypeNats`](TypeNats)
 
 Thanks to [`the-sett/elm-syntax-dsl`](https://package.elm-lang.org/packages/the-sett/elm-syntax-dsl/latest/)!
+
 -}
 
 import Browser
-import NNats exposing (..)
 import Bytes.Encode
-import NNats exposing (..)
 import Element as Ui
 import Element.Background as UiBg
 import Element.Border as UiBorder
@@ -25,7 +25,6 @@ import Elm.CodeGen
         , binOp
         , binOpChain
         , caseExpr
-        , fqVal
         , char
         , code
         , composel
@@ -39,6 +38,7 @@ import Elm.CodeGen
         , fqFun
         , fqNamedPattern
         , fqTyped
+        , fqVal
         , fun
         , funExpose
         , importStmt
@@ -84,6 +84,7 @@ import Extra.Ui as Ui
 import File.Download
 import Html exposing (Html)
 import Html.Attributes
+import NNats exposing (..)
 import SyntaxHighlight
 import Task
 import Time
@@ -119,12 +120,16 @@ type ShownOrFolded content
 
 --tags
 
-type NNatsTag =
-    NNatsValue
+
+type NNatsTag
+    = NNatsValue
+
 
 type TypeNatsTag
     = TypeNatsExact
     | TypeNatsAtLeast
+
+
 
 --
 
@@ -194,6 +199,7 @@ update msg model =
                                 (.nNatsModuleShownOrFolded model)
                                 viewNNatsModule
                     }
+
                 TypeNats ->
                     { model
                         | typeNatsModuleShownOrFolded =
@@ -201,6 +207,7 @@ update msg model =
                                 (.typeNatsModuleShownOrFolded model)
                                 viewTypeNatsModule
                     }
+
                 IValues ->
                     { model
                         | iValuesShownOrFolded =
@@ -234,7 +241,7 @@ natNAnn n =
     typed "Nat" [ n ]
 
 
-nAnn : Int  -> Elm.CodeGen.TypeAnnotation
+nAnn : Int -> Elm.CodeGen.TypeAnnotation
 nAnn n =
     typed "N"
         [ natXAnn n
@@ -243,25 +250,34 @@ nAnn n =
         , isAnn n "b"
         ]
 
+
 isAnn : Int -> String -> Elm.CodeGen.TypeAnnotation
 isAnn n var =
     typed "Is"
-        [ typeVar var, toAnn, natXPlusAnn n (typeVar var)
+        [ typeVar var
+        , toAnn
+        , natXPlusAnn n (typeVar var)
         ]
+
 
 toAnn : Elm.CodeGen.TypeAnnotation
 toAnn =
     typed "To" []
 
+
 natXAnn : Int -> Elm.CodeGen.TypeAnnotation
 natXAnn x =
     typed ("Nat" ++ String.fromInt x) []
 
+
 natXPlusAnn : Int -> Elm.CodeGen.TypeAnnotation -> Elm.CodeGen.TypeAnnotation
 natXPlusAnn x more =
     case x of
-        0-> more
-        _-> typed ("Nat" ++ String.fromInt x ++ "Plus") [ more ]
+        0 ->
+            more
+
+        _ ->
+            typed ("Nat" ++ String.fromInt x ++ "Plus") [ more ]
 
 
 valAnn : Elm.CodeGen.TypeAnnotation
@@ -277,9 +293,11 @@ lastN : Int
 lastN =
     160
 
-viewIValues : Ui.Element msg
+
+viewIValues : Ui.Element msg_
 viewIValues =
     Ui.module_ iValues
+
 
 iValues : Module Never
 iValues =
@@ -289,7 +307,7 @@ iValues =
     , declarations =
         List.range 0 lastN
             |> List.map
-                (\x->
+                (\x ->
                     packageInternalExposedFunDecl
                         (natNAnn (nAnn x))
                         ("nat" ++ String.fromInt x)
@@ -302,7 +320,8 @@ iValues =
                 )
     }
 
-viewNNatsModule : Ui.Element msg
+
+viewNNatsModule : Ui.Element msg_
 viewNNatsModule =
     Ui.module_ nNatsModule
 
@@ -313,7 +332,7 @@ nNatsModule =
     , roleInPackage =
         PackageExposedModule
             { moduleComment =
-                \declarations->
+                \declarations ->
                     [ markdown ("`Nat (N Nat0 ...)` to `Nat (N Nat" ++ String.fromInt lastN ++ " ...)`.")
                     , markdown "Bigger `Nat (N ...)` s start to slow down compilation, so they are avoided."
                     , markdown "See [`Nat.N`](Nat#N), [`Nat.N`](Nat#N) & [`NNat`](NNat) for an explanation."
@@ -321,7 +340,8 @@ nNatsModule =
                     ]
             }
     , imports =
-        [ importStmt [ "I" ] noAlias
+        [ importStmt [ "I" ]
+            noAlias
             (exposingExplicit
                 ([ "N", "Is", "To", "Nat" ]
                     |> List.map typeOrAliasExpose
@@ -332,7 +352,7 @@ nNatsModule =
     , declarations =
         List.range 0 lastN
             |> List.map
-                (\x->
+                (\x ->
                     packageExposedFunDecl NNatsValue
                         [ markdown ("The exact `Nat` " ++ String.fromInt x ++ ".") ]
                         (natNAnn (nAnn x))
@@ -343,7 +363,7 @@ nNatsModule =
     }
 
 
-viewTypeNatsModule : Ui.Element msg
+viewTypeNatsModule : Ui.Element msg_
 viewTypeNatsModule =
     Ui.module_ typeNatsModule
 
@@ -400,6 +420,7 @@ typeNatsModule =
         ]
             |> List.concat
     }
+
 
 
 --
