@@ -19,35 +19,30 @@ elm install lue-bird/elm-bounded-nat
 import Nat exposing (Nat, Min, In, ArgIn)
 import InNat
 import MinNat
-import NNats exposing (..)
-    -- nat0 to nat160
+import Nats exposing (..)
+    -- nat0-160, Nat0-160 & -Plus
 
-import TypeNats exposing (..)
-    -- Nat0 to Nat160 & Nat1Plus to Nat160Plus
-
-import Typed exposing (val, val2)
+import Typed
 ```
 
 
-## color
+## percent
 
 ```elm
-rgb : Float -> Float -> Float -> Color
+percent : Float -> Length
 ```
 
-This is common, but
-- _the one implementing_ the function has to handle the cases where a value is not between 0 and 1
+This is common but
+- _the one implementing_ it has to handle the cases where a value is not between 0 and 1
 - the _type_ doesn't tell us that a `Float` between 0 & 1 is wanted
 
 ```elm
-rgbPer100 :
-    Nat (ArgIn rMin_ Nat100 rIfN_)
-    -> Nat (ArgIn gMin_ Nat100 gIfN_)
-    -> Nat (ArgIn bMin_ Nat100 bIfN_)
-    -> Color
+percent :
+    Nat (ArgIn min_ Nat100 ifN_)
+    -> Length
 ```
-- _the one using_ the function must prove that the numbers are actually between 0 and 100
-- you clearly know what input is desired
+- _the one using_ it must prove that the numbers are actually between 0 and 100
+- you see the desired input in the type 
 
 The type
 ```elm
@@ -62,14 +57,14 @@ an integer >= 0: `Nat`
     - at most 100: `Nat100`
     - which might be exact: `ifN_`
 
-
-
 They can prove it by
 
 - using exact values
 
 ```elm
-red = rgbPer100 nat100 nat0 nat0 -- 👍
+twoThirds = percent nat67
+
+red = rgbPercent nat100 nat0 nat0 -- 👍
 ```
 - handling the possibility that a number isn't in the expected range
 
@@ -81,13 +76,11 @@ toPositive =
 - clamping
 
 ```elm
-grey float =
+greyFloatPercent float =
     let
         greyLevel =
-            float
-                * 100
-                |> round
-                |> Nat.intInRange nat0 nat100
+            Nat.intInRange nat0 nat100
+                (float * 100 |> round)
     in
     rgbPer100 greyLevel greyLevel greyLevel
 ```
@@ -187,27 +180,18 @@ No extra work.
 ## tips
 
 - keep _as much type information as possible_ and drop it only where you need to.
-```elm
-squares2To10 =
-    Nat.range nat2 nat10
-        -- more info than List.range 2 10
-        -- → every Nat is In Nat2 (Nat10Plus a_)
-        |> List.map
-            (Nat.toPower nat2
-                -- we still know it's >= 2
-            )
-```
+
 - keep your _function annotations as general as possible_
     
 Instead of accepting only exact values
 
 ```elm
-rgb : Nat (N r_ atLeastR_ (Is rTo100_ To Nat100) rIs_) -> --...
+percent : Nat (N perc_ atLeastPerc_ (Is to100_ To Nat100) is_) -> --...
 ```
 accept values that are somewhere in a range.
 
 ```elm
-rgb : Nat (ArgIn rMin_ Nat100 rIfN_) -> --...
+percent : Nat (ArgIn min_ Nat100 ifN_) -> --...
 ```
 
 `rIfN_` says that it _can_ be exact anyway. Or instead of
