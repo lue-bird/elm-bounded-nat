@@ -1,11 +1,8 @@
 module GenerateForElmBoundedNat exposing (main)
 
-{-| Helps you generate the source code of the modules
+{-| Helps you generate the source code of the module `Nats`.
 
-  - [`NNat`](NNat)
-  - [`TypeNats`](TypeNats)
-  - [`N`](N)
-  - the `natXs` in [`I`](I)
+Run `elm reactor` in this directory to preview & download.
 
 Thanks to [`the-sett/elm-syntax-dsl`](https://package.elm-lang.org/packages/the-sett/elm-syntax-dsl/latest/)!
 
@@ -47,16 +44,6 @@ type alias Model =
 type Folding content
     = Shown content
     | Folded
-
-
-
--- tags
-
-
-type NatsTag
-    = ExactTypeNat
-    | TypeNatPlusN
-    | NNatsValue
 
 
 
@@ -202,6 +189,16 @@ natXPlusAnn x more =
 
         _ ->
             typed (natXPlus x) [ more ]
+
+
+
+-- tags
+
+
+type NatsTag
+    = ExactTypeNat
+    | TypeNatPlusN
+    | NNatsValue
 
 
 
