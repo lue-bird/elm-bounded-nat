@@ -6,10 +6,9 @@ module MinNatTests exposing (suite)
 import Expect
 import InNat
 import MinNat
-import NNats exposing (..)
 import Nat exposing (ArgIn, In, Min, Nat)
+import Nats exposing (..)
 import Test exposing (Test, describe, test)
-import TypeNats exposing (..)
 import Typed exposing (val)
 
 

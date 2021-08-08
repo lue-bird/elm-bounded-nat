@@ -5,10 +5,9 @@ module InNatTests exposing (suite)
 
 import Expect
 import InNat
-import NNats exposing (..)
 import Nat exposing (ArgIn, In, Min, Nat)
+import Nats exposing (..)
 import Test exposing (Test, describe, test)
-import TypeNats exposing (..)
 
 
 suite : Test
@@ -58,9 +57,8 @@ grey : Float -> ()
 grey float =
     let
         greyLevel =
-            float
-                * 100
-                |> round
-                |> Nat.intInRange nat0 nat100
+            Nat.intInRange nat0
+                nat100
+                (float * 100 |> round)
     in
     rgbPer100 greyLevel greyLevel greyLevel
