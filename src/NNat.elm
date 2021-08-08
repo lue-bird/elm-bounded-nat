@@ -1,6 +1,6 @@
 module NNat exposing (add, sub)
 
-{-| Operations that only apply for `Nat (N ...)`s. You'll probably never need those.
+{-| Operations that only apply for `Nat (N ...)`s. You will probably never need those.
 
 
 ## modify
@@ -19,7 +19,7 @@ import Nat exposing (Is, N, Nat, To)
     --> Nat 11
     --> : Nat
     -->     (N Nat11
-    -->         (Nat11Plus a)
+    -->         (Nat11Plus a_)
     -->         (Is a To Nat11Plus a)
     -->         (Is b To Nat11Plus b)
     -->     )
@@ -30,8 +30,9 @@ This is only rarely useful, as you shouldn't
         -- won't work
         isInRange x (x |> NNat.add ( nat10, nat10 ))
 
+Only use it when the `Nat (N ...)` is used once.
+
     isAtLeast10GreaterThan x =
-        -- the only use case
         isAtLeast (x |> NNat.add ( nat10, nat10 ))
 
 (examples don't compile, just for demonstration)
@@ -50,7 +51,7 @@ add :
     -> Nat (N n atLeastN (Is a To aPlusN) (Is b To bPlusN))
     -> Nat (N sum atLeastSum (Is a To aPlusSum) (Is b To bPlusSum))
 add nNatToAdd =
-    Internal.add (nNatToAdd |> Tuple.first)
+    Internal.nNatAdd nNatToAdd
 
 
 {-| The `Nat (N ...)` plus another `Nat (N ...)`. Give the subtracted value twice as a tuple.
@@ -58,7 +59,7 @@ add nNatToAdd =
     nat6 |> NNat.sub ( nat5, nat5 )
     --> Nat 1
     --> : Nat
-    -->     (N Nat1 (Nat1Plus orMore_)
+    -->     (N Nat1 (Nat1Plus a_)
     -->         (Is a To (Nat1Plus a))
     -->         (Is b To (Nat1Plus b))
     -->     )
@@ -69,8 +70,9 @@ This is only rarely useful, as you shouldn't
         -- won't work
         isInRange (x |> NNat.sub ( nat10, nat10 )) x
 
+Only use it when the `Nat (N ...)` is used once.
+
     isAtLeast10LessThan x =
-        -- the only use case
         isAtLeast (x |> NNat.sub ( nat10, nat10 ))
 
 (examples don't compile, just for demonstration)
@@ -102,4 +104,4 @@ sub :
                 (Is b To bPlusDifference)
             )
 sub nNatToSubtract =
-    Internal.sub (nNatToSubtract |> Tuple.first)
+    Internal.nNatSub nNatToSubtract
