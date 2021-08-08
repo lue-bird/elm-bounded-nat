@@ -192,3 +192,4 @@ Corrected forgotten `maybeN`s & `min`s that were set to an exact value in doc.
 ## 19.0.0
 
 - used custom serialize errors instead of directly converting every error to a `String`
+- moved `NatX`, `NatXPlus` and `natX` in new `Nats` module
