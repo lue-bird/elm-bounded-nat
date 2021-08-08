@@ -1,8 +1,9 @@
 module MinNat exposing
-    ( is, isAtLeast, isAtMost, atLeast
+    ( is, isAtLeast, isAtMost
+    , atLeast
     , sub, add, subMax, addMin
     , value
-    , serialize
+    , serialize, serializeErrorToString
     )
 
 {-| 2 situations where you use these operations instead of the ones in [`Nat`](Nat) or [`InNat`](InNat):
@@ -14,14 +15,19 @@ module MinNat exposing
 
 2.  The maximum is a type variable
 
-        divideBy : Nat (ArgIn (Nat1Plus minMinus1) max ifN_) -> --...
+        divideBy : Nat (ArgIn (Nat1Plus minMinus1_) max_ ifN_) -> ...
         divideBy atLeast1 =
-            --...
+            ...
 
 
 # compare
 
-@docs is, isAtLeast, isAtMost, atLeast
+@docs is, isAtLeast, isAtMost
+
+
+## clamp
+
+@docs atLeast
 
 
 # modify
@@ -36,15 +42,14 @@ module MinNat exposing
 
 # extra
 
-@docs serialize
+@docs serialize, serializeErrorToString
 
 -}
 
-import I as Internal
+import I as Internal exposing (serializeValid)
 import InNat
-import N exposing (Nat1Plus, Nat2Plus)
-import NNats exposing (nat0)
 import Nat exposing (ArgIn, AtMostOrAbove(..), BelowOrAtLeast(..), In, Is, LessOrEqualOrGreater(..), Min, N, Nat, To)
+import Nats exposing (Nat1Plus, Nat2Plus, nat0)
 import Serialize
 import Typed exposing (val, val2)
 
@@ -53,7 +58,7 @@ import Typed exposing (val, val2)
 -- # modify
 
 
-{-| Add a `Nat` that isn't a `Nat (N ...)`. The second argument is the minimum added value.
+{-| Add a `Nat`. The second argument is the minimum added value. Use [`add`](MinNat#add) to add exact numbers.
 
     atLeast5 |> MinNat.addMin nat2 atLeast2
     --> : Nat (Min Nat7)
@@ -134,18 +139,20 @@ subMax maxSubtracted inNatToSubtract =
 
     giveAPresent { age } =
         case age |> MinNat.is nat18 { lowest = nat0 } of
-            Nat.Less age ->
-                toy { age = age }
+            Nat.Less younger ->
+                toy { age = younger }
 
-            Nat.Greater age ->
-                experience { age = age }
+            Nat.Greater older ->
+                book { age = older }
 
             Nat.Equal _ ->
                 bigPresent
 
-    toy : { age : Nat (ArgIn Nat0 Nat17 ifN_) } -> Toy
+    toy : { age : Nat (ArgIn min_ Nat17 ifN_) } -> Toy
 
-    experience : { age : Nat (ArgIn Nat19 max ifN_) } -> Experience
+    book :
+        { age : Nat (ArgIn (Nat19 minMinus19_) max_ ifN_) }
+        -> Book
 
 -}
 is :
@@ -172,8 +179,8 @@ is :
             (Nat (In lowest atLeastValueMinus1))
             (Nat (In (Nat1Plus valueMinus1) atLeastValue))
             (Nat (Min (Nat2Plus valueMinus1)))
-is valueToCompareAgainst lowest =
-    \minNat ->
+is valueToCompareAgainst =
+    \_ minNat ->
         case val2 compare minNat valueToCompareAgainst of
             LT ->
                 Less (Internal.newRange minNat)
@@ -226,8 +233,8 @@ isAtLeast :
         BelowOrAtLeast
             (Nat (In lowest maxLowerBoundMinus1))
             (Nat (Min minLowerBound))
-isAtLeast lowerBound lowest =
-    \minNat ->
+isAtLeast lowerBound =
+    \_ minNat ->
         if val2 (>=) minNat lowerBound then
             EqualOrGreater (Internal.newRange minNat)
 
@@ -265,13 +272,17 @@ isAtMost :
         AtMostOrAbove
             (Nat (In lowest maxUpperBound))
             (Nat (Min (Nat1Plus minUpperBound)))
-isAtMost upperBound lowest =
-    \minNat ->
+isAtMost upperBound =
+    \_ minNat ->
         if val2 (<=) minNat upperBound then
             EqualOrLess (Internal.newRange minNat)
 
         else
             Above (Internal.newRange minNat)
+
+
+
+-- ## clamp
 
 
 {-| Return the given number if the `Nat` is less.
@@ -292,7 +303,7 @@ atLeast lowerBound =
 
 
 
--- ## drop information
+-- # drop information
 
 
 {-| Convert a `Nat (ArgIn min ...)` to a `Nat (Min min)`.
@@ -321,19 +332,17 @@ value =
 
 
 
--- ## extra
+-- # extra
 
 
 {-| A [`Codec`](https://package.elm-lang.org/packages/MartinSStewart/elm-serialize/latest/) to serialize `Nat`s with a lower bound.
 
-    import Serialize
+    import Serialize exposing (Codec)
 
-    serializeNaturalNumber :
-        Serialize.Codec
-            String
-            (Nat (Min Nat0))
+    serializeNaturalNumber : Codec String (Nat (Min Nat0))
     serializeNaturalNumber =
         MinNat.serialize nat0
+            |> Serialize.mapError MinNat.serializeErrorToString
 
     encode : Nat (ArgIn min max ifN_) -> Bytes
     encode =
@@ -348,19 +357,39 @@ value =
 
 -}
 serialize :
-    Nat (ArgIn minLowerBound maxLowerBound_ lowerBoundIfN_)
-    -> Serialize.Codec String (Nat (Min minLowerBound))
+    Nat (ArgIn minLowerBound maxLowerBound lowerBoundIfN)
+    ->
+        Serialize.Codec
+            { expected :
+                { atLeast :
+                    Nat (ArgIn minLowerBound maxLowerBound lowerBoundIfN)
+                }
+            , actual : Int
+            }
+            (Nat (Min minLowerBound))
 serialize lowerBound =
-    Serialize.int
-        |> Serialize.mapValid
-            (\decodedInt ->
-                decodedInt
-                    |> Internal.isIntAtLeast lowerBound
-                    |> Result.fromMaybe
-                        ("The int "
-                            ++ String.fromInt decodedInt
-                            ++ " was less than the required minimum "
-                            ++ String.fromInt (val lowerBound)
-                        )
-            )
-            val
+    serializeValid
+        (Internal.isIntAtLeast lowerBound
+            >> Result.fromMaybe
+                { atLeast = lowerBound }
+        )
+
+
+{-| Convert the [serialization](https://package.elm-lang.org/packages/MartinSStewart/elm-serialize/latest/) error into a readable message.
+
+    { expected = { atLeast = nat11 }
+    , actual = 10
+    }
+        |> MinArr.serializeErrorToString
+    --> expected an int >= 11 but the actual int was 10
+
+-}
+serializeErrorToString :
+    { expected : { atLeast : Nat minimum_ }
+    , actual : Int
+    }
+    -> String
+serializeErrorToString error =
+    Internal.serializeErrorToString
+        (Internal.ExpectAtLeast << .atLeast)
+        error

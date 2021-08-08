@@ -1,8 +1,9 @@
 module InNat exposing
-    ( is, isInRange, isAtLeast, isAtMost, atLeast
+    ( is, isInRange, isAtLeast, isAtMost
+    , atLeast
     , add, sub, addIn, subIn
     , value
-    , serialize
+    , serialize, serializeErrorToString
     )
 
 {-| Operations when you know the `maximum` of the `Nat (ArgIn minimum maximum ifN_)`.
@@ -18,7 +19,12 @@ If the maximum isn't known, use the operations in [`MinNat`](MinNat).
 
 # compare
 
-@docs is, isInRange, isAtLeast, isAtMost, atLeast
+@docs is, isInRange, isAtLeast, isAtMost
+
+
+## clamp
+
+@docs atLeast
 
 
 # modify
@@ -33,20 +39,19 @@ If the maximum isn't known, use the operations in [`MinNat`](MinNat).
 
 # extra
 
-@docs serialize
+@docs serialize, serializeErrorToString
 
 -}
 
-import I as Internal
-import N exposing (Nat1Plus, Nat2Plus)
+import I as Internal exposing (serializeValid)
 import Nat exposing (ArgIn, AtMostOrAbove(..), BelowOrAtLeast(..), BelowOrInOrAboveRange(..), In, Is, LessOrEqualOrGreater(..), N, Nat, To)
-import Serialize
+import Nats exposing (Nat1Plus, Nat2Plus)
+import Serialize exposing (Codec)
 import Typed exposing (val, val2)
 
 
 
--- ## create
--- ### compare
+-- # compare
 
 
 {-| Is the `Nat` `BelowOrAtLeast` as big as a given number?
@@ -54,7 +59,7 @@ import Typed exposing (val, val2)
 `lowest` can be a number <= the minimum.
 
     vote :
-        { age : Nat (ArgIn (Nat18Plus orOlder) max ifN_) }
+        { age : Nat (ArgIn (Nat18Plus minMinus18_) max_ ifN_) }
         -> Vote
 
     tryToVote { age } =
@@ -63,8 +68,8 @@ import Typed exposing (val, val2)
                 --😓
                 Nothing
 
-            Nat.EqualOrGreater age ->
-                Just (vote { age = age })
+            Nat.EqualOrGreater oldEnough ->
+                Just (vote { age = oldEnough })
 
 -}
 isAtLeast :
@@ -90,8 +95,8 @@ isAtLeast :
         BelowOrAtLeast
             (Nat (In lowest atLeastLowerBoundMinus1))
             (Nat (In lowerBound max))
-isAtLeast lowerBound lowest =
-    \inNat ->
+isAtLeast lowerBound =
+    \_ inNat ->
         if val2 (>=) inNat lowerBound then
             EqualOrGreater (Internal.newRange inNat)
 
@@ -103,14 +108,14 @@ isAtLeast lowerBound lowest =
 
 `lowest` can be a number <= the minimum.
 
-    goToU18Party : { age : Nat (ArgIn min Nat17 ifN_) } -> Snack
+    goToU18Party : { age : Nat (ArgIn min_ Nat17 ifN_) } -> Snack
 
     tryToGoToU18Party { age } =
         case age |> InNat.isAtMost nat17 { lowest = nat0 } of
-            Nat.EqualOrLess age ->
-                Just (goToU18Party { age = age })
+            Nat.EqualOrLess u18 ->
+                Just (goToU18Party { age = u18 })
 
-            Nat.Above ->
+            Nat.Above _ ->
                 Nothing
 
 -}
@@ -137,8 +142,8 @@ isAtMost :
         AtMostOrAbove
             (Nat (In lowest atLeastUpperBound))
             (Nat (In (Nat1Plus upperBound) max))
-isAtMost upperBound lowest =
-    \inNat ->
+isAtMost upperBound =
+    \_ inNat ->
         if val inNat <= (upperBound |> val) then
             EqualOrLess (Internal.newRange inNat)
 
@@ -152,20 +157,20 @@ isAtMost upperBound lowest =
 
     giveAPresent { age } =
         case age |> InNat.is nat18 { lowest = nat0 } of
-            Nat.Less age ->
-                toy { age = age }
+            Nat.Less younger ->
+                toy { age = younger }
 
-            Nat.Greater age ->
-                experience { age = age }
+            Nat.Greater older ->
+                book { age = older }
 
             Nat.Equal _ ->
                 bigPresent
 
-    toy : { age : Nat (ArgIn min Nat17 ifN_) } -> Toy
+    toy : { age : Nat (ArgIn min_ Nat17 ifN_) } -> Toy
 
-    experience :
-        { age : Nat (ArgIn (Nat19Plus orOlder) max ifN_) }
-        -> Experience
+    book :
+        { age : Nat (ArgIn (Nat19Plus minMinus19_) max_ ifN_) }
+        -> Book
 
 -}
 is :
@@ -192,8 +197,8 @@ is :
             (Nat (In lowest atLeastValueMinus1))
             (Nat (In (Nat1Plus valueMinus1) atLeastValue))
             (Nat (In (Nat2Plus valueMinus1) max))
-is valueToCompareAgainst lowest =
-    \inNat ->
+is valueToCompareAgainst =
+    \_ inNat ->
         case val2 compare inNat valueToCompareAgainst of
             EQ ->
                 Equal (valueToCompareAgainst |> value)
@@ -209,18 +214,18 @@ is valueToCompareAgainst lowest =
 
 `lowest` can be a number <= the minimum.
 
-    justIfBetween3And10 nat =
+    ifBetween3And10 nat =
         case nat |> InNat.isInRange nat3 nat10 { lowest = nat0 } of
-            Nat.InRange ->
-                Just
+            Nat.InRange inRange ->
+                Just inRange
 
             _ ->
                 Nothing
 
-    justIfBetween3And10 nat9
+    ifBetween3And10 nat9
     --> Just (Nat 9)
 
-    justIfBetween3And10 nat123
+    ifBetween3And10 nat123
     --> Nothing
 
 -}
@@ -256,8 +261,8 @@ isInRange :
             (Nat (In lowest atLeastLowerBoundMinus1))
             (Nat (In lowerBound atLeastUpperBound))
             (Nat (In (Nat1Plus upperBound) max))
-isInRange lowerBound upperBound lowest =
-    \inNat ->
+isInRange lowerBound upperBound =
+    \_ inNat ->
         if val2 (<) inNat lowerBound then
             BelowRange (Internal.newRange inNat)
 
@@ -269,7 +274,7 @@ isInRange lowerBound upperBound lowest =
 
 
 
--- ### clamp
+-- ## clamp
 
 
 {-| Return the given number if the `Nat` is less.
@@ -290,7 +295,7 @@ atLeast lowerBound =
 
 
 
--- ## modify
+-- # modify
 
 
 {-| Add a `Nat` that isn't a `Nat (N ...)`.
@@ -403,7 +408,7 @@ sub nNatToSubtract =
 
 
 
--- ## drop information
+-- # drop information
 
 
 {-| Convert it to a `Nat (In min max)`.
@@ -430,15 +435,28 @@ value =
 
 
 
--- ## extra
+-- # extra
+
+
+{-| An expectation for the decoded int that hasn't been met.
+
+  - `ExpectAtLeast` some minimum in a range
+  - `ExpectAtMost` some maximum in a range
+
+See [serializeErrorToString](InNat#serializeErrorToString) and [serialize](InNat#serialize).
+
+-}
+type ExpectIn minimum maximum
+    = ExpectAtLeast (Nat minimum)
+    | ExpectAtMost (Nat maximum)
 
 
 {-| A [`Codec`](https://package.elm-lang.org/packages/MartinSStewart/elm-serialize/latest/) to serialize `Nat`s within a lower & upper bound.
 
-    import Serialize
+    import Serialize exposing (Codec)
 
     serializePercent :
-        Serialize.Codec
+        Codec
             String
             (Nat (In Nat0 (Nat100Plus a_)))
     serializePercent =
@@ -462,21 +480,63 @@ For decoded `Int`s out of the expected bounds, the `Result` is an error message.
 
 -}
 serialize :
-    Nat (ArgIn minLowerBound maxLowerBound lowerBoundIfN_)
-    -> Nat (ArgIn maxLowerBound maxUpperBound upperBoundIfN_)
-    -> Serialize.Codec String (Nat (In minLowerBound maxUpperBound))
+    Nat (ArgIn minLowerBound maxLowerBound lowerBoundIfN)
+    -> Nat (ArgIn maxLowerBound maxUpperBound upperBoundIfN)
+    ->
+        Codec
+            { actual : Int
+            , expected :
+                ExpectIn
+                    (ArgIn minLowerBound maxLowerBound lowerBoundIfN)
+                    (ArgIn maxLowerBound maxUpperBound upperBoundIfN)
+            }
+            (Nat (In minLowerBound maxUpperBound))
 serialize lowerBound upperBound =
-    Serialize.int
-        |> Serialize.mapValid
-            (\int ->
-                case int |> Nat.isIntInRange lowerBound upperBound of
-                    BelowRange () ->
-                        Err "Int was less than the expected minimum"
+    serializeValid
+        (\int ->
+            case int |> Nat.isIntInRange lowerBound upperBound of
+                BelowRange () ->
+                    Err (ExpectAtLeast lowerBound)
 
-                    AboveRange _ ->
-                        Err "Int was greater than the expected maximum"
+                AboveRange _ ->
+                    Err (ExpectAtMost upperBound)
 
-                    InRange inRange ->
-                        Ok inRange
-            )
-            val
+                InRange inRange ->
+                    Ok inRange
+        )
+
+
+{-| Convert the [serialization](https://package.elm-lang.org/packages/MartinSStewart/elm-serialize/latest/) error into a readable message.
+
+    { expected = MinArr.AtLeast nat11
+    , actual = 10
+    }
+        |> MinArr.serializeErrorToString
+    --> expected an int >= 11 but the actual int was 10
+
+-}
+serializeErrorToString :
+    { expected : ExpectIn minimum_ maximum_
+    , actual : Int
+    }
+    -> String
+serializeErrorToString error =
+    error
+        |> Internal.serializeErrorToString
+            toInternalExpected
+
+
+
+-- ### ↓ not important
+
+
+toInternalExpected :
+    ExpectIn minimum maximum
+    -> Internal.ExpectIn minimum maximum
+toInternalExpected expected =
+    case expected of
+        ExpectAtLeast minimum ->
+            Internal.ExpectAtLeast minimum
+
+        ExpectAtMost maximum ->
+            Internal.ExpectAtMost maximum
