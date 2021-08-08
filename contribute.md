@@ -1,6 +1,4 @@
-## Contribute
-
-**Contributing is appreciated! 💙**
+## Contributing 💙
 
 - Changes may be suggested through pull requests.
 - To discuss major changes, open up a feature request issue.
@@ -9,16 +7,14 @@
 
 - share your thoughts
 - add operations that might be useful
-    - note: `NNats` & `TypeNats` are [generated using elm](generate/src/GenerateForElmBoundedNat.elm)
+    - note: `Nats` is [generated using elm](generate/src/GenerateForElmBoundedNat.elm)
 
 If you have questions, don't hesitate to ask (e.g. start a discussion in github)!
 
-### Summary Guide
-
-commits look like this:
+## commits
+look like this
 > do details, make other details & this
 
-#### Category
 | mark     | means   |
 | :------- | :------ |
 | + ...    | add     |
