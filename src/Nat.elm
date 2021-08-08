@@ -72,7 +72,7 @@ module Nat exposing
 -}
 
 import I as Internal exposing (NatTag)
-import N exposing (Nat0, Nat1Plus)
+import Nats exposing (Nat0, Nat1Plus)
 import Random
 import Typed exposing (Checked, Public, Typed, val2)
 
@@ -531,7 +531,7 @@ atMost higherUpperBound lowest =
 
 
 
--- ## modify
+-- # modify
 
 
 {-| Multiply by a `Nat` >= 1.
@@ -555,7 +555,6 @@ mul natToMultiply =
 {-| Divide (`//`) by a `Nat` >= 1.
 
   - `/ 0` is impossible
-
   - `x / d` is at most x
 
 ```
@@ -607,7 +606,7 @@ toPower power =
 
 
 
--- ## drop information
+-- # drop information
 
 
 {-| Set the minimum lower.
@@ -655,7 +654,7 @@ restoreMax =
 
 
 
--- ## comparison
+-- # comparison
 
 
 {-| **Should not be exposed**
@@ -738,55 +737,57 @@ type BelowOrInOrAboveRange below inRange above
 
 
 
--- ## I don't know if either operation is really needed
+{- ## I don't know if either operation is really needed
 
 
-{-| Subtract a `Nat (In ..)` without calculating
+   {-| Subtract a `Nat (In ..)` without calculating
 
-  - the new minimum, the lowest value it could be after subtracting is 0
-  - the new maximum, the highest value it could be after subtracting is the old max
+     - the new minimum, the lowest value it could be after subtracting is 0
+     - the new maximum, the highest value it could be after subtracting is the old max
 
-```
-in6To12 |> Nat.subLossy between1And5
---> : Nat (In Nat0 Nat12)
+   ```
+   in6To12 |> Nat.subLossy between1And5
+   --> : Nat (In Nat0 Nat12)
 
-atLeast6 |> Nat.subLossy between1And5
---> : Nat (Min Nat0)
-```
+   atLeast6 |> Nat.subLossy between1And5
+   --> : Nat (Min Nat0)
+   ```
 
-  - if you know the maximum subtracted value, use [`MinNat.subMax`](MinNat#subMax).
+     - if you know the maximum subtracted value, use [`MinNat.subMax`](MinNat#subMax).
 
-  - if you also know the minimum subtracted value, use [`InNat.subIn`](InNat#subIn).
+     - if you also know the minimum subtracted value, use [`InNat.subIn`](InNat#subIn).
+
+   -}
+   subLossy :
+       Nat (ArgIn minSubbed_ min subbedIfN_)
+       -> Nat (ArgIn min max ifN_)
+       -> Nat (In Nat0 max)
+   subLossy natToSubtract =
+       Internal.sub natToSubtract
+
+
+   {-| Add a `Nat (In ...)`, but
+
+     - keep the current minimum, instead of computing the exact value
+
+     - use `Min` as the result instead of computing the maximum
+
+       atLeast5 |> Nat.addLossy atLeast2
+       --> : Nat (Min Nat5)
+
+       atLeast2 |> Nat.addLossy atLeast5
+       --> : Nat (Min Nat2)
+
+     - if you know the minimum added value, use [`MinNat.addMin`](MinNat#addMin).
+
+     - if you also know the minimum added value, use [`InNat.addIn`](InNat#addIn).
+
+   -}
+   addLossy :
+       Nat (ArgIn minAdded_ maxAdded_ addedIfN_)
+       -> Nat (ArgIn min max_ ifN_)
+       -> Nat (Min min)
+   addLossy natToAdd =
+       Internal.add natToAdd
 
 -}
-subLossy :
-    Nat (ArgIn minSubbed_ min subbedIfN_)
-    -> Nat (ArgIn min max ifN_)
-    -> Nat (In Nat0 max)
-subLossy natToSubtract =
-    Internal.sub natToSubtract
-
-
-{-| Add a `Nat (In ...)`, but
-
-  - keep the current minimum, instead of computing the exact value
-
-  - use `Min` as the result instead of computing the maximum
-
-    atLeast5 |> Nat.addLossy atLeast2
-    --> : Nat (Min Nat5)
-
-    atLeast2 |> Nat.addLossy atLeast5
-    --> : Nat (Min Nat2)
-
-  - if you know the minimum added value, use [`MinNat.addMin`](MinNat#addMin).
-
-  - if you also know the minimum added value, use [`InNat.addIn`](InNat#addIn).
-
--}
-addLossy :
-    Nat (ArgIn minAdded_ maxAdded_ addedIfN_)
-    -> Nat (ArgIn min max_ ifN_)
-    -> Nat (Min min)
-addLossy natToAdd =
-    Internal.add natToAdd
