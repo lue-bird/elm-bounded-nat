@@ -4,92 +4,28 @@ module GenerateForElmBoundedNat exposing (main)
 
   - [`NNat`](NNat)
   - [`TypeNats`](TypeNats)
+  - [`N`](N)
+  - the `natXs` in [`I`](I)
 
 Thanks to [`the-sett/elm-syntax-dsl`](https://package.elm-lang.org/packages/the-sett/elm-syntax-dsl/latest/)!
 
 -}
 
 import Browser
-import Bytes.Encode
 import Element as Ui
 import Element.Background as UiBg
 import Element.Border as UiBorder
 import Element.Font as UiFont
 import Element.Input as UiInput
-import Elm.CodeGen
-    exposing
-        ( access
-        , and
-        , append
-        , applyBinOp
-        , binOp
-        , binOpChain
-        , caseExpr
-        , char
-        , code
-        , composel
-        , composer
-        , cons
-        , construct
-        , customTypeDecl
-        , equals
-        , extRecordAnn
-        , fqConstruct
-        , fqFun
-        , fqNamedPattern
-        , fqTyped
-        , fqVal
-        , fun
-        , funExpose
-        , importStmt
-        , int
-        , intAnn
-        , lambda
-        , letDestructuring
-        , letExpr
-        , letFunction
-        , letVal
-        , list
-        , listAnn
-        , listPattern
-        , markdown
-        , maybeAnn
-        , minus
-        , namedPattern
-        , normalModule
-        , openTypeExpose
-        , parens
-        , pipel
-        , piper
-        , plus
-        , record
-        , recordAnn
-        , recordPattern
-        , tuple
-        , tupleAnn
-        , tuplePattern
-        , typeOrAliasExpose
-        , typeVar
-        , typed
-        , unConsPattern
-        , unit
-        , unitAnn
-        , val
-        , valDecl
-        , varPattern
-        )
-import Elm.Pretty
-import Extra.GenerateElm exposing (..)
-import Extra.Ui as Ui
+import Elm.CodeGen as Generation exposing (applyBinOp, code, construct, fqVal, importStmt, markdown, piper, tuple, typeVar, typed, val)
+import Elm.CodeGen.Extra exposing (..)
 import File.Download
 import Html exposing (Html)
-import Html.Attributes
-import NNats exposing (..)
-import SyntaxHighlight
+import Nats exposing (..)
 import Task
 import Time
+import Ui.Extra as Ui exposing (edges)
 import Zip
-import Zip.Entry
 
 
 main : Program () Model Msg
@@ -103,31 +39,24 @@ main =
 
 
 type alias Model =
-    { nNatsModuleShownOrFolded :
-        ShownOrFolded (Ui.Element Msg)
-    , typeNatsModuleShownOrFolded :
-        ShownOrFolded (Ui.Element Msg)
-    , iValuesShownOrFolded :
-        ShownOrFolded (Ui.Element Msg)
+    { natsModuleFolding :
+        Folding (Ui.Element Msg)
     }
 
 
-type ShownOrFolded content
+type Folding content
     = Shown content
     | Folded
 
 
 
---tags
+-- tags
 
 
-type NNatsTag
-    = NNatsValue
-
-
-type TypeNatsTag
-    = TypeNatsExact
-    | TypeNatsAtLeast
+type NatsTag
+    = ExactTypeNat
+    | TypeNatPlusN
+    | NNatsValue
 
 
 
@@ -136,9 +65,7 @@ type TypeNatsTag
 
 init : ( Model, Cmd Msg )
 init =
-    ( { nNatsModuleShownOrFolded = Folded
-      , typeNatsModuleShownOrFolded = Folded
-      , iValuesShownOrFolded = Folded
+    ( { natsModuleFolding = Folded
       }
     , Cmd.none
     )
@@ -151,9 +78,7 @@ type Msg
 
 
 type CodeForElmBoundedArray
-    = NNats
-    | TypeNats
-    | IValues
+    = Nats
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -182,9 +107,7 @@ update msg model =
                         zipEntryFromModule time moduleFile
                  in
                  Zip.fromEntries
-                    [ toZipEntry nNatsModule
-                    , toZipEntry typeNatsModule
-                    , toZipEntry iValues
+                    [ toZipEntry natsModule
                     ]
                     |> Zip.toBytes
                 )
@@ -192,38 +115,22 @@ update msg model =
 
         SwitchVisibleModule moduleKind ->
             ( case moduleKind of
-                NNats ->
+                Nats ->
                     { model
-                        | nNatsModuleShownOrFolded =
-                            switchShownOrFolded
-                                (.nNatsModuleShownOrFolded model)
-                                viewNNatsModule
-                    }
-
-                TypeNats ->
-                    { model
-                        | typeNatsModuleShownOrFolded =
-                            switchShownOrFolded
-                                (.typeNatsModuleShownOrFolded model)
-                                viewTypeNatsModule
-                    }
-
-                IValues ->
-                    { model
-                        | iValuesShownOrFolded =
-                            switchShownOrFolded
-                                (.iValuesShownOrFolded model)
-                                viewIValues
+                        | natsModuleFolding =
+                            switchFolding
+                                (.natsModuleFolding model)
+                                viewNatsModule
                     }
             , Cmd.none
             )
 
 
-switchShownOrFolded :
-    ShownOrFolded content
+switchFolding :
+    Folding content
     -> content
-    -> ShownOrFolded content
-switchShownOrFolded visibility content =
+    -> Folding content
+switchFolding visibility content =
     case visibility of
         Shown _ ->
             Folded
@@ -236,12 +143,17 @@ switchShownOrFolded visibility content =
 --
 
 
-natNAnn : Elm.CodeGen.TypeAnnotation -> Elm.CodeGen.TypeAnnotation
+nNatX : Int -> String
+nNatX x =
+    [ "nat", x |> String.fromInt ] |> String.concat
+
+
+natNAnn : Generation.TypeAnnotation -> Generation.TypeAnnotation
 natNAnn n =
     typed "Nat" [ n ]
 
 
-nAnn : Int -> Elm.CodeGen.TypeAnnotation
+nAnn : Int -> Generation.TypeAnnotation
 nAnn n =
     typed "N"
         [ natXAnn n
@@ -251,7 +163,7 @@ nAnn n =
         ]
 
 
-isAnn : Int -> String -> Elm.CodeGen.TypeAnnotation
+isAnn : Int -> String -> Generation.TypeAnnotation
 isAnn n var =
     typed "Is"
         [ typeVar var
@@ -260,29 +172,36 @@ isAnn n var =
         ]
 
 
-toAnn : Elm.CodeGen.TypeAnnotation
+toAnn : Generation.TypeAnnotation
 toAnn =
     typed "To" []
 
 
-natXAnn : Int -> Elm.CodeGen.TypeAnnotation
+natX : Int -> String
+natX x =
+    [ "Nat", x |> String.fromInt ]
+        |> String.concat
+
+
+natXAnn : Int -> Generation.TypeAnnotation
 natXAnn x =
-    typed ("Nat" ++ String.fromInt x) []
+    typed (natX x) []
 
 
-natXPlusAnn : Int -> Elm.CodeGen.TypeAnnotation -> Elm.CodeGen.TypeAnnotation
+natXPlus : Int -> String
+natXPlus x =
+    [ "Nat", x |> String.fromInt, "Plus" ]
+        |> String.concat
+
+
+natXPlusAnn : Int -> Generation.TypeAnnotation -> Generation.TypeAnnotation
 natXPlusAnn x more =
     case x of
         0 ->
             more
 
         _ ->
-            typed ("Nat" ++ String.fromInt x ++ "Plus") [ more ]
-
-
-valAnn : Elm.CodeGen.TypeAnnotation
-valAnn =
-    funAnn [ natNAnn (typeVar "n") ] intAnn
+            typed (natXPlus x) [ more ]
 
 
 
@@ -294,128 +213,153 @@ lastN =
     160
 
 
-viewIValues : Ui.Element msg_
-viewIValues =
-    Ui.module_ iValues
+viewNatsModule : Ui.Element msg_
+viewNatsModule =
+    Ui.module_ natsModule
 
 
-iValues : Module Never
-iValues =
-    { name = [ "IValues" ]
-    , roleInPackage = PackageInternalModule
-    , imports = []
-    , declarations =
-        List.range 0 lastN
-            |> List.map
-                (\x ->
-                    packageInternalExposedFunDecl
-                        (natNAnn (nAnn x))
-                        ("nat" ++ String.fromInt x)
-                        []
-                        (applyBinOp
-                            (construct "tag" [ int x ])
-                            piper
-                            (construct "isChecked" [ fun "Nat" ])
-                        )
-                )
-    }
-
-
-viewNNatsModule : Ui.Element msg_
-viewNNatsModule =
-    Ui.module_ nNatsModule
-
-
-nNatsModule : Module NNatsTag
-nNatsModule =
-    { name = [ "NNats" ]
+natsModule : Module NatsTag
+natsModule =
+    { name = [ "Nats" ]
     , roleInPackage =
         PackageExposedModule
             { moduleComment =
                 \declarations ->
-                    [ markdown ("`Nat (N Nat0 ...)` to `Nat (N Nat" ++ String.fromInt lastN ++ " ...)`.")
-                    , markdown "Bigger `Nat (N ...)` s start to slow down compilation, so they are avoided."
+                    [ markdown "## [numbers](#numbers)"
+                    , markdown
+                        ([ "`"
+                         , nNatX 0
+                         , " : Nat (N "
+                         , natX 0
+                         , " ...)` to `"
+                         , nNatX lastN
+                         , " : Nat (N "
+                         , natX lastN
+                         , " ...)`."
+                         ]
+                            |> String.concat
+                        )
                     , markdown "See [`Nat.N`](Nat#N), [`Nat.N`](Nat#N) & [`NNat`](NNat) for an explanation."
+                    , markdown "##[types](#types)"
+                    , markdown "Express exact natural numbers in a type."
+                    , code "onlyExact1 : Nat (Only Nat1) -> Cake"
+                    , markdown "- `takesOnlyExact1 nat10` is a compile-time error"
+                    , code "add2 : Nat (Only n) -> Nat (Only (Nat2Plus n))"
+                    , markdown "- `add2 nat2` is of type `Nat (Only Nat4)`"
+                    , markdown "## limits"
+                    , markdown "If type aliases expand too much"
+                    , code "big : Nat (Only (Nat160Plus (Nat160Plus (Nat160Plus Nat160))))"
+                    , markdown "- compilation is a bit slower (but following compilations are fast again)"
+                    , markdown "- (`elm-stuff` can corrupt)"
+                    , markdown "- **tools that analyse the types are slow**"
+                    , markdown "# numbers"
                     , docTagsFrom NNatsValue declarations
+                    , markdown "# types"
+                    , markdown "## plus n"
+                    , docTagsFrom TypeNatPlusN declarations
+                    , markdown "## exact"
+                    , docTagsFrom ExactTypeNat declarations
                     ]
             }
     , imports =
         [ importStmt [ "I" ]
             noAlias
             (exposingExplicit
-                ([ "N", "Is", "To", "Nat" ]
-                    |> List.map typeOrAliasExpose
+                (aliasExpose [ "N", "Is", "To", "Nat", "S", "Z" ]
+                    ++ funExpose [ "nNatAdd" ]
                 )
             )
-        , importStmt [ "N" ] noAlias exposingAll
         ]
     , declarations =
-        List.range 0 lastN
+        let
+            exactDoc : Int -> Doc kind_
+            exactDoc n =
+                [ markdown
+                    ([ "Exact the natural number "
+                     , String.fromInt n
+                     , "."
+                     ]
+                        |> String.concat
+                    )
+                ]
+
+            natPlusNDoc : Int -> Doc kind_
+            natPlusNDoc n =
+                [ markdown
+                    ([ n |> String.fromInt
+                     , " + some natural number `n`."
+                     ]
+                        |> String.concat
+                    )
+                ]
+        in
+        [ [ 0, 1 ]
             |> List.map
                 (\x ->
                     packageExposedFunDecl NNatsValue
-                        [ markdown ("The exact `Nat` " ++ String.fromInt x ++ ".") ]
-                        (natNAnn (nAnn x))
-                        ("nat" ++ String.fromInt x)
-                        []
-                        (fqVal [ "I" ] ("nat" ++ String.fromInt x))
-                )
-    }
-
-
-viewTypeNatsModule : Ui.Element msg_
-viewTypeNatsModule =
-    Ui.module_ typeNatsModule
-
-
-typeNatsModule : Module TypeNatsTag
-typeNatsModule =
-    { name = [ "TypeNats" ]
-    , roleInPackage =
-        PackageExposedModule
-            { moduleComment =
-                \declarations ->
-                    [ markdown "Express exact natural numbers in a type."
-                    , code "onlyExact1 : Nat (ArgIn min Nat1 ifN_) -> Cake"
-                    , markdown "- `takesOnlyExact1 nat10` is a compile-time error"
-                    , code "add2 : Nat (ArgIn min max ifN_) -> Nat (In (Nat2Plus min) (Nat4Plus max))"
-                    , markdown "- `add2 nat2` is of type `Nat (In Nat4 (Nat4Plus a_))`"
-                    , markdown "### about a big limitation"
-                    , markdown "Sadly, while experimenting with type aliases, I discovered that type aliases can only expand so much."
-                    , code "compilingGetsKilled : Nat (N (Nat100Plus Nat93) is_0 is_1)"
-                    , markdown "If a type alias is not fully expanded after ~192 tries,"
-                    , markdown "- the compilation stops"
-                    , markdown "- the elm-stuff can corrupt"
-                    , markdown "## plus n"
-                    , docTagsFrom TypeNatsAtLeast declarations
-                    , markdown "## exact"
-                    , docTagsFrom TypeNatsExact declarations
-                    ]
-            }
-    , imports =
-        [ importStmt [ "N" ] noAlias noExposing
-        ]
-    , declarations =
-        [ List.range 1 lastN
-            |> List.map
-                (\n ->
-                    packageExposedAliasDecl TypeNatsAtLeast
                         [ markdown
-                            (String.fromInt n ++ " + some natural number n.")
+                            ([ "The exact `Nat` ", x |> String.fromInt, "." ]
+                                |> String.concat
+                            )
                         ]
-                        ("Nat" ++ String.fromInt n ++ "Plus")
-                        [ "n" ]
-                        (fqTyped [ "N" ] ("Nat" ++ String.fromInt n ++ "Plus") [ typeVar "n" ])
+                        (natNAnn (nAnn x))
+                        (nNatX x)
+                        []
+                        (fqVal [ "I" ] (nNatX x))
                 )
-        , List.range 0 lastN
+        , List.range 2 lastN
+            |> List.map
+                (\x ->
+                    packageExposedFunDecl NNatsValue
+                        [ markdown
+                            ([ "The exact `Nat` ", x |> String.fromInt, "." ]
+                                |> String.concat
+                            )
+                        ]
+                        (natNAnn (nAnn x))
+                        (nNatX x)
+                        []
+                        (applyBinOp
+                            (val (nNatX (x - 1)))
+                            piper
+                            (construct "nNatAdd"
+                                [ tuple (List.repeat 2 (val (nNatX 1))) ]
+                            )
+                        )
+                )
+        , [ packageExposedAliasDecl TypeNatPlusN
+                (natPlusNDoc 1)
+                (natX 1 ++ "Plus")
+                [ "n" ]
+                (typed "S" [ typeVar "n" ])
+          ]
+        , List.range 2 lastN
             |> List.map
                 (\n ->
-                    packageExposedAliasDecl TypeNatsExact
-                        [ markdown ("Exact the natural number " ++ String.fromInt n ++ ".")
-                        ]
-                        ("Nat" ++ String.fromInt n)
+                    packageExposedAliasDecl TypeNatPlusN
+                        (natPlusNDoc n)
+                        (natXPlus n)
+                        [ "n" ]
+                        (List.repeat n ()
+                            |> List.foldl
+                                (\() after -> typed "S" [ after ])
+                                (typeVar "n")
+                        )
+                )
+        , [ packageExposedAliasDecl ExactTypeNat
+                (exactDoc 0)
+                (natX 0)
+                []
+                (typed "Z" [])
+          ]
+        , List.range 1 lastN
+            |> List.map
+                (\n ->
+                    packageExposedAliasDecl ExactTypeNat
+                        (exactDoc n)
+                        (natX n)
                         []
-                        (fqTyped [ "N" ] ("Nat" ++ String.fromInt n) [])
+                        (natXPlusAnn n (typed "Z" []))
                 )
         ]
             |> List.concat
@@ -426,45 +370,92 @@ typeNatsModule =
 --
 
 
-args : (arg -> String) -> List arg -> String
-args argToString =
-    List.map argToString >> String.join " "
-
-
-indexed : ((String -> String) -> a) -> Int -> Int -> List a
-indexed use first last =
-    List.range first last
-        |> List.map
-            (\i ->
-                use (\base -> base ++ String.fromInt i)
-            )
-
-
-charIndex : Int -> Char
-charIndex i =
-    i + Char.toCode 'a' |> Char.fromCode
-
-
-charPrefixed : ((String -> String) -> a) -> Int -> List a
-charPrefixed use last =
-    List.range 0 last
-        |> List.map
-            (charIndex >> (\i -> use (String.cons i)))
+button :
+    msg
+    -> List (Ui.Attribute msg)
+    -> Ui.Element msg
+    -> Ui.Element msg
+button onPress attributes label =
+    UiInput.button
+        ([ UiBorder.color (Ui.rgb 1 0.4 0)
+         , UiBorder.widthEach { edges | bottom = 2 }
+         ]
+            ++ attributes
+        )
+        { onPress = Just onPress, label = label }
 
 
 view : Model -> Html Msg
-view { nNatsModuleShownOrFolded, typeNatsModuleShownOrFolded, iValuesShownOrFolded } =
-    Ui.layoutWith
-        { options =
-            [ Ui.focusStyle
-                { borderColor = Just (Ui.rgba 0 1 1 0.38)
-                , backgroundColor = Nothing
-                , shadow = Nothing
-                }
+view { natsModuleFolding } =
+    [ Ui.text "elm-bounded-nat modules"
+        |> Ui.el
+            [ UiFont.size 40
+            , UiFont.family [ UiFont.monospace ]
             ]
-        }
-        []
-        (Ui.column
+    , button DownloadModules
+        [ Ui.padding 16
+        ]
+        (Ui.text "⬇ download elm modules")
+    , ((Ui.text "📂 preview modules"
+            |> Ui.el [ Ui.paddingXY 0 6 ]
+       )
+        :: (let
+                switchButton text switch =
+                    button switch
+                        [ Ui.padding 12
+                        , Ui.width Ui.fill
+                        ]
+                        (Ui.text text
+                            |> Ui.el
+                                [ UiFont.family [ UiFont.monospace ] ]
+                        )
+                        |> Ui.el
+                            [ Ui.paddingXY 0 4
+                            , Ui.moveUp 6
+                            ]
+
+                viewAccordingToFolding visibility name switch =
+                    case visibility of
+                        Shown ui ->
+                            [ Ui.el
+                                [ Ui.width (Ui.px 1)
+                                , UiBg.color (Ui.rgba 1 0.4 0 0.6)
+                                , Ui.height Ui.fill
+                                ]
+                                Ui.none
+                            , [ switchButton ("⌃ " ++ name) switch
+                              , ui |> Ui.el [ Ui.moveRight 5 ]
+                              ]
+                                |> Ui.column []
+                            ]
+                                |> Ui.row
+                                    [ Ui.height Ui.fill ]
+
+                        Folded ->
+                            switchButton ("⌄ " ++ name) switch
+            in
+            [ {- ( iValuesFolding
+                   , ( "values in I", IValues )
+                   )
+                 ,
+              -}
+              ( natsModuleFolding
+              , ( "Nats", Nats )
+              )
+            ]
+                |> List.map
+                    (\( visibility, ( name, moduleKind ) ) ->
+                        viewAccordingToFolding visibility
+                            name
+                            (SwitchVisibleModule moduleKind)
+                    )
+           )
+      )
+        |> Ui.column
+            [ Ui.width Ui.fill
+            ]
+    ]
+        |> Ui.column
             [ Ui.paddingXY 40 60
             , Ui.spacing 32
             , Ui.width Ui.fill
@@ -472,80 +463,13 @@ view { nNatsModuleShownOrFolded, typeNatsModuleShownOrFolded, iValuesShownOrFold
             , UiBg.color (Ui.rgb255 35 36 31)
             , UiFont.color (Ui.rgb 1 1 1)
             ]
-            [ Ui.el
-                [ UiFont.size 40
-                , UiFont.family [ UiFont.monospace ]
+        |> Ui.layoutWith
+            { options =
+                [ Ui.focusStyle
+                    { borderColor = Just (Ui.rgba 0 1 1 0.4)
+                    , backgroundColor = Nothing
+                    , shadow = Nothing
+                    }
                 ]
-                (Ui.text "elm-bounded-nat modules")
-            , UiInput.button
-                [ Ui.padding 16
-                , UiBg.color (Ui.rgba 1 0.4 0 0.6)
-                ]
-                { onPress = Just DownloadModules
-                , label = Ui.text "⬇ download elm modules"
-                }
-            , Ui.column
-                [ Ui.width Ui.fill
-                ]
-                (Ui.el [ Ui.paddingXY 0 6 ]
-                    (Ui.text "📂 preview modules")
-                    :: (let
-                            switchButton text switch =
-                                Ui.el
-                                    [ Ui.width Ui.fill
-                                    , Ui.paddingXY 0 6
-                                    , Ui.moveUp 6
-                                    ]
-                                    (UiInput.button
-                                        [ UiBg.color (Ui.rgba 1 0.4 0 0.6)
-                                        , Ui.padding 12
-                                        , Ui.width Ui.fill
-                                        ]
-                                        { onPress = Just switch
-                                        , label =
-                                            Ui.el
-                                                [ UiFont.family [ UiFont.monospace ] ]
-                                                (Ui.text text)
-                                        }
-                                    )
-
-                            viewAccordingToShownOrFolded visibility name switch =
-                                case visibility of
-                                    Shown ui ->
-                                        Ui.row
-                                            [ Ui.height Ui.fill, Ui.width Ui.fill ]
-                                            [ Ui.el
-                                                [ Ui.width (Ui.px 1)
-                                                , UiBg.color (Ui.rgba 1 0.4 0 0.6)
-                                                , Ui.height Ui.fill
-                                                ]
-                                                Ui.none
-                                            , Ui.column [ Ui.width Ui.fill ]
-                                                [ switchButton ("⌃ " ++ name) switch
-                                                , Ui.el [ Ui.moveRight 5 ] ui
-                                                ]
-                                            ]
-
-                                    Folded ->
-                                        switchButton ("⌄ " ++ name) switch
-                        in
-                        [ ( nNatsModuleShownOrFolded
-                          , ( "NNats", NNats )
-                          )
-                        , ( typeNatsModuleShownOrFolded
-                          , ( "TypeNats", TypeNats )
-                          )
-                        , ( iValuesShownOrFolded
-                          , ( "values in I", IValues )
-                          )
-                        ]
-                            |> List.map
-                                (\( visibility, ( name, moduleKind ) ) ->
-                                    viewAccordingToShownOrFolded visibility
-                                        name
-                                        (SwitchVisibleModule moduleKind)
-                                )
-                       )
-                )
-            ]
-        )
+            }
+            []

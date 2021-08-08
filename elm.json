@@ -7,17 +7,15 @@
     "exposed-modules": [
         "Nat",
         "NNat",
-        "NNats",
         "MinNat",
         "InNat",
-        "TypeNats"
+        "Nats"
     ],
     "elm-version": "0.19.0 <= v < 0.20.0",
     "dependencies": {
         "MartinSStewart/elm-serialize": "1.2.5 <= v < 2.0.0",
         "elm/core": "1.0.0 <= v < 2.0.0",
         "elm/random": "1.0.0 <= v < 2.0.0",
-        "indique/n": "2.0.0 <= v < 3.0.0",
         "lue-bird/elm-typed-value": "5.0.0 <= v < 6.0.0"
     },
     "test-dependencies": {

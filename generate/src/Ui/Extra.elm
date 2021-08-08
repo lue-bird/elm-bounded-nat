@@ -1,11 +1,11 @@
-module Extra.Ui exposing (module_, slider)
+module Ui.Extra exposing (edges, module_, slider)
 
 import Element as Ui
 import Element.Background as UiBg
 import Element.Border as UiBorder
 import Element.Font as UiFont
 import Element.Input as UiInput
-import Extra.GenerateElm exposing (Module, stringFromModuleFile)
+import Elm.CodeGen.Extra exposing (Module, stringFromModuleFile)
 import Html
 import Html.Attributes
 import SyntaxHighlight
@@ -86,3 +86,8 @@ module_ moduleFile =
                     ++ "\n"
                     ++ string
                 )
+
+
+edges : { bottom : number, left : number, top : number, right : number }
+edges =
+    { bottom = 0, left = 0, top = 0, right = 0 }

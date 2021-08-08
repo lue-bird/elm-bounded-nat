@@ -7,6 +7,7 @@
     "elm-version": "0.19.1",
     "dependencies": {
         "direct": {
+            "MartinSStewart/elm-serialize": "1.2.5",
             "agu-z/elm-zip": "3.0.0",
             "elm/browser": "1.0.2",
             "elm/bytes": "1.0.8",
@@ -15,7 +16,6 @@
             "elm/html": "1.0.0",
             "elm/random": "1.0.0",
             "elm/time": "1.0.0",
-            "indique/n": "2.0.0",
             "lue-bird/elm-typed-value": "4.0.0",
             "mdgriffith/elm-ui": "1.1.8",
             "pablohirafuji/elm-syntax-highlight": "3.4.0",
@@ -23,7 +23,6 @@
         },
         "indirect": {
             "Chadtech/elm-bool-extra": "2.4.2",
-            "MartinSStewart/elm-serialize": "1.2.5",
             "bburdette/toop": "1.0.1",
             "danfishgold/base64-bytes": "1.1.0",
             "elm/json": "1.1.3",
