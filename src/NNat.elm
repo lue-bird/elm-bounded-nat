@@ -1,6 +1,6 @@
 module NNat exposing (add, sub)
 
-{-| Operations that only apply for `Nat (N ...)`s. You will probably never need those.
+{-| Operations that can only be used with `Nat (N ...)`s. You will probably never need those.
 
 
 ## modify
@@ -16,7 +16,7 @@ import Nat exposing (Is, N, Nat, To)
 {-| The `Nat (N ...)` plus another `Nat (N ...)`. Give the added value twice as a tuple.
 
     nat6 |> NNat.add ( nat5, nat5 )
-    --> Nat 11
+    --> nat11
     --> : Nat
     -->     (N Nat11
     -->         (Nat11Plus a_)
@@ -54,10 +54,10 @@ add nNatToAdd =
     Internal.nNatAdd nNatToAdd
 
 
-{-| The `Nat (N ...)` plus another `Nat (N ...)`. Give the subtracted value twice as a tuple.
+{-| The `Nat (N ...)` minus another `Nat (N ...)`. Give the subtracted value twice as a tuple.
 
     nat6 |> NNat.sub ( nat5, nat5 )
-    --> Nat 1
+    --> nat1
     --> : Nat
     -->     (N Nat1 (Nat1Plus a_)
     -->         (Is a To (Nat1Plus a))
