@@ -50,8 +50,8 @@ import I as Internal exposing (serializeValid)
 import InNat
 import Nat exposing (ArgIn, AtMostOrAbove(..), BelowOrAtLeast(..), In, Is, LessOrEqualOrGreater(..), Min, N, Nat, To)
 import Nats exposing (Nat1Plus, Nat2Plus, nat0)
-import Serialize
-import Typed exposing (val, val2)
+import Serialize exposing (Codec)
+import Typed exposing (val2)
 
 
 
@@ -198,7 +198,7 @@ is valueToCompareAgainst =
     factorial =
         factorialBody
 
-    factorialBody : -- as in factorial
+    factorialBody : Nat (ArgIn min_ max_ ifN_) -> Nat (Min Nat1)
     factorialBody =
         case x |> MinNat.isAtLeast nat1 { lowest = nat0 } of
             Nat.Below _ ->
@@ -248,8 +248,8 @@ isAtLeast lowerBound =
 
     tryToGoToU18Party { age } =
         case age |> MinNat.isAtMost nat17 { lowest = nat0 } of
-            EqualOrLess age ->
-                Just (goToU18Party { age = age })
+            EqualOrLess u18 ->
+                Just (goToU18Party { age = u18 })
 
             Greater _ ->
                 Nothing
@@ -344,7 +344,7 @@ value =
         MinNat.serialize nat0
             |> Serialize.mapError MinNat.serializeErrorToString
 
-    encode : Nat (ArgIn min max ifN_) -> Bytes
+    encode : Nat (ArgIn min_ max_ ifN_) -> Bytes
     encode =
         MinNat.value
             >> Serialize.encodeToBytes serializeNaturalNumber
@@ -359,7 +359,7 @@ value =
 serialize :
     Nat (ArgIn minLowerBound maxLowerBound lowerBoundIfN)
     ->
-        Serialize.Codec
+        Codec
             { expected :
                 { atLeast :
                     Nat (ArgIn minLowerBound maxLowerBound lowerBoundIfN)
