@@ -344,15 +344,16 @@ value =
         MinNat.serialize nat0
             |> Serialize.mapError MinNat.serializeErrorToString
 
-    encode : Nat (ArgIn min_ max_ ifN_) -> Bytes
-    encode =
-        MinNat.value
+    encodeNaturalNumber : Nat (ArgIn min_ max_ ifN_) -> Bytes
+    encodeNaturalNumber =
+        Nat.lowerMin nat0
+            >> MinNat.value
             >> Serialize.encodeToBytes serializeNaturalNumber
 
-    decode :
+    decodeNaturalNumber :
         Bytes
         -> Result (Serialize.Error String) (Nat (Min Nat0))
-    decode =
+    decodeNaturalNumber =
         Serialize.decodeFromBytes serializeNaturalNumber
 
 -}
@@ -380,7 +381,7 @@ serialize lowerBound =
     { expected = { atLeast = nat11 }
     , actual = 10
     }
-        |> MinArr.serializeErrorToString
+        |> MinNat.serializeErrorToString
     --> expected an int >= 11 but the actual int was 10
 
 -}
