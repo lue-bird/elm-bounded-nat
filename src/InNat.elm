@@ -514,7 +514,7 @@ serialize lowerBound upperBound =
     , actual = 10
     }
         |> InNat.serializeErrorToString
-    --> expected an int >= 11 but the actual int was 10
+    --> "expected an int >= 11 but the actual int was 10"
 
 -}
 serializeErrorToString :

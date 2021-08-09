@@ -382,7 +382,7 @@ serialize lowerBound =
     , actual = 10
     }
         |> MinNat.serializeErrorToString
-    --> expected an int >= 11 but the actual int was 10
+    --> "expected an int >= 11 but the actual int was 10"
 
 -}
 serializeErrorToString :
