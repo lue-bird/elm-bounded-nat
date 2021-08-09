@@ -3,7 +3,7 @@
 Type-safe natural numbers (>= 0) can ensure that a `Nat` is in a given range _at compile-time_.
 
 ```elm
-toHexChar : Nat (ArgIn min_ Nat15 ifN_) -> Char
+toHexChar : Nat (ArgIn _ Nat15 _) -> Char
 ```
 
 **No number below 0 or above 15** can be passed in as an argument!
@@ -31,18 +31,18 @@ import Typed
 ```elm
 percent : Float -> Length
 ```
-
-This is common but
+is common.
 - _the one implementing_ it has to handle the cases where a value is not between 0 and 1
 - the _type_ doesn't tell us that a `Float` between 0 & 1 is wanted
 
+with `bounded-nat`
 ```elm
 percent :
     Nat (ArgIn min_ Nat100 ifN_)
     -> Length
 ```
-- _the one using_ it must prove that the numbers are actually between 0 and 100
-- you see the desired input in the type 
+- _the user_ it must prove that the numbers are actually between 0 and 100
+- the type tells us that a number 0 to 100 is wanted
 
 The type
 ```elm
@@ -59,33 +59,35 @@ an integer >= 0: `Nat`
 
 They can prove it by
 
-- using exact values
+  - using exact values
 
-```elm
-twoThirds = percent nat67
+    ```elm
+    twoThirds = percent nat67
 
-red = rgbPercent nat100 nat0 nat0 -- 👍
-```
-- handling the possibility that a number isn't in the expected range
+    red = rgbPercent nat100 nat0 nat0 -- 👍
+    ```
 
-```elm
-toPositive : Int -> Maybe (Nat (Min Nat1))
-toPositive =
-    Nat.isIntAtLeast nat1
-```
-- clamping
+  - handling the possibility that a number isn't in the expected range
 
-```elm
-greyFloatPercent float =
-    let
-        greyLevel =
-            Nat.intInRange nat0 nat100
-                (float * 100 |> round)
-    in
-    rgbPer100 greyLevel greyLevel greyLevel
-```
+    ```elm
+    toPositive : Int -> Maybe (Nat (Min Nat1))
+    toPositive =
+        Nat.isIntAtLeast nat1
+    ```
 
-- There are more ways, but you get the idea 🙂
+  - clamping
+
+    ```elm
+    greyFloatPercent float =
+        let
+            greyLevel =
+                Nat.intInRange nat0 nat100
+                    (float * 100 |> round)
+        in
+        rgbPercent greyLevel greyLevel greyLevel
+    ```
+
+  - There are more ways, but you get the idea 🙂
 
 &emsp;
 
@@ -179,32 +181,34 @@ No extra work.
 
 ## tips
 
-- keep _as much type information as possible_ and drop it only where you need to.
+  - keep _as much type information as possible_ and drop it only where you need to.
 
-- keep your _function annotations as general as possible_
+  - keep your _function annotations as general as possible_
     
-Instead of accepting only exact values
+    Instead of accepting only exact values
 
-```elm
-percent : Nat (N perc_ atLeastPerc_ (Is to100_ To Nat100) is_) -> --...
-```
-accept values that are somewhere in a range.
+    ```elm
+    percent :
+        Nat (N p_ atLeast_ (Is to100_ To Nat100) is_)
+        -> Length
+    ```
+    accept values that are somewhere in a range.
 
-```elm
-percent : Nat (ArgIn min_ Nat100 ifN_) -> --...
-```
+    ```elm
+    percent : Nat (ArgIn min_ Nat100 ifN_) -> Length
+    ```
 
-`rIfN_` says that it _can_ be exact anyway. Or instead of
+    `ifN_` says that it _can_ be exact anyway. Or instead of
 
-```elm
-charFromCode : Nat (Min min_) -> Char
-```
+    ```elm
+    charFromCode : Nat (Min min_) -> Char
+    ```
 
-which you should also never do, allow `Nat (In min ...)` with any max & `Nat (N ...)` to fit in as well!
+    which you should also never do, allow `Nat (In min ...)` with any max & `Nat (N ...)` to fit in as well!
 
-```elm
-charFromCode : Nat (ArgIn min_ max_ ifN_) -> Char
-```
+    ```elm
+    charFromCode : Nat (ArgIn min_ max_ ifN_) -> Char
+    ```
 
 Take a **look at [`typesafe-array`][typesafe-array]** to see a lot of this in action!
 
