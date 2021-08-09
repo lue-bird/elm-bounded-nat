@@ -463,6 +463,8 @@ type ExpectIn minimum maximum
         InNat.serialize nat0 nat100
             >> Serialize.mapError InNat.serializeErrorToString
 
+The encode/decode functions can be extracted if needed.
+
     encodePercent : Nat (ArgIn min_ Nat100 ifN_) -> Bytes
     encodePercent =
         Nat.restoreMax nat100

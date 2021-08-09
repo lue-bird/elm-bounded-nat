@@ -342,7 +342,10 @@ value =
     serializeNaturalNumber : Codec String (Nat (Min Nat0))
     serializeNaturalNumber =
         MinNat.serialize nat0
+            -- if we just want a simple error string
             |> Serialize.mapError MinNat.serializeErrorToString
+
+The encode/decode functions can be extracted if needed.
 
     encodeNaturalNumber : Nat (ArgIn min_ max_ ifN_) -> Bytes
     encodeNaturalNumber =
