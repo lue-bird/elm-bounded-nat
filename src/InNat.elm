@@ -461,19 +461,21 @@ type ExpectIn minimum maximum
             (Nat (In Nat0 (Nat100Plus a_)))
     serializePercent =
         InNat.serialize nat0 nat100
+            >> Serialize.mapError InNat.serializeErrorToString
 
-    encode : Nat (ArgIn min_ Nat100 ifN_) -> Bytes
-    encode =
-        InNat.value
+    encodePercent : Nat (ArgIn min_ Nat100 ifN_) -> Bytes
+    encodePercent =
+        Nat.restoreMax nat100
+            >> InNat.value
             >> Serialize.encodeToBytes serializePercent
 
-    decode :
+    decodePercent :
         Bytes
         ->
             Result
                 (Serialize.Error String)
                 (Nat (In Nat0 (Nat100Plus a_)))
-    decode =
+    decodePercent =
         Serialize.decodeFromBytes serializePercent
 
 For decoded `Int`s out of the expected bounds, the `Result` is an error message.
@@ -508,10 +510,10 @@ serialize lowerBound upperBound =
 
 {-| Convert the [serialization](https://package.elm-lang.org/packages/MartinSStewart/elm-serialize/latest/) error into a readable message.
 
-    { expected = MinArr.AtLeast nat11
+    { expected = InNat.ExpectAtLeast nat11
     , actual = 10
     }
-        |> MinArr.serializeErrorToString
+        |> InNat.serializeErrorToString
     --> expected an int >= 11 but the actual int was 10
 
 -}
