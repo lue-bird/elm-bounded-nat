@@ -2,11 +2,14 @@ module I exposing
     ( Differences, Infinity, Is, Nat, NatTag, NotN, To, N, ArgIn
     , isIntInRange, isIntAtLeast, atLeast, atMost
     , BelowOrInOrAboveRange(..)
-    , mul, toPower, remainderBy, div, nNatAdd, nNatSub
+    , mul, toPower, remainderBy, div
+    , nNatAdd, minAdd, minAddMin, inAdd, inAddIn
+    , nNatSub, inSub, inSubIn, minSub
     , abs, random, range
-    , toMinNat, toInNat
+    , lowerMin, toInNat, toMinNat
+    , restoreMax
     , serializeValid
-    , add, sub, newRange
+    , newRange
     , Z, S
     , nat0, nat1
     )
@@ -33,7 +36,17 @@ For performance reasons, the names are shortened, so that [`NNats`](NNats)'s com
 
 ## modify
 
-@docs mul, toPower, remainderBy, div, nNatAdd, nNatSub
+@docs mul, toPower, remainderBy, div
+
+
+### add
+
+@docs nNatAdd, minAdd, minAddMin, inAdd, inAddIn
+
+
+### subtract
+
+@docs nNatSub, inSub, inSubIn, minSub
 
 
 ## create
@@ -43,7 +56,12 @@ For performance reasons, the names are shortened, so that [`NNats`](NNats)'s com
 
 ## drop information
 
-@docs toMinNat, toInNat
+@docs lowerMin, toInNat, toMinNat
+
+
+## restore information
+
+@docs restoreMax
 
 
 ## extra
@@ -53,7 +71,7 @@ For performance reasons, the names are shortened, so that [`NNats`](NNats)'s com
 
 ## not type-safe
 
-@docs add, sub, newRange
+@docs newRange
 
 
 ## Nat types
@@ -136,7 +154,10 @@ sub natToSubtract =
         >> isChecked Nat
 
 
-newRange : Nat min_ -> Nat newMin_
+{-| Calls to this functions are unsafe.
+Should not be exposed in the future so that all unsafe operations are located here!
+-}
+newRange : Nat range_ -> Nat newRange_
 newRange =
     val >> tag >> isChecked Nat
 
@@ -294,6 +315,56 @@ nNatAdd nNatToAdd =
     add (nNatToAdd |> Tuple.first)
 
 
+minAddMin :
+    Nat (N minAdded atLeastMinAdded_ (Is min To sumMin) is_)
+    -> Nat (ArgIn minAdded maxAdded_ addedIfN_)
+    -> Nat (ArgIn min max_ ifN_)
+    -> Nat (Min sumMin)
+minAddMin minAdded inNatToAdd =
+    add inNatToAdd
+
+
+minAdd :
+    Nat (N added_ atLeastAdded_ (Is min To sumMin) is_)
+    -> Nat (ArgIn min max_ ifN_)
+    -> Nat (Min sumMin)
+minAdd nNatToAdd =
+    add nNatToAdd
+
+
+inAddIn :
+    Nat (N minAdded atLeastMinAdded_ (Is min To sumMin) minAddedIs_)
+    -> Nat (N maxAdded atLeastMaxAdded_ (Is max To sumMax) maxAddedIs_)
+    -> Nat (ArgIn minAdded maxAdded addedIfN_)
+    -> Nat (ArgIn min max ifN_)
+    -> Nat (In sumMin sumMax)
+inAddIn minAdded maxAdded inNatToAdd =
+    add inNatToAdd
+
+
+{-| Add a `Nat (N ...)`.
+
+    between70And100
+        |> InNat.add nat7
+    --> : Nat (In Nat77 (Nat107Plus a_))
+
+Use [addIn](InNat#addIn) if you want to add a `Nat` that isn't a `Nat (N ...)`.
+
+-}
+inAdd :
+    Nat
+        (N
+            added_
+            atLeastAdded_
+            (Is min To sumMin)
+            (Is max To sumMax)
+        )
+    -> Nat (ArgIn min max ifN_)
+    -> Nat (In sumMin sumMax)
+inAdd nNatToAdd =
+    add nNatToAdd
+
+
 nNatSub :
     ( Nat
         (N
@@ -323,8 +394,66 @@ nNatSub nNatToSubtract =
     sub (nNatToSubtract |> Tuple.first)
 
 
+inSubIn :
+    Nat
+        (N
+            minSubbed
+            atLeastMinSubbed_
+            (Is differenceMax To max)
+            minSubbedIs_
+        )
+    ->
+        Nat
+            (N
+                maxSubbed
+                atLeastMaxSubbed_
+                (Is differenceMin To min)
+                maxSubbedIs_
+            )
+    -> Nat (ArgIn minSubbed maxSubbed subbedIfN_)
+    -> Nat (ArgIn min max ifN_)
+    -> Nat (In differenceMin differenceMax)
+inSubIn minSubtracted maxSubtracted inNatToSubtract =
+    sub inNatToSubtract
+
+
+inSub :
+    Nat
+        (N
+            subbed_
+            atLeastSubbed_
+            (Is differenceMin To min)
+            (Is differenceMax To max)
+        )
+    -> Nat (ArgIn min max ifN_)
+    -> Nat (In differenceMin differenceMax)
+inSub nNatToSubtract =
+    sub nNatToSubtract
+
+
+minSub :
+    Nat (N subbed_ atLeastSubbed_ (Is differenceMin To min) is_)
+    -> Nat (ArgIn min max ifN_)
+    -> Nat (In differenceMin max)
+minSub nNatToSubtract =
+    sub nNatToSubtract
+
+
 
 -- ## drop information
+
+
+lowerMin :
+    Nat (ArgIn newMin min lowerIfN_)
+    -> Nat (ArgIn min max ifN_)
+    -> Nat (In newMin max)
+lowerMin =
+    \_ -> newRange
+
+
+toInNat : Nat (ArgIn min max ifN_) -> Nat (In min max)
+toInNat =
+    newRange
 
 
 toMinNat : Nat (ArgIn min max_ ifN_) -> Nat (Min min)
@@ -332,9 +461,16 @@ toMinNat =
     newRange
 
 
-toInNat : Nat (ArgIn min max ifN_) -> Nat (In min max)
-toInNat =
-    newRange
+
+-- ## restore
+
+
+restoreMax :
+    Nat (ArgIn max newMax newMaxIfN_)
+    -> Nat (ArgIn min max ifN)
+    -> Nat (ArgIn min newMax ifN)
+restoreMax =
+    \_ -> newRange
 
 
 

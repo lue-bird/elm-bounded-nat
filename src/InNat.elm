@@ -314,7 +314,7 @@ addIn :
     -> Nat (ArgIn min max ifN_)
     -> Nat (In sumMin sumMax)
 addIn minAdded maxAdded inNatToAdd =
-    Internal.add inNatToAdd
+    Internal.inAddIn minAdded maxAdded inNatToAdd
 
 
 {-| Add a `Nat (N ...)`.
@@ -337,7 +337,7 @@ add :
     -> Nat (ArgIn min max ifN_)
     -> Nat (In sumMin sumMax)
 add nNatToAdd =
-    Internal.add nNatToAdd
+    Internal.inAdd nNatToAdd
 
 
 {-| Subtract a `Nat` taht isn't a `Nat (N ...)`.
@@ -375,7 +375,7 @@ subIn :
     -> Nat (ArgIn min max ifN_)
     -> Nat (In differenceMin differenceMax)
 subIn minSubtracted maxSubtracted inNatToSubtract =
-    Internal.sub inNatToSubtract
+    Internal.inSubIn minSubtracted maxSubtracted inNatToSubtract
 
 
 {-| Subtract an exact `Nat (N ...)` value.
@@ -398,7 +398,7 @@ sub :
     -> Nat (ArgIn min max ifN_)
     -> Nat (In differenceMin differenceMax)
 sub nNatToSubtract =
-    Internal.sub nNatToSubtract
+    Internal.inSub nNatToSubtract
 
 
 

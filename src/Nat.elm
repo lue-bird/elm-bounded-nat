@@ -65,7 +65,7 @@ module Nat exposing
 @docs lowerMin, toIn, toMin
 
 
-# restore information
+# restore
 
 @docs restoreMax
 
@@ -627,7 +627,7 @@ lowerMin :
     -> Nat (ArgIn min max ifN_)
     -> Nat (In newMin max)
 lowerMin =
-    \_ -> Internal.newRange
+    Internal.lowerMin
 
 
 {-| Convert it to a `Nat (In min max)`.
@@ -702,7 +702,7 @@ restoreMax :
     -> Nat (ArgIn min max ifN)
     -> Nat (ArgIn min newMax ifN)
 restoreMax =
-    \_ -> Internal.newRange
+    Internal.restoreMax
 
 
 
