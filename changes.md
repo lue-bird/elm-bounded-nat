@@ -195,3 +195,4 @@ Corrected forgotten `maybeN`s & `min`s that were set to an exact value in doc.
 - used custom serialize errors instead of directly converting every error to a `String`
 - moved `MinNat.value` to `Nat.toMin`
 - moved `InNat.value` to `Nat.toIn`
+- `Nat.isIntInRange` now returns an `Int` for if `BelowRange`
