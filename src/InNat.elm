@@ -476,6 +476,7 @@ type Expectation
 
 
 {-| A [serialization](https://package.elm-lang.org/packages/MartinSStewart/elm-serialize/latest/) error for when a decoded int is out of the expected bounds.
+Use [`errorToString`](InNat#errorToString) if you want to transform it into a message.
 -}
 type alias Error =
     { expected : Expectation
