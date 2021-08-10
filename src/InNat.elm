@@ -451,7 +451,7 @@ serialize lowerBound upperBound =
                     Nat.lowerMin nat0 >> toMinNat
             in
             case int |> Nat.isIntInRange lowerBound upperBound of
-                BelowRange () ->
+                BelowRange _ ->
                     Err (ExpectAtLeast (lowerBound |> toMin0))
 
                 AboveRange _ ->
