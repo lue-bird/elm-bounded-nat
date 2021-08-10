@@ -148,7 +148,7 @@ factorialBody : -- as in factorial
 factorialBody =
     case x |> MinNat.isAtLeast nat1 { lowest = nat0 } of
         Nat.Below _ ->
-            MinNat.value nat1
+            Nat.toMin nat1
 
         Nat.EqualOrGreater atLeast1 ->
             -- atLeast1 is a Nat (Min Nat1)

@@ -24,7 +24,7 @@ suite =
         , test "ultraSafeFactorial"
             (\() ->
                 ultraSafeFactorial nat4
-                    |> Expect.equal (nat24 |> MinNat.value |> Nat.lowerMin nat1)
+                    |> Expect.equal (nat24 |> Nat.toMin |> Nat.lowerMin nat1)
             )
         ]
 
@@ -36,7 +36,7 @@ listLength =
             MinNat.add nat1
                 >> Nat.lowerMin nat0
         )
-        (nat0 |> MinNat.value)
+        (nat0 |> Nat.toMin)
 
 
 {-| recurses idefinitely for negative integers
@@ -59,7 +59,7 @@ factorialBody : Nat (ArgIn min_ max_ ifN_) -> Nat (Min Nat1)
 factorialBody x =
     case x |> MinNat.isAtLeast nat1 { lowest = nat0 } of
         Nat.Below _ ->
-            MinNat.value nat1
+            Nat.toMin nat1
 
         Nat.EqualOrGreater atLeast1 ->
             Nat.mul atLeast1
@@ -100,6 +100,6 @@ testSubN =
 
 testLowerMin : List (Nat (In Nat3 (Nat4Plus a_)))
 testLowerMin =
-    [ nat3 |> InNat.value
+    [ nat3 |> Nat.toIn
     , nat4 |> Nat.lowerMin nat3
     ]

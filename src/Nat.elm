@@ -4,11 +4,11 @@ module Nat exposing
     , N, Is, To
     , ArgIn
     , abs, range, random
-    , intAtLeast, intInRange, atMost
     , isIntInRange, isIntAtLeast, theGreater, theSmaller
     , AtMostOrAbove(..), BelowOrAtLeast(..), BelowOrInOrAboveRange(..), LessOrEqualOrGreater(..)
+    , intAtLeast, intInRange, atMost
     , toPower, remainderBy, mul, div
-    , lowerMin
+    , lowerMin, toIn, toMin
     , restoreMax
     )
 
@@ -40,19 +40,19 @@ module Nat exposing
 @docs abs, range, random
 
 
-## clamp
-
-@docs intAtLeast, intInRange, atMost
-
-
-## compare
+# compare
 
 @docs isIntInRange, isIntAtLeast, theGreater, theSmaller
 
 
-### comparison result
+## comparison result
 
 @docs AtMostOrAbove, BelowOrAtLeast, BelowOrInOrAboveRange, LessOrEqualOrGreater
+
+
+## clamp
+
+@docs intAtLeast, intInRange, atMost
 
 
 # modify
@@ -62,7 +62,7 @@ module Nat exposing
 
 # drop information
 
-@docs lowerMin
+@docs lowerMin, toIn, toMin
 
 
 # restore information
@@ -301,7 +301,7 @@ Really only use this if you want the absolute value.
                 MinNat.add nat1
                     >> Nat.lowerMin nat0
             )
-            (nat0 |> MinNat.value)
+            (nat0 |> Nat.toMin)
 
 If something like this isn't possible, [`MinNat.intAtLeast`](MinNat#intAtLeast) is the best way!
 
@@ -366,7 +366,7 @@ theGreater a b =
 {-| The smaller of 2 `Nat`s.
 
     Nat.theSmaller
-        (nat3 |> MinNat.value)
+        (nat3 |> Nat.toMin)
         (atLeast4 |> Nat.lowerMin nat3)
     --> Nat 3 : Nat (Min Nat3)
 
@@ -390,7 +390,7 @@ theSmaller a b =
             InRange inRange ->
                 Ok inRange
 
-            BelowRange () ->
+            BelowRange _ ->
                 Err "must be >= 1"
 
             AboveRange _ ->
@@ -407,7 +407,7 @@ isIntInRange :
     -> Int
     ->
         BelowOrInOrAboveRange
-            ()
+            Int
             (Nat (In minLowerBound maxUpperBound))
             (Nat (Min (Nat1Plus maxUpperBound)))
 isIntInRange lowerBound upperBound int =
@@ -486,7 +486,7 @@ But avoid it if you can do better, like
                 MinNat.add nat1
                     >> Nat.lowerMin nat0
             )
-            (MinNat.value nat0)
+            (Nat.toMin nat0)
 
 If you want to handle the case `< minimum` yourself, use [`Nat.isIntAtLeast`](Nat#isIntAtLeast).
 
@@ -497,7 +497,7 @@ intAtLeast :
     -> Nat (Min min)
 intAtLeast minimum =
     isIntAtLeast minimum
-        >> Maybe.withDefault (Internal.minValue minimum)
+        >> Maybe.withDefault (Internal.toMinNat minimum)
 
 
 {-| **Cap** the `Nat` to at most a number.
@@ -630,6 +630,58 @@ lowerMin =
     \_ -> Internal.newRange
 
 
+{-| Convert it to a `Nat (In min max)`.
+
+    Nat.toIn nat4
+    --> : Nat (In Nat4 (Nat4Plus a_))
+
+Example
+
+    [ in3To10, nat3 ]
+
+Elm complains:
+
+> But all the previous elements in the list are: `Nat (In Nat3 Nat10)`
+
+    [ in3To10
+    , nat3 |> Nat.toIn
+    ]
+
+-}
+toIn : Nat (ArgIn min max ifN_) -> Nat (In min max)
+toIn =
+    Internal.toInNat
+
+
+{-| Convert a `Nat (ArgIn min ...)` to a `Nat (Min min)`.
+
+    between3And10 |> Nat.toMin
+    --> : Nat (Min Nat4)
+
+There is **only 1 situation you should use this.**
+
+To make these the same type.
+
+    [ atLeast1, between1And10 ]
+
+Elm complains:
+
+> But all the previous elements in the list are: `Nat (Min Nat1)`
+
+    [ atLeast1
+    , between1And10 |> Nat.toMin
+    ]
+
+-}
+toMin : Nat (ArgIn min max_ ifN_) -> Nat (Min min)
+toMin =
+    Internal.toMinNat
+
+
+
+-- # restore information
+
+
 {-| Make it fit into functions with require a higher maximum.
 
 You should design type annotations as general as possible.
@@ -722,9 +774,7 @@ type LessOrEqualOrGreater less equal greater
 {-| The result of comparing a `Nat` to a range from a lower to an upper bound.
 
   - `InRange`
-
   - `AboveRange`: greater than the upper bound
-
   - `BelowRange`: less than the lower bound?
 
 Values exist for each condition.
@@ -737,7 +787,7 @@ type BelowOrInOrAboveRange below inRange above
 
 
 
-{- ## I don't know if either operation is really needed
+{- I don't know if these lossy operations are really needed
 
 
    {-| Subtract a `Nat (In ..)` without calculating

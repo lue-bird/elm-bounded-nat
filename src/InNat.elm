@@ -2,8 +2,7 @@ module InNat exposing
     ( is, isInRange, isAtLeast, isAtMost
     , atLeast
     , add, sub, addIn, subIn
-    , value
-    , serialize, serializeErrorToString
+    , serialize, Error, Expectation(..), errorToString
     )
 
 {-| Operations when you know the `maximum` of the `Nat (ArgIn minimum maximum ifN_)`.
@@ -32,20 +31,15 @@ If the maximum isn't known, use the operations in [`MinNat`](MinNat).
 @docs add, sub, addIn, subIn
 
 
-# drop information
-
-@docs value
-
-
 # extra
 
-@docs serialize, serializeErrorToString
+@docs serialize, Error, Expectation, errorToString
 
 -}
 
-import I as Internal exposing (serializeValid)
-import Nat exposing (ArgIn, AtMostOrAbove(..), BelowOrAtLeast(..), BelowOrInOrAboveRange(..), In, Is, LessOrEqualOrGreater(..), N, Nat, To)
-import Nats exposing (Nat1Plus, Nat2Plus)
+import I as Internal exposing (serializeValid, toMinNat)
+import Nat exposing (ArgIn, AtMostOrAbove(..), BelowOrAtLeast(..), BelowOrInOrAboveRange(..), In, Is, LessOrEqualOrGreater(..), Min, N, Nat, To)
+import Nats exposing (Nat0, Nat1Plus, Nat2Plus, nat0)
 import Serialize exposing (Codec)
 import Typed exposing (val, val2)
 
@@ -201,7 +195,7 @@ is valueToCompareAgainst =
     \_ inNat ->
         case val2 compare inNat valueToCompareAgainst of
             EQ ->
-                Equal (valueToCompareAgainst |> value)
+                Equal (valueToCompareAgainst |> Nat.toIn)
 
             GT ->
                 Greater (Internal.newRange inNat)
@@ -408,47 +402,7 @@ sub nNatToSubtract =
 
 
 
--- # drop information
-
-
-{-| Convert it to a `Nat (In min max)`.
-
-    InNat.value nat4
-    --> : Nat (In Nat4 (Nat4Plus a_))
-
-Example
-
-    [ in3To10, nat3 ]
-
-Elm complains:
-
-> But all the previous elements in the list are: `Nat (In Nat3 Nat10)`
-
-    [ in3To10
-    , nat3 |> InNat.value
-    ]
-
--}
-value : Nat (ArgIn min max ifN_) -> Nat (In min max)
-value =
-    Internal.newRange
-
-
-
 -- # extra
-
-
-{-| An expectation for the decoded int that hasn't been met.
-
-  - `ExpectAtLeast` some minimum in a range
-  - `ExpectAtMost` some maximum in a range
-
-See [serializeErrorToString](InNat#serializeErrorToString) and [serialize](InNat#serialize).
-
--}
-type ExpectIn minimum maximum
-    = ExpectAtLeast (Nat minimum)
-    | ExpectAtMost (Nat maximum)
 
 
 {-| A [`Codec`](https://package.elm-lang.org/packages/MartinSStewart/elm-serialize/latest/) to serialize `Nat`s within a lower & upper bound.
@@ -461,14 +415,13 @@ type ExpectIn minimum maximum
             (Nat (In Nat0 (Nat100Plus a_)))
     serializePercent =
         InNat.serialize nat0 nat100
-            >> Serialize.mapError InNat.serializeErrorToString
+            >> Serialize.mapError InNat.errorToString
 
 The encode/decode functions can be extracted if needed.
 
     encodePercent : Nat (ArgIn min_ Nat100 ifN_) -> Bytes
     encodePercent =
-        Nat.restoreMax nat100
-            >> InNat.value
+        Nat.toIn
             >> Serialize.encodeToBytes serializePercent
 
     decodePercent :
@@ -484,63 +437,75 @@ For decoded `Int`s out of the expected bounds, the `Result` is an error message.
 
 -}
 serialize :
-    Nat (ArgIn minLowerBound maxLowerBound lowerBoundIfN)
-    -> Nat (ArgIn maxLowerBound maxUpperBound upperBoundIfN)
+    Nat (ArgIn minLowerBound maxLowerBound lowerBoundIfN_)
+    -> Nat (ArgIn maxLowerBound maxUpperBound upperBoundIfN_)
     ->
         Codec
-            { actual : Int
-            , expected :
-                ExpectIn
-                    (ArgIn minLowerBound maxLowerBound lowerBoundIfN)
-                    (ArgIn maxLowerBound maxUpperBound upperBoundIfN)
-            }
+            Error
             (Nat (In minLowerBound maxUpperBound))
 serialize lowerBound upperBound =
     serializeValid
         (\int ->
+            let
+                toMin0 =
+                    Nat.lowerMin nat0 >> toMinNat
+            in
             case int |> Nat.isIntInRange lowerBound upperBound of
                 BelowRange () ->
-                    Err (ExpectAtLeast lowerBound)
+                    Err (ExpectAtLeast (lowerBound |> toMin0))
 
                 AboveRange _ ->
-                    Err (ExpectAtMost upperBound)
+                    Err (ExpectAtMost (upperBound |> toMin0))
 
                 InRange inRange ->
                     Ok inRange
         )
 
 
-{-| Convert the [serialization](https://package.elm-lang.org/packages/MartinSStewart/elm-serialize/latest/) error into a readable message.
+{-| An expectation for the decoded int that hasn't been met.
+
+  - `ExpectAtLeast` some minimum in a range
+  - `ExpectAtMost` some maximum in a range
+
+See [errorToString](InNat#errorToString) and [serialize](InNat#serialize).
+
+-}
+type Expectation
+    = ExpectAtLeast (Nat (Min Nat0))
+    | ExpectAtMost (Nat (Min Nat0))
+
+
+{-| A [serialization](https://package.elm-lang.org/packages/MartinSStewart/elm-serialize/latest/) error for when a decoded int is out of the expected bounds.
+-}
+type alias Error =
+    { expected : Expectation
+    , actual : Int
+    }
+
+
+{-| Convert a [serialization](https://package.elm-lang.org/packages/MartinSStewart/elm-serialize/latest/) error into a readable message.
 
     { expected = InNat.ExpectAtLeast nat11
     , actual = 10
     }
-        |> InNat.serializeErrorToString
+        |> InNat.errorToString
     --> "expected an int >= 11 but the actual int was 10"
 
+(example won't compile because `nat11` isn't of type `Nat (Min Nat0)`)
+
 -}
-serializeErrorToString :
-    { expected : ExpectIn minimum_ maximum_
-    , actual : Int
-    }
-    -> String
-serializeErrorToString error =
-    error
-        |> Internal.serializeErrorToString
-            toInternalExpected
-
-
-
--- ### ↓ not important
-
-
-toInternalExpected :
-    ExpectIn minimum maximum
-    -> Internal.ExpectIn minimum maximum
-toInternalExpected expected =
-    case expected of
+errorToString : Error -> String
+errorToString error =
+    [ "expected an int"
+    , case error.expected of
         ExpectAtLeast minimum ->
-            Internal.ExpectAtLeast minimum
+            [ ">=", val minimum |> String.fromInt ]
+                |> String.join " "
 
         ExpectAtMost maximum ->
-            Internal.ExpectAtMost maximum
+            [ "<=", val maximum |> String.fromInt ]
+                |> String.join " "
+    , "but the actual int was"
+    , String.fromInt error.actual
+    ]
+        |> String.join " "

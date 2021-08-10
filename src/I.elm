@@ -4,12 +4,11 @@ module I exposing
     , BelowOrInOrAboveRange(..)
     , mul, toPower, remainderBy, div, nNatAdd, nNatSub
     , abs, random, range
-    , minValue
-    , serializeValid, serializeErrorToString
+    , toMinNat, toInNat
+    , serializeValid
     , add, sub, newRange
     , Z, S
     , nat0, nat1
-    , ExpectIn(..)
     )
 
 {-| The internals of this package. Only this package can mark `Int`s as `Nat`s.
@@ -44,12 +43,12 @@ For performance reasons, the names are shortened, so that [`NNats`](NNats)'s com
 
 ## drop information
 
-@docs minValue
+@docs toMinNat, toInNat
 
 
 ## extra
 
-@docs serializeValid, ExpectedIn, serializeErrorToString
+@docs serializeValid
 
 
 ## not type-safe
@@ -152,12 +151,12 @@ isIntInRange :
     -> Int
     ->
         BelowOrInOrAboveRange
-            ()
+            Int
             (Nat (In minLowerBound maxUpperBound))
             (Nat (Min (Nat1Plus maxUpperBound)))
 isIntInRange lowerBound upperBound int =
     if int < val lowerBound then
-        BelowRange ()
+        BelowRange int
 
     else if int > val upperBound then
         AboveRange (tag int |> isChecked Nat)
@@ -328,8 +327,13 @@ nNatSub nNatToSubtract =
 -- ## drop information
 
 
-minValue : Nat (ArgIn min max_ ifN_) -> Nat (Min min)
-minValue =
+toMinNat : Nat (ArgIn min max_ ifN_) -> Nat (Min min)
+toMinNat =
+    newRange
+
+
+toInNat : Nat (ArgIn min max ifN_) -> Nat (In min max)
+toInNat =
     newRange
 
 
@@ -360,44 +364,11 @@ serializeValid mapValid =
             val
 
 
-type ExpectIn minimum maximum
-    = ExpectAtLeast (Nat minimum)
-    | ExpectAtMost (Nat maximum)
-
-
-{-|
-
-> expected an int {} but the actual int was {}
-
--}
-serializeErrorToString :
-    (expected -> ExpectIn minimum_ maximum_)
-    ->
-        { expected : expected
-        , actual : Int
-        }
-    -> String
-serializeErrorToString expectedToString error =
-    [ "expected an int"
-    , case expectedToString error.expected of
-        ExpectAtLeast minimum ->
-            [ ">=", val minimum |> String.fromInt ]
-                |> String.join " "
-
-        ExpectAtMost maximum ->
-            [ "<=", val maximum |> String.fromInt ]
-                |> String.join " "
-    , "but the actual int was"
-    , String.fromInt error.actual
-    ]
-        |> String.join " "
-
-
 
 -- ## Nat types
 
 
-type S n
+type S n_
     = S Never
 
 

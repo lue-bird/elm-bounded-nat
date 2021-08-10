@@ -2,8 +2,7 @@ module MinNat exposing
     ( is, isAtLeast, isAtMost
     , atLeast
     , sub, add, subMax, addMin
-    , value
-    , serialize, serializeErrorToString
+    , serialize, Error, errorToString, generalizeError
     )
 
 {-| 2 situations where you use these operations instead of the ones in [`Nat`](Nat) or [`InNat`](InNat):
@@ -35,21 +34,16 @@ module MinNat exposing
 @docs sub, add, subMax, addMin
 
 
-# drop information
-
-@docs value
-
-
 # extra
 
-@docs serialize, serializeErrorToString
+@docs serialize, Error, errorToString, generalizeError
 
 -}
 
 import I as Internal exposing (serializeValid)
 import InNat
 import Nat exposing (ArgIn, AtMostOrAbove(..), BelowOrAtLeast(..), In, Is, LessOrEqualOrGreater(..), Min, N, Nat, To)
-import Nats exposing (Nat1Plus, Nat2Plus, nat0)
+import Nats exposing (Nat0, Nat1Plus, Nat2Plus, nat0)
 import Serialize exposing (Codec)
 import Typed exposing (val2)
 
@@ -186,7 +180,7 @@ is valueToCompareAgainst =
                 Less (Internal.newRange minNat)
 
             EQ ->
-                Equal (valueToCompareAgainst |> InNat.value)
+                Equal (valueToCompareAgainst |> Nat.toIn)
 
             GT ->
                 Greater (Internal.newRange minNat)
@@ -202,7 +196,7 @@ is valueToCompareAgainst =
     factorialBody =
         case x |> MinNat.isAtLeast nat1 { lowest = nat0 } of
             Nat.Below _ ->
-                MinNat.value nat1
+                Nat.toMin nat1
 
             Nat.EqualOrGreater atLeast1 ->
                 Nat.mul atLeast1
@@ -299,36 +293,9 @@ atLeast :
     -> Nat (ArgIn min_ max_ ifN_)
     -> Nat (Min minNewMin)
 atLeast lowerBound =
-    value >> Internal.atLeast (value lowerBound)
-
-
-
--- # drop information
-
-
-{-| Convert a `Nat (ArgIn min ...)` to a `Nat (Min min)`.
-
-    between3And10 |> MinNat.value
-    --> : Nat (Min Nat4)
-
-There is **only 1 situation you should use this.**
-
-To make these the same type.
-
-    [ atLeast1, between1And10 ]
-
-Elm complains:
-
-> But all the previous elements in the list are: `Nat (Min Nat1)`
-
-    [ atLeast1
-    , between1And10 |> MinNat.value
-    ]
-
--}
-value : Nat (ArgIn min max_ ifN_) -> Nat (Min min)
-value =
-    Internal.minValue
+    Nat.toMin
+        >> Internal.atLeast
+            (lowerBound |> Nat.toMin)
 
 
 
@@ -343,14 +310,14 @@ value =
     serializeNaturalNumber =
         MinNat.serialize nat0
             -- if we just want a simple error string
-            |> Serialize.mapError MinNat.serializeErrorToString
+            |> Serialize.mapError MinNat.errorToString
 
 The encode/decode functions can be extracted if needed.
 
     encodeNaturalNumber : Nat (ArgIn min_ max_ ifN_) -> Bytes
     encodeNaturalNumber =
         Nat.lowerMin nat0
-            >> MinNat.value
+            >> Nat.toMin
             >> Serialize.encodeToBytes serializeNaturalNumber
 
     decodeNaturalNumber :
@@ -361,22 +328,59 @@ The encode/decode functions can be extracted if needed.
 
 -}
 serialize :
-    Nat (ArgIn minLowerBound maxLowerBound lowerBoundIfN)
-    ->
-        Codec
-            { expected :
-                { atLeast :
-                    Nat (ArgIn minLowerBound maxLowerBound lowerBoundIfN)
-                }
-            , actual : Int
-            }
-            (Nat (Min minLowerBound))
+    Nat (ArgIn minLowerBound maxLowerBound_ lowerBoundIfN_)
+    -> Codec Error (Nat (Min minLowerBound))
 serialize lowerBound =
     serializeValid
         (Internal.isIntAtLeast lowerBound
             >> Result.fromMaybe
-                { atLeast = lowerBound }
+                { atLeast =
+                    lowerBound
+                        |> Nat.lowerMin nat0
+                        |> Nat.toMin
+                }
         )
+
+
+type alias Error =
+    { expected : { atLeast : Nat (Min Nat0) }
+    , actual : Int
+    }
+
+
+{-| Use the same error type as `InNat`.
+
+    import Serialize exposing (Codec)
+
+    Serialize.mapError MinNat.generalizeError
+    --> : Codec MinNat.Error a -> Codec InNat.Error a
+
+Use this if you serialize `InNat` _and_ `MinNat`:
+
+    Serialize.tuple
+        (MinNat.serialize nat0)
+        (InNat.serialize nat0 nat99)
+    --> error : `Codec`s have different custom errors
+
+    Serialize.tuple
+        (MinNat.serialize nat0
+            |> Serialize.mapError MinNat.generalizeError
+        )
+        (InNat.serialize nat0 nat99)
+    --> Codec
+    -->     InNat.Error
+    -->     ( Nat (Min Nat0), Nat (In Nat0 (Nat99Plus a_)) )
+
+Note: there's also [`errorToString`](MinNat#errorToString).
+
+-}
+generalizeError : Error -> InNat.Error
+generalizeError error =
+    { expected =
+        error.expected.atLeast
+            |> InNat.ExpectAtLeast
+    , actual = error.actual
+    }
 
 
 {-| Convert the [serialization](https://package.elm-lang.org/packages/MartinSStewart/elm-serialize/latest/) error into a readable message.
@@ -384,16 +388,18 @@ serialize lowerBound =
     { expected = { atLeast = nat11 }
     , actual = 10
     }
-        |> MinNat.serializeErrorToString
+        |> MinNat.errorToString
     --> "expected an int >= 11 but the actual int was 10"
 
+Equivalent to
+
+    error
+        |> MinNat.generalizeError
+        |> InNat.errorToString
+
 -}
-serializeErrorToString :
-    { expected : { atLeast : Nat minimum_ }
-    , actual : Int
-    }
-    -> String
-serializeErrorToString error =
-    Internal.serializeErrorToString
-        (Internal.ExpectAtLeast << .atLeast)
-        error
+errorToString : Error -> String
+errorToString error =
+    error
+        |> generalizeError
+        |> InNat.errorToString
