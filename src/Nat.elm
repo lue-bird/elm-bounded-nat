@@ -114,13 +114,15 @@ Like what to store in the `Model` for example.
 
 ### n
 
-    -- = 3, & 3, described as 2 differences
-    Nat
-        (N Nat3
-            (Nat3Plus orMore_)
-            (Is a To (Nat3Plus a))
-            (Is b To (Nat3Plus b))
-        )
+An exact number. It's type enables adding/subtracting `Nat...` types.
+
+    nat3
+        : Nat
+            (N Nat3
+                (Nat3Plus x_)
+                (Is a To (Nat3Plus a))
+                (Is b To (Nat3Plus b))
+            )
 
     -- An exact number nTo15 away from 15
     Nat (N n atLeastN_ (Is nTo15 To Nat15) is_)
@@ -131,7 +133,7 @@ type alias Nat range =
 
 
 
--- ## bounds
+-- # bounds
 
 
 {-| `In minimum maximum`: A value somewhere within a `minimum` & `maximum`. We don't know the exact value, though.
@@ -282,6 +284,10 @@ You can just ignore the second difference if you don't need it ([`MinNat.add`](M
 -}
 type alias N n atLeastN asADifference asAnotherDifference =
     ArgIn n atLeastN (Internal.Differences asADifference asAnotherDifference)
+
+
+
+-- # create
 
 
 {-| The absolute value of an `Int`, which is `>= 0`.
