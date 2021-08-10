@@ -342,8 +342,13 @@ serialize lowerBound =
         )
 
 
-{-| A [serialization](https://package.elm-lang.org/packages/MartinSStewart/elm-serialize/latest/) error for when a decoded int is out of the expected bounds.
-Use [`errorToString`](InNat#errorToString) if you want to transform it into a message.
+{-| An error for when a decoded int is outside the expected bounds. You can
+
+  - transform it into a message: [`errorToString`](MinNat#errorToString)
+  - transform it into [`InNat.Error`](InNat#Error): [`generalizeError`](MinNat#generalizeError)
+
+See [`serialize`](MinNat#serialize).
+
 -}
 type alias Error =
     { expected : { atLeast : Nat (Min Nat0) }

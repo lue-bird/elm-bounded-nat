@@ -475,8 +475,12 @@ type Expectation
     | ExpectAtMost (Nat (Min Nat0))
 
 
-{-| A [serialization](https://package.elm-lang.org/packages/MartinSStewart/elm-serialize/latest/) error for when a decoded int is out of the expected bounds.
-Use [`errorToString`](InNat#errorToString) if you want to transform it into a message.
+{-| An error for when a decoded int is outside the expected bounds.
+
+You can transform it into a message with [`errorToString`](MinNat#errorToString).
+
+See [`serialize`](InNat#serialize).
+
 -}
 type alias Error =
     { expected : Expectation
