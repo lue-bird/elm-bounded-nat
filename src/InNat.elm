@@ -488,7 +488,7 @@ type alias Error =
     }
 
 
-{-| Convert a [serialization](https://package.elm-lang.org/packages/MartinSStewart/elm-serialize/latest/) error into a readable message.
+{-| Convert an [`Error`](InNat#Error) to a readable message.
 
     { expected = InNat.ExpectAtLeast nat11
     , actual = 10

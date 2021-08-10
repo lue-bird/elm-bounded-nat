@@ -342,10 +342,10 @@ serialize lowerBound =
         )
 
 
-{-| An error for when a decoded int is outside the expected bounds. You can
+{-| An error for when a decoded int is outside the expected bounds. You can transform it into
 
-  - transform it into a message: [`errorToString`](MinNat#errorToString)
-  - transform it into [`InNat.Error`](InNat#Error): [`generalizeError`](MinNat#generalizeError)
+  - a message: [`errorToString`](MinNat#errorToString)
+  - an [`InNat.Error`](InNat#Error): [`generalizeError`](MinNat#generalizeError)
 
 See [`serialize`](MinNat#serialize).
 
@@ -363,7 +363,7 @@ type alias Error =
     Serialize.mapError MinNat.generalizeError
     --> : Codec MinNat.Error a -> Codec InNat.Error a
 
-Use this if you serialize `InNat` _and_ `MinNat`:
+Use this if you serialize `InNat` together with `MinNat`:
 
     Serialize.tuple
         (MinNat.serialize nat0)
@@ -391,13 +391,15 @@ generalizeError error =
     }
 
 
-{-| Convert the [serialization](https://package.elm-lang.org/packages/MartinSStewart/elm-serialize/latest/) error into a readable message.
+{-| Convert an [`Error`](MinNat#Error) to a readable message.
 
     { expected = { atLeast = nat11 }
     , actual = 10
     }
         |> MinNat.errorToString
     --> "expected an int >= 11 but the actual int was 10"
+
+(example won't compile because `nat11` isn't of type `Nat (Min Nat0)`)
 
 Equivalent to
 
