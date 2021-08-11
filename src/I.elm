@@ -4,14 +4,13 @@ module I exposing
     , nat1
     , isIntInRange, isIntAtLeast, minIs, minIsAtLeast, minIsAtMost, inIsAtLeast, inIsAtMost, inIs, inIsInRange
     , BelowOrInOrAboveRange(..), LessOrEqualOrGreater(..), AtMostOrAbove(..), BelowOrAtLeast(..)
-    , atLeast, atMost
+    , atLeast, atMost, intInRange
     , mul, toPower, remainderBy, div
     , nNatAdd, minAdd, minAddMin, inAdd, inAddIn
     , nNatSub, inSub, inSubIn, minSub
     , abs, random, range
     , lowerMin, toInNat, toMinNat
     , restoreMax
-    , newRange
     )
 
 {-| The internals of this package. Only this package can mark `Int`s as `Nat`s.
@@ -46,7 +45,7 @@ For performance reasons, the names are shortened, so that [`NNats`](NNats)'s com
 
 ## clamp
 
-@docs atLeast, atMost
+@docs atLeast, atMost, intInRange
 
 
 # modify
@@ -78,15 +77,9 @@ For performance reasons, the names are shortened, so that [`NNats`](NNats)'s com
 
 @docs restoreMax
 
-
-# not type-safe
-
-@docs newRange
-
 -}
 
 import Random
-import Serialize exposing (Codec)
 import Typed exposing (Checked, Public, Typed, isChecked, map, tag, val, val2)
 
 
@@ -493,6 +486,23 @@ atLeast :
     -> Nat (In newMin max)
 atLeast lowerBound =
     map (max (val lowerBound)) >> isChecked Nat
+
+
+intInRange :
+    Nat (ArgIn minLowerBound minUpperBound lowerBoundIfN_)
+    -> Nat (ArgIn minUpperBound maxUpperBound upperBoundIfN_)
+    -> Int
+    -> Nat (In minLowerBound maxUpperBound)
+intInRange lowerBound upperBound int =
+    case isIntInRange lowerBound upperBound int of
+        InRange inRange ->
+            inRange
+
+        BelowRange _ ->
+            lowerBound |> newRange
+
+        AboveRange _ ->
+            upperBound |> lowerMin lowerBound
 
 
 

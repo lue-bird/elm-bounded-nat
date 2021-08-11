@@ -446,15 +446,7 @@ intInRange :
     -> Int
     -> Nat (In minLowerBound maxUpperBound)
 intInRange lowerBound upperBound int =
-    case isIntInRange lowerBound upperBound int of
-        InRange inRange ->
-            inRange
-
-        BelowRange _ ->
-            lowerBound |> Internal.newRange
-
-        AboveRange _ ->
-            upperBound |> lowerMin lowerBound
+    Internal.intInRange lowerBound upperBound int
 
 
 {-| If the `Int >= a minimum`, `Just` the `Nat (Min minimum)`, else `Nothing`.
