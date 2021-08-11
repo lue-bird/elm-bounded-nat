@@ -459,7 +459,7 @@ type Expectation
 
 {-| An error for when a decoded int is outside the expected bounds.
 
-You can transform it into a message with [`errorToString`](MinNat#errorToString).
+You can transform it into a message with [`errorToString`](InNat#errorToString).
 
 See [`serialize`](InNat#serialize).
 
