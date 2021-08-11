@@ -27,7 +27,7 @@ This Code of Conduct applies both within project and public spaces for represent
 
 ## Enforcement
 
-Report unacceptable behavior by contacting indique.
+Report unacceptable behavior by contacting lue-bird.
 
 Project maintainers who do not follow or enforce the Code of Conduct in good
 faith may face temporary or permanent repercussions as determined by other
