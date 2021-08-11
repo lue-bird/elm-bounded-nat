@@ -17,12 +17,12 @@ import Nat exposing (Is, N, Nat, To)
 
     nat6 |> NNat.add ( nat5, nat5 )
     --> nat11
-    --> : Nat
-    -->     (N Nat11
-    -->         (Nat11Plus a_)
-    -->         (Is a To Nat11Plus a)
-    -->         (Is b To Nat11Plus b)
-    -->     )
+    -->     : Nat
+    -->        (N Nat11
+    -->            (Nat11Plus a_)
+    -->            (Is a To Nat11Plus a)
+    -->            (Is b To Nat11Plus b)
+    -->        )
 
 This is only rarely useful, as you shouldn't
 
@@ -35,7 +35,7 @@ Only use it when the `Nat (N ...)` is used once.
     isAtLeast10GreaterThan x =
         isAtLeast (x |> NNat.add ( nat10, nat10 ))
 
-(examples don't compile, just for demonstration)
+(examples don't compile)
 
 -}
 add :
@@ -57,12 +57,12 @@ add nNatToAdd =
 {-| The `Nat (N ...)` minus another `Nat (N ...)`. Give the subtracted value twice as a tuple.
 
     nat6 |> NNat.sub ( nat5, nat5 )
-    --> nat1
-    --> : Nat
-    -->     (N Nat1 (Nat1Plus a_)
-    -->         (Is a To (Nat1Plus a))
-    -->         (Is b To (Nat1Plus b))
-    -->     )
+    --> nat1 :
+    -->     Nat
+    -->         (N Nat1 (Nat1Plus a_)
+    -->             (Is a To (Nat1Plus a))
+    -->             (Is b To (Nat1Plus b))
+    -->         )
 
 This is only rarely useful, as you shouldn't
 
@@ -75,7 +75,7 @@ Only use it when the `Nat (N ...)` is used once.
     isAtLeast10LessThan x =
         isAtLeast (x |> NNat.sub ( nat10, nat10 ))
 
-(examples don't compile, just for demonstration)
+(examples don't compile)
 
 -}
 sub :
