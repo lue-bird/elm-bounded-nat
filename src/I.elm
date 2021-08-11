@@ -1,14 +1,14 @@
 module I exposing
     ( Differences, Infinity, Is, Nat, NatTag, NotN, To, N, ArgIn
-    , isIntInRange, isIntAtLeast, atLeast, atMost
-    , BelowOrInOrAboveRange(..)
+    , isIntInRange, isIntAtLeast, minIs, minIsAtLeast, minIsAtMost, inIsAtLeast, inIsAtMost, inIs, inIsInRange
+    , BelowOrInOrAboveRange(..), LessOrEqualOrGreater(..), AtMostOrAbove(..), BelowOrAtLeast(..)
+    , atLeast, atMost
     , mul, toPower, remainderBy, div
     , nNatAdd, minAdd, minAddMin, inAdd, inAddIn
     , nNatSub, inSub, inSubIn, minSub
     , abs, random, range
     , lowerMin, toInNat, toMinNat
     , restoreMax
-    , serializeValid
     , newRange
     , Z, S
     , nat0, nat1
@@ -19,54 +19,54 @@ module I exposing
 For performance reasons, the names are shortened, so that [`NNats`](NNats)'s compiling performance is better.
 
 
-## types
+# types
 
 @docs Differences, Infinity, Is, Nat, NatTag, NotN, To, N, ArgIn
 
 
-## compare
+# compare
 
-@docs isIntInRange, isIntAtLeast, atLeast, atMost
-
-
-### comparison result
-
-@docs BelowOrInOrAboveRange
+@docs isIntInRange, isIntAtLeast, minIs, minIsAtLeast, minIsAtMost, inIsAtLeast, inIsAtMost, inIs, inIsInRange
 
 
-## modify
+## comparison result
+
+@docs BelowOrInOrAboveRange, LessOrEqualOrGreater, AtMostOrAbove, BelowOrAtLeast
+
+
+## clamp
+
+@docs atLeast, atMost
+
+
+# modify
 
 @docs mul, toPower, remainderBy, div
 
 
-### add
+## add
 
 @docs nNatAdd, minAdd, minAddMin, inAdd, inAddIn
 
 
-### subtract
+## subtract
 
 @docs nNatSub, inSub, inSubIn, minSub
 
 
-## create
+# create
 
 @docs abs, random, range
 
 
-## drop information
+# drop information
 
 @docs lowerMin, toInNat, toMinNat
 
 
-## restore information
+# restore
 
 @docs restoreMax
-
-
-## extra
-
-@docs serializeValid
 
 
 ## not type-safe
@@ -198,6 +198,275 @@ isIntAtLeast minimum int =
         Nothing
 
 
+minIs :
+    Nat
+        (N
+            (Nat1Plus valueMinus1)
+            atLeastValue
+            (Is a_ To (Nat1Plus atLeastValueMinus1))
+            valueIs_
+        )
+    ->
+        { lowest :
+            Nat
+                (N
+                    lowest
+                    atLeastLowest_
+                    (Is lowestToMin_ To min)
+                    (Is minToValueMinus1_ To valueMinus1)
+                )
+        }
+    -> Nat (ArgIn min max_ ifN_)
+    ->
+        LessOrEqualOrGreater
+            (Nat (In lowest atLeastValueMinus1))
+            (Nat (In (Nat1Plus valueMinus1) atLeastValue))
+            (Nat (Min (Nat2Plus valueMinus1)))
+minIs valueToCompareAgainst =
+    \_ minNat ->
+        case val2 compare minNat valueToCompareAgainst of
+            LT ->
+                Less (minNat |> newRange)
+
+            EQ ->
+                Equal (valueToCompareAgainst |> toInNat)
+
+            GT ->
+                Greater (minNat |> newRange)
+
+
+minIsAtLeast :
+    Nat
+        (ArgIn
+            minLowerBound
+            (Nat1Plus maxLowerBoundMinus1)
+            lowerBoundIfN_
+        )
+    ->
+        { lowest :
+            Nat
+                (N
+                    lowest
+                    atLeastLowest_
+                    (Is lowestToMin_ To min)
+                    (Is lowestToMinLowerBound_ To minLowerBound)
+                )
+        }
+    -> Nat (ArgIn min max_ ifN_)
+    ->
+        BelowOrAtLeast
+            (Nat (In lowest maxLowerBoundMinus1))
+            (Nat (Min minLowerBound))
+minIsAtLeast lowerBound =
+    \_ minNat ->
+        if val2 (>=) minNat lowerBound then
+            EqualOrGreater (minNat |> newRange)
+
+        else
+            Below (minNat |> newRange)
+
+
+minIsAtMost :
+    Nat (ArgIn minUpperBound maxUpperBound upperBoundIfN_)
+    ->
+        { lowest :
+            Nat
+                (N
+                    lowest
+                    atLeastLowest_
+                    (Is lowestToMin_ To min)
+                    (Is minToAtMostMin_ To minUpperBound)
+                )
+        }
+    -> Nat (ArgIn min max_ ifN_)
+    ->
+        AtMostOrAbove
+            (Nat (In lowest maxUpperBound))
+            (Nat (Min (Nat1Plus minUpperBound)))
+minIsAtMost upperBound =
+    \_ minNat ->
+        if val2 (<=) minNat upperBound then
+            EqualOrLess (minNat |> newRange)
+
+        else
+            Above (minNat |> newRange)
+
+
+inIsAtLeast :
+    Nat
+        (N
+            lowerBound
+            (Nat1Plus atLeastLowerBoundMinus1)
+            (Is atLeastRange_ To max)
+            is_
+        )
+    ->
+        { lowest :
+            Nat
+                (N
+                    lowest
+                    atLeastLowest_
+                    (Is lowestToMin_ To min)
+                    (Is (Nat1Plus lowestToLowerBound_) To lowerBound)
+                )
+        }
+    -> Nat (ArgIn min max ifN_)
+    ->
+        BelowOrAtLeast
+            (Nat (In lowest atLeastLowerBoundMinus1))
+            (Nat (In lowerBound max))
+inIsAtLeast lowerBound =
+    \_ inNat ->
+        if val2 (>=) inNat lowerBound then
+            EqualOrGreater (inNat |> newRange)
+
+        else
+            Below (inNat |> newRange)
+
+
+inIsAtMost :
+    Nat
+        (N
+            upperBound
+            atLeastUpperBound
+            (Is (Nat1Plus greaterRange_) To max)
+            is_
+        )
+    ->
+        { lowest :
+            Nat
+                (N
+                    lowest
+                    atLeastLowest_
+                    (Is lowestToMin_ To min)
+                    (Is minToUpperBound_ To upperBound)
+                )
+        }
+    -> Nat (ArgIn min max ifN_)
+    ->
+        AtMostOrAbove
+            (Nat (In lowest atLeastUpperBound))
+            (Nat (In (Nat1Plus upperBound) max))
+inIsAtMost upperBound =
+    \_ inNat ->
+        if val inNat <= (upperBound |> val) then
+            EqualOrLess (inNat |> newRange)
+
+        else
+            Above (inNat |> newRange)
+
+
+inIs :
+    Nat
+        (N
+            (Nat1Plus valueMinus1)
+            atLeastValue
+            (Is a_ To (Nat1Plus atLeastValueMinus1))
+            (Is valueToMax_ To max)
+        )
+    ->
+        { lowest :
+            Nat
+                (N
+                    lowest
+                    atLeastLowest_
+                    (Is lowestToMin_ To min)
+                    (Is minToValue_ To (Nat1Plus valueMinus1))
+                )
+        }
+    -> Nat (ArgIn min max ifN_)
+    ->
+        LessOrEqualOrGreater
+            (Nat (In lowest atLeastValueMinus1))
+            (Nat (In (Nat1Plus valueMinus1) atLeastValue))
+            (Nat (In (Nat2Plus valueMinus1) max))
+inIs valueToCompareAgainst =
+    \_ inNat ->
+        case val2 compare inNat valueToCompareAgainst of
+            EQ ->
+                Equal (valueToCompareAgainst |> toInNat)
+
+            GT ->
+                Greater (inNat |> newRange)
+
+            LT ->
+                Less (inNat |> newRange)
+
+
+inIsInRange :
+    Nat
+        (N
+            lowerBound
+            (Nat1Plus atLeastLowerBoundMinus1)
+            (Is lowerBoundToUpperBound_ To upperBound)
+            lowerBoundIs_
+        )
+    ->
+        Nat
+            (N
+                upperBound
+                atLeastUpperBound
+                (Is upperBoundToMax_ To max)
+                upperBoundIs_
+            )
+    ->
+        { lowest :
+            Nat
+                (N
+                    lowest
+                    atLeastLowest_
+                    (Is lowestToMin_ To min)
+                    (Is minToLowerBound_ To lowerBound)
+                )
+        }
+    -> Nat (ArgIn min max ifN_)
+    ->
+        BelowOrInOrAboveRange
+            (Nat (In lowest atLeastLowerBoundMinus1))
+            (Nat (In lowerBound atLeastUpperBound))
+            (Nat (In (Nat1Plus upperBound) max))
+inIsInRange lowerBound upperBound =
+    \_ inNat ->
+        if val2 (<) inNat lowerBound then
+            BelowRange (inNat |> newRange)
+
+        else if val2 (>) inNat upperBound then
+            AboveRange (inNat |> newRange)
+
+        else
+            InRange (inNat |> newRange)
+
+
+
+-- ## comparison result
+
+
+type AtMostOrAbove equalOrLess above
+    = EqualOrLess equalOrLess
+    | Above above
+
+
+type BelowOrAtLeast below equalOrGreater
+    = Below below
+    | EqualOrGreater equalOrGreater
+
+
+type LessOrEqualOrGreater less equal greater
+    = Less less
+    | Equal equal
+    | Greater greater
+
+
+type BelowOrInOrAboveRange below inRange above
+    = BelowRange below
+    | InRange inRange
+    | AboveRange above
+
+
+
+-- ## clamp
+
+
 atMost :
     Nat (ArgIn minNewMax atLeastNewMax newMaxIfN_)
     ->
@@ -227,17 +496,7 @@ atLeast lowerBound =
 
 
 
--- ### comparison result
-
-
-type BelowOrInOrAboveRange below inRange above
-    = BelowRange below
-    | InRange inRange
-    | AboveRange above
-
-
-
--- ## create
+-- # create
 
 
 abs : Int -> Nat (Min Nat0)
@@ -474,33 +733,6 @@ restoreMax =
 
 
 
--- ## extra
-
-
-serializeValid :
-    (Int -> Result expected (Nat range))
-    ->
-        Codec
-            { expected : expected
-            , actual : Int
-            }
-            (Nat range)
-serializeValid mapValid =
-    Serialize.int
-        |> Serialize.mapValid
-            (\int ->
-                mapValid int
-                    |> Result.mapError
-                        (\expected ->
-                            { expected = expected
-                            , actual = int
-                            }
-                        )
-            )
-            val
-
-
-
 -- ## Nat types
 
 
@@ -524,13 +756,17 @@ type alias Nat1 =
     Nat1Plus Z
 
 
+type alias Nat2Plus n =
+    S (Nat1Plus n)
 
--- ## NNats
+
+
+-- # NNats
 
 
 nat0 : Nat (N Nat0 a_ (Is a To a) (Is b To b))
 nat0 =
-    tag 0 |> isChecked Nat
+    nat1 |> nNatSub ( nat1, nat1 )
 
 
 nat1 : Nat (N Nat1 (Nat1Plus a_) (Is a To (Nat1Plus a)) (Is b To (Nat1Plus b)))

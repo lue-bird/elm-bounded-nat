@@ -37,7 +37,8 @@ If the maximum isn't known, use the operations in [`MinNat`](MinNat).
 
 -}
 
-import I as Internal exposing (serializeValid, toMinNat)
+import Common exposing (fromInternalAtMostOrAbove, fromInternalBelowOrAtLeast, fromInternalBelowOrInOrAboveRange, fromInternalLessOrEqualOrGreater, serializeValid)
+import I as Internal exposing (toMinNat)
 import Nat exposing (ArgIn, AtMostOrAbove(..), BelowOrAtLeast(..), BelowOrInOrAboveRange(..), In, Is, LessOrEqualOrGreater(..), Min, N, Nat, To)
 import Nats exposing (Nat0, Nat1Plus, Nat2Plus, nat0)
 import Serialize exposing (Codec)
@@ -90,12 +91,9 @@ isAtLeast :
             (Nat (In lowest atLeastLowerBoundMinus1))
             (Nat (In lowerBound max))
 isAtLeast lowerBound =
-    \_ inNat ->
-        if val2 (>=) inNat lowerBound then
-            EqualOrGreater (Internal.newRange inNat)
-
-        else
-            Below (Internal.newRange inNat)
+    \lowest ->
+        Internal.inIsAtLeast lowerBound lowest
+            >> fromInternalBelowOrAtLeast
 
 
 {-| Is the `Nat` `AtMostOrAbove` a given number?
@@ -137,12 +135,9 @@ isAtMost :
             (Nat (In lowest atLeastUpperBound))
             (Nat (In (Nat1Plus upperBound) max))
 isAtMost upperBound =
-    \_ inNat ->
-        if val inNat <= (upperBound |> val) then
-            EqualOrLess (Internal.newRange inNat)
-
-        else
-            Above (Internal.newRange inNat)
+    \lowest ->
+        Internal.inIsAtMost upperBound lowest
+            >> fromInternalAtMostOrAbove
 
 
 {-| Is the `Nat` `LessOrEqualOrGreater` than a given number?
@@ -192,16 +187,9 @@ is :
             (Nat (In (Nat1Plus valueMinus1) atLeastValue))
             (Nat (In (Nat2Plus valueMinus1) max))
 is valueToCompareAgainst =
-    \_ inNat ->
-        case val2 compare inNat valueToCompareAgainst of
-            EQ ->
-                Equal (valueToCompareAgainst |> Nat.toIn)
-
-            GT ->
-                Greater (Internal.newRange inNat)
-
-            LT ->
-                Less (Internal.newRange inNat)
+    \lowest ->
+        Internal.inIs valueToCompareAgainst lowest
+            >> fromInternalLessOrEqualOrGreater
 
 
 {-| Compared to a range from a lower to an upper bound, is the `Nat` `BelowOrInOrAboveRange`?
@@ -256,15 +244,9 @@ isInRange :
             (Nat (In lowerBound atLeastUpperBound))
             (Nat (In (Nat1Plus upperBound) max))
 isInRange lowerBound upperBound =
-    \_ inNat ->
-        if val2 (<) inNat lowerBound then
-            BelowRange (Internal.newRange inNat)
-
-        else if val2 (>) inNat upperBound then
-            AboveRange (Internal.newRange inNat)
-
-        else
-            InRange (Internal.newRange inNat)
+    \lowest ->
+        Internal.inIsInRange lowerBound upperBound lowest
+            >> fromInternalBelowOrInOrAboveRange
 
 
 

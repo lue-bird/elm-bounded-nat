@@ -40,7 +40,8 @@ module MinNat exposing
 
 -}
 
-import I as Internal exposing (serializeValid)
+import Common exposing (fromInternalAtMostOrAbove, fromInternalBelowOrAtLeast, fromInternalLessOrEqualOrGreater, serializeValid)
+import I as Internal
 import InNat
 import Nat exposing (ArgIn, AtMostOrAbove(..), BelowOrAtLeast(..), In, Is, LessOrEqualOrGreater(..), Min, N, Nat, To)
 import Nats exposing (Nat0, Nat1Plus, Nat2Plus, nat0)
@@ -174,16 +175,9 @@ is :
             (Nat (In (Nat1Plus valueMinus1) atLeastValue))
             (Nat (Min (Nat2Plus valueMinus1)))
 is valueToCompareAgainst =
-    \_ minNat ->
-        case val2 compare minNat valueToCompareAgainst of
-            LT ->
-                Less (Internal.newRange minNat)
-
-            EQ ->
-                Equal (valueToCompareAgainst |> Nat.toIn)
-
-            GT ->
-                Greater (Internal.newRange minNat)
+    \lowest ->
+        Internal.minIs valueToCompareAgainst lowest
+            >> fromInternalLessOrEqualOrGreater
 
 
 {-| Is the `Nat` `BelowOrAtLeast` a given number?
@@ -228,12 +222,9 @@ isAtLeast :
             (Nat (In lowest maxLowerBoundMinus1))
             (Nat (Min minLowerBound))
 isAtLeast lowerBound =
-    \_ minNat ->
-        if val2 (>=) minNat lowerBound then
-            EqualOrGreater (Internal.newRange minNat)
-
-        else
-            Below (Internal.newRange minNat)
+    \lowest ->
+        Internal.minIsAtLeast lowerBound lowest
+            >> fromInternalBelowOrAtLeast
 
 
 {-| Is the `Nat` `AtMostOrAbove` a given number?
@@ -267,12 +258,9 @@ isAtMost :
             (Nat (In lowest maxUpperBound))
             (Nat (Min (Nat1Plus minUpperBound)))
 isAtMost upperBound =
-    \_ minNat ->
-        if val2 (<=) minNat upperBound then
-            EqualOrLess (Internal.newRange minNat)
-
-        else
-            Above (Internal.newRange minNat)
+    \lowest ->
+        Internal.minIsAtMost upperBound lowest
+            >> fromInternalAtMostOrAbove
 
 
 

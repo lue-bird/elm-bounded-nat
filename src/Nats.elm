@@ -160,14 +160,14 @@ If type aliases expand too much
 
 -}
 
-import I exposing (Is, N, Nat, S, To, Z, nNatAdd)
+import I exposing (Is, N, Nat, S, To, Z, nNatAdd, nNatSub)
 
 
 {-| The exact `Nat` 0.
 -}
 nat0 : Nat (N Nat0 a_ (Is a To a) (Is b To b))
 nat0 =
-    I.nat0
+    nat1 |> nNatSub ( nat1, nat1 )
 
 
 {-| The exact `Nat` 1.
