@@ -1,5 +1,7 @@
 module I exposing
     ( Differences, Infinity, Is, Nat, NatTag, NotN, To, N, ArgIn
+    , Z, S
+    , nat1
     , isIntInRange, isIntAtLeast, minIs, minIsAtLeast, minIsAtMost, inIsAtLeast, inIsAtMost, inIs, inIsInRange
     , BelowOrInOrAboveRange(..), LessOrEqualOrGreater(..), AtMostOrAbove(..), BelowOrAtLeast(..)
     , atLeast, atMost
@@ -10,8 +12,6 @@ module I exposing
     , lowerMin, toInNat, toMinNat
     , restoreMax
     , newRange
-    , Z, S
-    , nat0, nat1
     )
 
 {-| The internals of this package. Only this package can mark `Int`s as `Nat`s.
@@ -22,6 +22,16 @@ For performance reasons, the names are shortened, so that [`NNats`](NNats)'s com
 # types
 
 @docs Differences, Infinity, Is, Nat, NatTag, NotN, To, N, ArgIn
+
+
+## Nat types
+
+@docs Z, S
+
+
+# NNat
+
+@docs nat1
 
 
 # compare
@@ -69,19 +79,9 @@ For performance reasons, the names are shortened, so that [`NNats`](NNats)'s com
 @docs restoreMax
 
 
-## not type-safe
+# not type-safe
 
 @docs newRange
-
-
-## Nat types
-
-@docs Z, S
-
-
-## NNats
-
-@docs nat0, nat1
 
 -}
 
@@ -761,12 +761,7 @@ type alias Nat2Plus n =
 
 
 
--- # NNats
-
-
-nat0 : Nat (N Nat0 a_ (Is a To a) (Is b To b))
-nat0 =
-    nat1 |> nNatSub ( nat1, nat1 )
+-- # NNat
 
 
 nat1 : Nat (N Nat1 (Nat1Plus a_) (Is a To (Nat1Plus a)) (Is b To (Nat1Plus b)))

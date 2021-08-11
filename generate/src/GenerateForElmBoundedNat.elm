@@ -263,7 +263,7 @@ natsModule =
             noAlias
             (exposingExplicit
                 (aliasExpose [ "N", "Is", "To", "Nat", "S", "Z" ]
-                    ++ funExpose [ "nNatAdd" ]
+                    ++ funExpose [ "nNatAdd", "nNatSub" ]
                 )
             )
         ]
@@ -289,30 +289,39 @@ natsModule =
                         |> String.concat
                     )
                 ]
+            
+            nNatDoc x =
+                [ markdown
+                    ([ "The exact `Nat` ", x |> String.fromInt, "." ]
+                        |> String.concat
+                    )
+                ]
         in
-        [ [ 0, 1 ]
-            |> List.map
-                (\x ->
-                    packageExposedFunDecl NNatsValue
-                        [ markdown
-                            ([ "The exact `Nat` ", x |> String.fromInt, "." ]
-                                |> String.concat
-                            )
+        [ [ packageExposedFunDecl NNatsValue
+                (nNatDoc 0)
+                (natNAnn (nAnn 0))
+                (nNatX 0)
+                []
+                (applyBinOp
+                    (val "nat1")
+                    piper
+                    (construct "nNatSub"
+                        [ tuple (List.repeat 2 (val "nat1"))
                         ]
-                        (natNAnn (nAnn x))
-                        (nNatX x)
-                        []
-                        (fqVal [ "I" ] (nNatX x))
+                    )
                 )
+          , packageExposedFunDecl NNatsValue
+                (nNatDoc 1)
+                (natNAnn (nAnn 1))
+                (nNatX 1)
+                []
+                (fqVal [ "I" ] (nNatX 1))
+          ]
         , List.range 2 lastN
             |> List.map
                 (\x ->
                     packageExposedFunDecl NNatsValue
-                        [ markdown
-                            ([ "The exact `Nat` ", x |> String.fromInt, "." ]
-                                |> String.concat
-                            )
-                        ]
+                        (nNatDoc x)
                         (natNAnn (nAnn x))
                         (nNatX x)
                         []
