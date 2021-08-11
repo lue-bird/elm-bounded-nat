@@ -46,7 +46,6 @@ import InNat
 import Nat exposing (ArgIn, AtMostOrAbove(..), BelowOrAtLeast(..), In, Is, LessOrEqualOrGreater(..), Min, N, Nat, To)
 import Nats exposing (Nat0, Nat1Plus, Nat2Plus, nat0)
 import Serialize exposing (Codec)
-import Typed exposing (val2)
 
 
 
