@@ -2,7 +2,8 @@ module InNat exposing
     ( is, isInRange, isAtLeast, isAtMost
     , atLeast
     , add, sub, addIn, subIn
-    , serialize, Error, Expectation(..), errorToString
+    , serialize
+    , Error, Expectation(..), errorToString
     )
 
 {-| Operations when you know the `maximum` of the `Nat (ArgIn minimum maximum ifN_)`.
@@ -31,9 +32,14 @@ If the maximum isn't known, use the operations in [`MinNat`](MinNat).
 @docs add, sub, addIn, subIn
 
 
-# extra
+# transform
 
-@docs serialize, Error, Expectation, errorToString
+@docs serialize
+
+
+## error
+
+@docs Error, Expectation, errorToString
 
 -}
 

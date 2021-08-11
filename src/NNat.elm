@@ -3,7 +3,7 @@ module NNat exposing (add, sub)
 {-| Operations that can only be used with `Nat (N ...)`s. You will probably never need those.
 
 
-## modify
+# modify
 
 @docs add, sub
 

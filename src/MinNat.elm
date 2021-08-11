@@ -2,7 +2,8 @@ module MinNat exposing
     ( is, isAtLeast, isAtMost
     , atLeast
     , sub, add, subMax, addMin
-    , serialize, Error, errorToString, generalizeError
+    , serialize
+    , Error, errorToString, generalizeError
     )
 
 {-| 2 situations where you use these operations instead of the ones in [`Nat`](Nat) or [`InNat`](InNat):
@@ -34,9 +35,14 @@ module MinNat exposing
 @docs sub, add, subMax, addMin
 
 
-# extra
+# transform
 
-@docs serialize, Error, errorToString, generalizeError
+@docs serialize
+
+
+## error
+
+@docs Error, errorToString, generalizeError
 
 -}
 
@@ -329,7 +335,7 @@ serialize lowerBound =
         )
 
 
-{-| An error for when a decoded int is outside the expected bounds. You can transform it into
+{-| An error for when a decoded int is less than the expected minimum. You can transform it into
 
   - a message: [`errorToString`](MinNat#errorToString)
   - an [`InNat.Error`](InNat#Error): [`generalizeError`](MinNat#generalizeError)
