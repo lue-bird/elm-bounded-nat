@@ -135,8 +135,8 @@ nNatX x =
     [ "nat", x |> String.fromInt ] |> String.concat
 
 
-natNAnn : Generation.TypeAnnotation -> Generation.TypeAnnotation
-natNAnn n =
+natAnn : Generation.TypeAnnotation -> Generation.TypeAnnotation
+natAnn n =
     typed "Nat" [ n ]
 
 
@@ -236,7 +236,7 @@ natsModule =
                          ]
                             |> String.concat
                         )
-                    , markdown "See [`Nat.N`](Nat#N), [`Nat.N`](Nat#N) & [`NNat`](NNat) for an explanation."
+                    , markdown "See [`Nat.N`](Nat#N) for more details."
                     , markdown "##[types](#types)"
                     , markdown "Express exact natural numbers in a type."
                     , code "onlyExact1 : Nat (Only Nat1) -> Cake"
@@ -290,46 +290,40 @@ natsModule =
                     )
                 ]
             
-            nNatDoc x =
-                [ markdown
-                    ([ "The exact `Nat` ", x |> String.fromInt, "." ]
-                        |> String.concat
-                    )
-                ]
+            nNatDecl x implementation =
+                packageExposedFunDecl NNatsValue
+                    [ markdown
+                        ([ "The exact `Nat` ", x |> String.fromInt, "." ]
+                            |> String.concat
+                        )
+                    ]
+                    (natAnn (nAnn x))
+                    (nNatX x)
+                    []
+                    implementation
         in
-        [ [ packageExposedFunDecl NNatsValue
-                (nNatDoc 0)
-                (natNAnn (nAnn 0))
-                (nNatX 0)
-                []
+        [ [ nNatDecl 0
                 (applyBinOp
-                    (val "nat1")
+                    (val (nNatX 1))
                     piper
                     (construct "nNatSub"
-                        [ tuple (List.repeat 2 (val "nat1"))
+                        [ tuple (List.repeat 2 (val (nNatX 1)))
                         ]
                     )
                 )
-          , packageExposedFunDecl NNatsValue
-                (nNatDoc 1)
-                (natNAnn (nAnn 1))
-                (nNatX 1)
-                []
+          , nNatDecl 1
                 (fqVal [ "I" ] (nNatX 1))
           ]
         , List.range 2 lastN
             |> List.map
                 (\x ->
-                    packageExposedFunDecl NNatsValue
-                        (nNatDoc x)
-                        (natNAnn (nAnn x))
-                        (nNatX x)
-                        []
+                    nNatDecl x
                         (applyBinOp
                             (val (nNatX (x - 1)))
                             piper
                             (construct "nNatAdd"
-                                [ tuple (List.repeat 2 (val (nNatX 1))) ]
+                                [ tuple (List.repeat 2 (val (nNatX 1)))
+                                ]
                             )
                         )
                 )

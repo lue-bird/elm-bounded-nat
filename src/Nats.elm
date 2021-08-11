@@ -61,7 +61,7 @@ module Nats exposing
 
 `nat0 : Nat (N Nat0 ...)` to `nat160 : Nat (N Nat160 ...)`.
 
-See [`Nat.N`](Nat#N), [`Nat.N`](Nat#N) & [`NNat`](NNat) for an explanation.
+See [`Nat.N`](Nat#N) for more details.
 
 ##[types](#types)
 
