@@ -1,0 +1,10 @@
+{
+  "root": "../src",
+  "tests": [
+    "./README.md",
+    "Nat",
+    "InNat",
+    "MinNat",
+    "NNat"
+  ]
+}
