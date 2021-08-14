@@ -238,7 +238,7 @@ type alias To =
     Internal.To
 
 
-{-| `Is a To b`: an exact value as the diffference `b - a`.
+{-| `Is a To b`: an exact value as the difference `b - a`.
 
     N Nat5
         (Nat5Plus a_)
@@ -255,7 +255,7 @@ type alias Is a to b =
 
 {-| The most detailed description of an exact value.
 
-[`InNat.add`](InNat#add) for example uses this knowledg to describe the number as differences between other type variables.
+[`InNat.add`](InNat#add) for example uses this knowledge to describe the number as differences between other type variables.
 
     add :
         Nat

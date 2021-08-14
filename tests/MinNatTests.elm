@@ -39,7 +39,7 @@ listLength =
         (nat0 |> Nat.toMin)
 
 
-{-| recurses idefinitely for negative integers
+{-| recurses indefinitely for negative integers
 -}
 intFactorial : Int -> Int
 intFactorial x =

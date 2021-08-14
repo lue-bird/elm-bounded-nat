@@ -328,7 +328,7 @@ add nNatToAdd =
     Internal.inAdd nNatToAdd
 
 
-{-| Subtract a `Nat` taht isn't a `Nat (N ...)`.
+{-| Subtract a `Nat` that isn't a `Nat (N ...)`.
 
 The first 2 arguments are
 
