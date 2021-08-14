@@ -208,10 +208,12 @@ No extra work.
     charFromCode : Nat (ArgIn min_ max_ ifN_) -> Char
     ```
 
-Take a **look at [`typesafe-array`][typesafe-array]** to see a lot of this in action!
+## ready? go!
 
-You get to know that
-- a `Nat (ArgIn ...)` is very useful as an index
-- `In`, `Min`, `Only` can also describe the array length
+- Take a **look at [`typesafe-array`][typesafe-array]** to see a lot of this in action!
+
+    You get to know that
+    - a `Nat (ArgIn ...)` is very useful as an index
+    - `In`, `Min`, `Only` can also describe the array length
 
 [typesafe-array]: https://package.elm-lang.org/packages/lue-bird/elm-typesafe-array/latest/
