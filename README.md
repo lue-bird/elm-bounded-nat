@@ -3,7 +3,9 @@
 Type-safe natural numbers (>= 0) can ensure that a `Nat` is in a given range _at compile-time_.
 
 ```elm
-toHexChar : Nat (ArgIn _ Nat15 _) -> Char
+toHexChar :
+    Nat (ArgIn anyMinimum_ Nat15 _)
+    -> Char
 ```
 
 **No number below 0 or above 15** can be passed in as an argument!
@@ -57,7 +59,7 @@ an integer >= 0: `Nat`
     - at most 100: `Nat100`
     - which might be exact: `ifN_`
 
-They can prove it by
+Use can prove this by
 
   - using exact values
 
@@ -78,13 +80,9 @@ They can prove it by
   - clamping
 
     ```elm
-    greyFloatPercent float =
-        let
-            greyLevel =
-                Nat.intInRange nat0 nat100
-                    (float * 100 |> round)
-        in
-        rgbPercent greyLevel greyLevel greyLevel
+    floatPercent float =
+        Nat.intInRange nat0 nat100
+            (float * 100 |> round)
     ```
 
   - There are more ways, but you get the idea 🙂
