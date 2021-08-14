@@ -237,7 +237,7 @@ natsModule =
                             |> String.concat
                         )
                     , markdown "See [`Nat.N`](Nat#N) for more details."
-                    , markdown "##[types](#types)"
+                    , markdown "## [types](#types)"
                     , markdown "Express exact natural numbers in a type."
                     , code "onlyExact1 : Nat (Only Nat1) -> Cake"
                     , markdown "- `takesOnlyExact1 nat10` is a compile-time error"

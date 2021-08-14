@@ -63,7 +63,8 @@ module Nats exposing
 
 See [`Nat.N`](Nat#N) for more details.
 
-##[types](#types)
+
+## [types](#types)
 
 Express exact natural numbers in a type.
 
