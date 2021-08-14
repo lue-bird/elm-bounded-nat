@@ -5,9 +5,14 @@
 
 ## What you can do
 
+- use it
 - share your thoughts
+- add tests
 - add operations that might be useful
-    - note: `Nats` is [generated using elm](generate/src/GenerateForElmBoundedNat.elm)
+    - notes:
+        - `Nats` is [generated using elm](generate/src/GenerateForElmBoundedNat.elm)
+        - run `elm-review` and `elm-test` before creating a PR
+        - you don't need to `elm-verify-examples`
 
 If you have questions, don't hesitate to ask (e.g. start a discussion in github)!
 
