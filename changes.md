@@ -196,3 +196,7 @@ Corrected forgotten `maybeN`s & `min`s that were set to an exact value in doc.
 - moved `MinNat.value` to `Nat.toMin`
 - moved `InNat.value` to `Nat.toIn`
 - `Nat.isIntInRange` now returns an `Int` for if `BelowRange`
+
+#### 19.0.1
+
+- corrected spelling mistakes
