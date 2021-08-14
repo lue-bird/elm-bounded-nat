@@ -91,11 +91,11 @@ type alias Nat range =
     NatAs Checked range
 
 
-type NatTag range_
+type NatTag range
     = Nat
 
 
-type Is a_ to_ b_
+type Is a to b
     = Is Never
 
 
@@ -103,7 +103,7 @@ type To
     = To Never
 
 
-type ArgIn minimum_ maximum_ ifN_
+type ArgIn minimum maximum ifN
     = ArgIn Never
 
 
@@ -131,7 +131,7 @@ type alias Differences a b =
     D a b
 
 
-type D aDifference_ bDifference_
+type D aDifference bDifference
     = D Never
 
 
@@ -750,7 +750,7 @@ restoreMax =
 -- ## Nat types
 
 
-type S n_
+type S n
     = S Never
 
 
