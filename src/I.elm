@@ -80,11 +80,15 @@ For performance reasons, the names are shortened, so that [`NNats`](NNats)'s com
 -}
 
 import Random
-import Typed exposing (Checked, Public, Typed, isChecked, map, tag, val, val2)
+import Typed exposing (Checked, Public, Tagged, Typed, isChecked, map, tag, val, val2)
+
+
+type alias NatAs whoCanCreate range =
+    Typed whoCanCreate (NatTag range) Public Int
 
 
 type alias Nat range =
-    Typed Checked (NatTag range) Public Int
+    NatAs Checked range
 
 
 type NatTag range_
@@ -135,24 +139,12 @@ type D aDifference_ bDifference_
 -- ## not type-safe
 
 
-add : Nat addedRange_ -> Nat range_ -> Nat sumRange_
-add natToAdd =
-    val2 (+) natToAdd >> tag >> isChecked Nat
-
-
-sub : Nat subtractedRange_ -> Nat range_ -> Nat differenceRange_
-sub natToSubtract =
-    val2 (\toSub x -> x - toSub) natToSubtract
-        >> tag
-        >> isChecked Nat
-
-
 {-| Calls to this functions are unsafe.
 Should not be exposed in the future so that all unsafe operations are located here!
 -}
-newRange : Nat range_ -> Nat newRange_
+newRange : Nat range_ -> NatAs Tagged newRange_
 newRange =
-    val >> tag >> isChecked Nat
+    val >> tag
 
 
 
@@ -219,13 +211,13 @@ minIs valueToCompareAgainst =
     \_ minNat ->
         case val2 compare minNat valueToCompareAgainst of
             LT ->
-                Less (minNat |> newRange)
+                Less (minNat |> newRange |> isChecked Nat)
 
             EQ ->
                 Equal (valueToCompareAgainst |> toInNat)
 
             GT ->
-                Greater (minNat |> newRange)
+                Greater (minNat |> newRange |> isChecked Nat)
 
 
 minIsAtLeast :
@@ -253,10 +245,10 @@ minIsAtLeast :
 minIsAtLeast lowerBound =
     \_ minNat ->
         if val2 (>=) minNat lowerBound then
-            EqualOrGreater (minNat |> newRange)
+            EqualOrGreater (minNat |> newRange |> isChecked Nat)
 
         else
-            Below (minNat |> newRange)
+            Below (minNat |> newRange |> isChecked Nat)
 
 
 minIsAtMost :
@@ -279,10 +271,10 @@ minIsAtMost :
 minIsAtMost upperBound =
     \_ minNat ->
         if val2 (<=) minNat upperBound then
-            EqualOrLess (minNat |> newRange)
+            EqualOrLess (minNat |> newRange |> isChecked Nat)
 
         else
-            Above (minNat |> newRange)
+            Above (minNat |> newRange |> isChecked Nat)
 
 
 inIsAtLeast :
@@ -311,10 +303,10 @@ inIsAtLeast :
 inIsAtLeast lowerBound =
     \_ inNat ->
         if val2 (>=) inNat lowerBound then
-            EqualOrGreater (inNat |> newRange)
+            EqualOrGreater (inNat |> newRange |> isChecked Nat)
 
         else
-            Below (inNat |> newRange)
+            Below (inNat |> newRange |> isChecked Nat)
 
 
 inIsAtMost :
@@ -343,10 +335,10 @@ inIsAtMost :
 inIsAtMost upperBound =
     \_ inNat ->
         if val inNat <= (upperBound |> val) then
-            EqualOrLess (inNat |> newRange)
+            EqualOrLess (inNat |> newRange |> isChecked Nat)
 
         else
-            Above (inNat |> newRange)
+            Above (inNat |> newRange |> isChecked Nat)
 
 
 inIs :
@@ -380,10 +372,10 @@ inIs valueToCompareAgainst =
                 Equal (valueToCompareAgainst |> toInNat)
 
             GT ->
-                Greater (inNat |> newRange)
+                Greater (inNat |> newRange |> isChecked Nat)
 
             LT ->
-                Less (inNat |> newRange)
+                Less (inNat |> newRange |> isChecked Nat)
 
 
 inIsInRange :
@@ -421,13 +413,13 @@ inIsInRange :
 inIsInRange lowerBound upperBound =
     \_ inNat ->
         if val2 (<) inNat lowerBound then
-            BelowRange (inNat |> newRange)
+            BelowRange (inNat |> newRange |> isChecked Nat)
 
         else if val2 (>) inNat upperBound then
-            AboveRange (inNat |> newRange)
+            AboveRange (inNat |> newRange |> isChecked Nat)
 
         else
-            InRange (inNat |> newRange)
+            InRange (inNat |> newRange |> isChecked Nat)
 
 
 
@@ -499,7 +491,7 @@ intInRange lowerBound upperBound int =
             inRange
 
         BelowRange _ ->
-            lowerBound |> newRange
+            lowerBound |> newRange |> isChecked Nat
 
         AboveRange _ ->
             upperBound |> lowerMin lowerBound
@@ -568,6 +560,11 @@ toPower power =
     map (\x -> x ^ val power) >> isChecked Nat
 
 
+add : Nat addedRange_ -> Nat range_ -> Nat sumRange_
+add natToAdd =
+    val2 (+) natToAdd >> tag >> isChecked Nat
+
+
 nNatAdd :
     ( Nat (N added atLeastFirstAdded_ (Is n To sum) (Is atLeastN To atLeastSum))
     , Nat
@@ -632,6 +629,13 @@ inAdd :
     -> Nat (In sumMin sumMax)
 inAdd nNatToAdd =
     add nNatToAdd
+
+
+sub : Nat subtractedRange_ -> Nat range_ -> Nat differenceRange_
+sub natToSubtract =
+    val2 (\toSub x -> x - toSub) natToSubtract
+        >> tag
+        >> isChecked Nat
 
 
 nNatSub :
@@ -717,17 +721,17 @@ lowerMin :
     -> Nat (ArgIn min max ifN_)
     -> Nat (In newMin max)
 lowerMin =
-    \_ -> newRange
+    \_ -> newRange >> isChecked Nat
 
 
 toInNat : Nat (ArgIn min max ifN_) -> Nat (In min max)
 toInNat =
-    newRange
+    newRange >> isChecked Nat
 
 
 toMinNat : Nat (ArgIn min max_ ifN_) -> Nat (Min min)
 toMinNat =
-    newRange
+    newRange >> isChecked Nat
 
 
 
@@ -739,7 +743,7 @@ restoreMax :
     -> Nat (ArgIn min max ifN)
     -> Nat (ArgIn min newMax ifN)
 restoreMax =
-    \_ -> newRange
+    \_ -> newRange >> isChecked Nat
 
 
 
