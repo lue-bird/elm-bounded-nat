@@ -29,9 +29,3 @@ look like this
 | ✓ ...    | correct |
 | -< ...   | split   |
 | >- ...   | merge   |
-
-#### Others
-| mark        | means         |
-| :---------- | :------------ |
-| #...        | see           |
-| ! ...       | attention     |
