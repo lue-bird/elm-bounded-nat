@@ -179,7 +179,7 @@ No extra work.
 
 ## tips
 
-  - keep _as much type information as possible_ and drop it only where you need to.
+  - keep _as much type information as possible_ and drop it only where you need to: ["Wrap early, unwrap late"](https://sporto.github.io/elm-patterns/basic/wrap-early.html)
 
   - keep your _function annotations as general as possible_
     
