@@ -4,6 +4,7 @@
 
 - removed `Nat.theGreater` and `Nat.theSmaller` in favor of the more general versions `Typed.max` & `Typed.min`
 - exposed `Nat.NoMax`
+- simplified readme
 
 #### 19.0.1
 
