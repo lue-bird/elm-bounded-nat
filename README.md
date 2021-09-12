@@ -1,14 +1,14 @@
 ## bounded-nat
 
-Type-safe natural numbers (>= 0) can ensure that a `Nat` is in a given range _at compile-time_.
+Type-safe natural numbers >= 0 that can ensure is in a given range _at compile-time_.
 
 ```elm
 toHexChar :
-    Nat (ArgIn anyMinimum_ Nat15 _)
+    Nat (ArgIn anyMinimum_ Nat15 couldBeExact_)
     -> Char
 ```
 
-**No number below 0 or above 15** can be passed in as an argument!
+**Only numbers from 0 to 15** can be passed in as an argument!
 
 # examples
 
@@ -59,7 +59,7 @@ an integer >= 0: `Nat`
     - at most 100: `Nat100`
     - which might be exact: `ifN_`
 
-Use can prove this by
+Users can prove this by
 
   - using exact values
 
@@ -102,16 +102,13 @@ You might be able to do anything with this `Int` value, but you lost useful info
 - Can the result even have multiple digits?
 
 ```elm
-toDigit : Char -> Maybe Digit
-
-type alias Digit =
-    Nat (In Nat0 Nat9)
+toDigit : Char -> Maybe (Nat (In Nat0 (Nat9Plus a_)))
 ```
 
 The type of a value reflects how much you know.
 
-- between a minimum & maximum value: `In`
 - at least a minimum value: `Min`
+- between a minimum & maximum value: `In`
 - exact value: `N`
     - can describe the difference between 2 values → useful for adding/subtracting/...
 
