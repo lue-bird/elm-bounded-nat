@@ -203,5 +203,5 @@ Corrected forgotten `maybeN`s & `min`s that were set to an exact value in doc.
 
 ### 20.0.0
 
-- removed `Nat.theGreater` and `Nat.theSmaller` in favor of the more general versions in `Typed`
+- removed `Nat.theGreater` and `Nat.theSmaller` in favor of the more general versions `Typed.min` & `Typed.max`
 - exposed `Nat.NoMax`
