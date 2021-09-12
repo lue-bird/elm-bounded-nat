@@ -6,15 +6,11 @@ module InNat exposing
     , Error, Expectation(..), errorToString
     )
 
-{-| Operations when you know the `maximum` of the `Nat (ArgIn minimum maximum ifN_)`.
+{-| If a `Nat` has a maximum (not [`NoMax`](Nat#NoMax)) you should use operations from `InNat` instead of [`MinNat`](MinNat).
 
 For example for the argument in
 
     toHexChar : Nat (ArgIn min_ Nat15 ifN_) -> Char
-
-you should use `InNat` operations.
-
-If the maximum isn't known, use the operations in [`MinNat`](MinNat).
 
 
 # compare
@@ -45,7 +41,7 @@ If the maximum isn't known, use the operations in [`MinNat`](MinNat).
 
 import Common exposing (fromInternalAtMostOrAbove, fromInternalBelowOrAtLeast, fromInternalBelowOrInOrAboveRange, fromInternalLessOrEqualOrGreater, serializeValid)
 import I as Internal exposing (toMinNat)
-import Nat exposing (ArgIn, AtMostOrAbove(..), BelowOrAtLeast(..), BelowOrInOrAboveRange(..), In, Is, LessOrEqualOrGreater(..), Min, N, Nat, To)
+import Nat exposing (ArgIn, AtMostOrAbove, BelowOrAtLeast, BelowOrInOrAboveRange(..), In, Is, LessOrEqualOrGreater, Min, N, Nat, To)
 import Nats exposing (Nat0, Nat1Plus, Nat2Plus, nat0)
 import Serialize exposing (Codec)
 import Typed exposing (val)
@@ -311,7 +307,7 @@ addIn minAdded maxAdded inNatToAdd =
         |> InNat.add nat7
     --> : Nat (In Nat77 (Nat107Plus a_))
 
-Use [addIn](InNat#addIn) if you want to add a `Nat` that isn't a `Nat (N ...)`.
+Use [addIn](#addIn) if you want to add a `Nat` that isn't a `Nat (N ...)`.
 
 -}
 add :

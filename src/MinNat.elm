@@ -6,7 +6,7 @@ module MinNat exposing
     , Error, errorToString, generalizeError
     )
 
-{-| 2 situations where you use these operations instead of the ones in [`Nat`](Nat) or [`InNat`](InNat):
+{-| In 2 situations you should use the operations in `MinNat` instead of the ones in [`InNat`](InNat):
 
 1.  Your value is of type `Nat (Min ...)`
 
@@ -49,7 +49,7 @@ module MinNat exposing
 import Common exposing (fromInternalAtMostOrAbove, fromInternalBelowOrAtLeast, fromInternalLessOrEqualOrGreater, serializeValid)
 import I as Internal
 import InNat
-import Nat exposing (ArgIn, AtMostOrAbove(..), BelowOrAtLeast(..), In, Is, LessOrEqualOrGreater(..), Min, N, Nat, To)
+import Nat exposing (ArgIn, AtMostOrAbove, BelowOrAtLeast, In, Is, LessOrEqualOrGreater, Min, N, Nat, To)
 import Nats exposing (Nat0, Nat1Plus, Nat2Plus, nat0)
 import Serialize exposing (Codec)
 
