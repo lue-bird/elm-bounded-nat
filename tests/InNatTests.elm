@@ -1,4 +1,4 @@
-module InNatTests exposing (suite)
+module InNatTests exposing (suite, toDigit)
 
 {-| Especially type tests.
 -}
@@ -13,7 +13,23 @@ import Test exposing (Test, describe, test)
 suite : Test
 suite =
     describe "InNat"
-        []
+        [ describe "toDigit"
+            [ test "from invalid char"
+                (\() ->
+                    [ 'a', '/', ':' ]
+                        |> List.map toDigit
+                        |> Expect.equalLists
+                            (List.repeat 3 Nothing)
+                )
+            , test "from valid char"
+                (\() ->
+                    [ '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' ]
+                        |> List.map toDigit
+                        |> Expect.equalLists
+                            (Nat.range nat0 nat9 |> List.map Just)
+                )
+            ]
+        ]
 
 
 
@@ -62,3 +78,19 @@ grey float =
                 (float * 100 |> round)
     in
     rgbPer100 greyLevel greyLevel greyLevel
+
+
+toDigit : Char -> Maybe (Nat (In Nat0 (Nat9Plus a_)))
+toDigit char =
+    case
+        (Char.toCode char - Char.toCode '0')
+            |> Nat.isIntInRange nat0 nat9
+    of
+        Nat.InRange digit ->
+            Just digit
+
+        Nat.BelowRange _ ->
+            Nothing
+
+        Nat.AboveRange _ ->
+            Nothing
