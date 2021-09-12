@@ -11,8 +11,9 @@ when inside the directory containing this file.
 
 -}
 
-import Review.Rule exposing (Rule)
+import Review.Rule as Rule exposing (Rule)
 import NoUnused.Dependencies
+import NoUnused.Variables
 import OnlyAllSingleUseTypeVarsEndWith_
 import NoSinglePatternCase
 import NoLeftPizza
@@ -22,11 +23,15 @@ import NoMissingTypeAnnotation
 import NoForbiddenWords
 import NoBooleanCase
 import NoPrematureLetComputation
+import NoRecordAliasConstructor
+import LinksPointToExistingPackageMembers
 
 
 config : List Rule
 config =
     [ NoUnused.Dependencies.rule
+    , NoUnused.Variables.rule
+        |> Rule.ignoreErrorsForDirectories [ "tests/" ]
     , OnlyAllSingleUseTypeVarsEndWith_.rule
     , NoSinglePatternCase.rule
         (NoSinglePatternCase.fixInArgument
@@ -40,7 +45,9 @@ config =
     , NoExposingEverything.rule
     , NoImportingEverything.rule [ "Nats" ]
     , NoMissingTypeAnnotation.rule
-    , NoForbiddenWords.rule [ "TODO", "todo" ]
+    , NoForbiddenWords.rule [ "TODO", "todo", "REPLACEME" ]
     , NoBooleanCase.rule
     , NoPrematureLetComputation.rule
+    , NoRecordAliasConstructor.rule
+    , LinksPointToExistingPackageMembers.rule
     ]
