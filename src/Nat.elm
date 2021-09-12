@@ -1,10 +1,10 @@
 module Nat exposing
     ( Nat
-    , Min, In, Only
+    , Min, In, NoMax
     , N, Is, To
-    , ArgIn
+    , ArgIn, Only
     , abs, range, random
-    , isIntInRange, isIntAtLeast, theGreater, theSmaller
+    , isIntInRange, isIntAtLeast
     , AtMostOrAbove(..), BelowOrAtLeast(..), BelowOrInOrAboveRange(..), LessOrEqualOrGreater(..)
     , intAtLeast, intInRange, atMost
     , toPower, remainderBy, mul, div
@@ -22,7 +22,7 @@ module Nat exposing
 
 ## value / return type
 
-@docs Min, In, Only
+@docs Min, In, NoMax
 
 
 ### n
@@ -32,7 +32,7 @@ module Nat exposing
 
 ## argument-only types
 
-@docs ArgIn
+@docs ArgIn, Only
 
 
 # create
@@ -42,7 +42,7 @@ module Nat exposing
 
 # compare
 
-@docs isIntInRange, isIntAtLeast, theGreater, theSmaller
+@docs isIntInRange, isIntAtLeast
 
 
 ## comparison result
@@ -74,7 +74,7 @@ module Nat exposing
 import I as Internal exposing (NatTag)
 import Nats exposing (Nat0, Nat1Plus)
 import Random
-import Typed exposing (Checked, Public, Typed, val2)
+import Typed exposing (Checked, Public, Typed)
 
 
 {-| A **bounded** natural number (`>= 0`).
@@ -83,10 +83,10 @@ import Typed exposing (Checked, Public, Typed, val2)
 ### argument-only type
 
     -- >= 4
-    Nat (ArgIn (Nat4Plus minMinus4) max ifN_)
+    Nat (ArgIn (Nat4Plus minMinus4_) max_ ifN_)
 
     -- 4 <= nat <= 15
-    Nat (ArgIn (Nat4Plus minMinus4) Nat15 ifN_)
+    Nat (ArgIn (Nat4Plus minMinus4_) Nat15 ifN_)
 
     -- any, just >= 0
     Nat range
@@ -181,8 +181,8 @@ A number, at least 5:
   - `ifN_` could contain extra information if the argument is a `Nat (N ...)`
 
 -}
-type alias ArgIn minimum maximum ifN_ =
-    Internal.ArgIn minimum maximum ifN_
+type alias ArgIn minimum maximum ifN =
+    Internal.ArgIn minimum maximum ifN
 
 
 {-| Only **value / return types should be `Min`**.
@@ -203,7 +203,37 @@ Every `Min min` is of type `In min`.
 
 -}
 type alias Min minimum =
-    In minimum Internal.Infinity
+    In minimum NoMax
+
+
+{-| Don't check if this number is below a maximum.
+
+    type alias Min minimum =
+        In minimum NoMax
+
+is the definition of [`Min`](#Min).
+
+An example where this is useful using [typesafe-array](https://package.elm-lang.org/packages/lue-bird/elm-typesafe-array/latest/):
+
+    type Tree maximumChildCount a
+        = Tree
+            a
+            (Arr
+                (In Nat0 maximumChildCount)
+                (Maybe (Tree maximumChildCount a))
+            )
+
+    type alias RoseTree a =
+        Tree a NoMax
+
+    type alias BinaryTree a =
+        Tree Nat2 a
+
+(btw, feel free to create a package with this type ^^)
+
+-}
+type alias NoMax =
+    Internal.NoMax
 
 
 {-| Expect an exact number.
@@ -268,7 +298,7 @@ type alias Is a to b =
         -> Nat (ArgIn min max ifN_)
         -> Nat (In sumMin sumMax)
 
-You can just ignore the second difference if you don't need it ([`MinNat.add`](MinNat#add)).
+You can just ignore the second difference if you don't need it like for example [`MinNat.add`](MinNat#add):
 
     add :
         Nat
@@ -309,7 +339,7 @@ Really only use this if you want the absolute value.
             )
             (nat0 |> Nat.toMin)
 
-If something like this isn't possible, [`MinNat.intAtLeast`](MinNat#intAtLeast) is the best way!
+If something like this isn't possible, [`MinNat.intAtLeast`](Nat#intAtLeast) is the best way!
 
 -}
 abs : Int -> Nat (Min Nat0)
@@ -327,7 +357,7 @@ abs int =
 
 The resulting `List` always has >= 1 element.
 
-With [nats in typesafe-array](https://package.elm-lang.org/packages/lue-bird/elm-typesafe-array/latest/Arr#nats) the type even knows the length! Try it.
+Using a [typesafe-array](https://package.elm-lang.org/packages/lue-bird/elm-typesafe-array/latest/Arr#nats) the type even knows the length! Try it.
 
 -}
 range :
@@ -350,40 +380,6 @@ random :
     -> Random.Generator (Nat (In lowerBoundMin upperBoundMax))
 random lowest highest =
     Internal.random lowest highest
-
-
-{-| The greater of 2 `Nat`s.
-
-    Nat.theGreater
-        between1And3
-        (atLeast4 |> Nat.lowerMin nat1)
-    --> : Nat (Min Nat1)
-
--}
-theGreater : Nat range -> Nat range -> Nat range
-theGreater a b =
-    if val2 (>) a b then
-        a
-
-    else
-        b
-
-
-{-| The smaller of 2 `Nat`s.
-
-    Nat.theSmaller
-        (nat3 |> Nat.toMin)
-        (atLeast4 |> Nat.lowerMin nat3)
-    --> Nat 3 : Nat (Min Nat3)
-
--}
-theSmaller : Nat range -> Nat range -> Nat range
-theSmaller a b =
-    if val2 (<) a b then
-        a
-
-    else
-        b
 
 
 {-| Compared to a range from a lower to an upper bound, is the `Int` `BelowOrInOrAboveRange`?
@@ -435,6 +431,21 @@ isIntInRange lowerBound upperBound int =
 
 99 |> Nat.intInRange nat3 nat12
 --> Nat 12 : Nat (In Nat3 (Nat12Plus a_))
+
+toDigit : Char -> Maybe (Nat (In Nat0 (Nat9Plus a_)))
+toDigit char =
+    case
+        (Char.toCode char - Char.toCode '0')
+            |> Nat.isIntInRange nat0 nat9
+    of
+        Nat.InRange digit ->
+            Just digit
+
+        Nat.BelowRange _ ->
+            Nothing
+
+        Nat.AboveRange _ ->
+            Nothing
 ```
 
 If you want to handle the cases `< minimum` & `> maximum` explicitly, use [`isIntInRange`](Nat#isIntInRange).
@@ -449,7 +460,7 @@ intInRange lowerBound upperBound int =
     Internal.intInRange lowerBound upperBound int
 
 
-{-| If the `Int >= a minimum`, `Just` the `Nat (Min minimum)`, else `Nothing`.
+{-| If the `Int >= a minimum`, return `Just` the `Nat (Min minimum)`, else `Nothing`.
 
     4 |> Nat.isIntAtLeast nat5
     --> Nothing : Maybe (Nat (Min Nat5))
@@ -684,9 +695,9 @@ toMin =
 
 You should design type annotations as general as possible.
 
-    onlyAtMost18 : Nat (ArgIn min_ Nat18 ifN_)
+    onlyAtMost18 : Nat (ArgIn min_ Nat18 ifN_) -> Fine
 
-    onlyAtMost18 between3And8 -- fine
+    onlyAtMost18 between3And8 --> Fine
 
 But once you implement `onlyAtMost18`, you might use the value in `onlyAtMost19`.
 
