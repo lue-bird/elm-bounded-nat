@@ -2,42 +2,34 @@
 
 A typed natural number >= 0 that has extra information about its range _at compile-time_.
 
-#### Appetizer:
+## example: `toHexChar`
+
+```elm
+toHexChar : Int -> Char
+```
+
+- the _type_ doesn't tell us that a `Float` between 0 & 15 is wanted
+- _the one implementing_ it has to handle the cases where a value is not between 0 & 15
+
+with `bounded-nat`:
 ```elm
 toHexChar :
     Nat (ArgIn anyMinimum_ Nat15 couldBeExact_)
     -> Char
 ```
 
-**Only numbers from 0 to 15** can be passed in as an argument!
-
-## example: percent
-
-```elm
-percent : Float -> Length
-```
-
-- the _type_ doesn't tell us that a `Float` between 0 & 1 is wanted
-- _the one implementing_ it has to handle the cases where a value is not between 0 & 1
-
-with `bounded-nat`:
-```elm
-percent :
-    Nat (ArgIn min_ Nat100 ifN_)
-    -> Length
-```
-- the type tells us that a number between 0 & 100 is wanted
-- _the user_ it must prove that the number is actually between 0 & 100
+- the type tells us that a number between 0 & 15 is wanted
+- _the user_ it must prove that the number is actually between 0 & 15
 
 The type of the argument
 ```elm
-Nat (ArgIn min_ Nat100 ifN_)
+Nat (ArgIn min_ Nat15 ifN_)
 ```
 Says: Give me an integer >= 0: `Nat` 
 
 - in a range: `ArgIn`
     - at least 0 → any minimum value is fine: `min_`
-    - at most 100: `Nat100`
+    - at most 15: `Nat15`
     - which might be `nat0`, `nat1`, ...: `ifN_`
 
 Users can prove this by
@@ -45,7 +37,8 @@ Users can prove this by
   - using exact values
 
     ```elm
-    twoThirds = percent nat67
+    toHexChar nat2
+    --> 'c'
 
     red = rgbPercent nat100 nat0 nat0 -- 👍
     ```
@@ -71,7 +64,7 @@ Users can prove this by
 &emsp;
 
 
-## example: digit
+## example: `toDigit`
 
 ```elm
 toDigit : Char -> Maybe Int
@@ -97,7 +90,7 @@ The type of a value reflects how much you know.
 &emsp;
 
 
-## example: factorial
+## example: `factorial`
 
 ```elm
 intFactorial : Int -> Int
