@@ -1,5 +1,5 @@
 module I exposing
-    ( Differences, Infinity, Is, Nat, NatTag, NotN, To, N, ArgIn
+    ( Differences, NoMax, Is, Nat, NatTag, NotN, To, N, ArgIn
     , Z, S
     , nat1
     , isIntInRange, isIntAtLeast, minIs, minIsAtLeast, minIsAtMost, inIsAtLeast, inIsAtMost, inIs, inIsInRange
@@ -13,14 +13,14 @@ module I exposing
     , restoreMax
     )
 
-{-| The internals of this package. Only this package can mark `Int`s as `Nat`s.
+{-| The internals of this package. Only this package can mark `Int`s as `Nat`s. These `isChecked Nat` calls should be minimized.
 
-For performance reasons, the names are shortened, so that [`NNats`](NNats)'s compiling performance is better.
+For performance reasons, the names are shortened, so that [`Nats`](Nats)'s compiling performance is better.
 
 
 # types
 
-@docs Differences, Infinity, Is, Nat, NatTag, NotN, To, N, ArgIn
+@docs Differences, NoMax, Is, Nat, NatTag, NotN, To, N, ArgIn
 
 
 ## Nat types
@@ -108,11 +108,11 @@ type ArgIn minimum maximum ifN
 
 
 type alias Min minimum =
-    In minimum Infinity
+    In minimum NoMax
 
 
-type Infinity
-    = Infinity Never
+type NoMax
+    = NoMax Never
 
 
 type alias In minimum maximum =
