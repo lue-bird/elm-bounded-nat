@@ -14,7 +14,7 @@
         - run `elm-review` and `elm-test` before creating a PR
         - you don't need to `elm-verify-examples`
 
-If you have questions, don't hesitate to ask (e.g. start a discussion in github)!
+If you have questions, don't hesitate to ask (e.g. in slack (@lue lue.the.bird@gmail.com) or by starting a discussion in github)!
 
 ## commits
 look like this
