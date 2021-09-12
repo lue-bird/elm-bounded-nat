@@ -1,7 +1,7 @@
 module InNat exposing
-    ( is, isInRange, isAtLeast, isAtMost
+    ( add, sub, addIn, subIn
+    , is, isInRange, isAtLeast, isAtMost
     , atLeast
-    , add, sub, addIn, subIn
     , serialize
     , Error, Expectation(..), errorToString
     )
@@ -13,6 +13,11 @@ For example for the argument in
     toHexChar : Nat (ArgIn min_ Nat15 ifN_) -> Char
 
 
+# modify
+
+@docs add, sub, addIn, subIn
+
+
 # compare
 
 @docs is, isInRange, isAtLeast, isAtMost
@@ -21,11 +26,6 @@ For example for the argument in
 ## clamp
 
 @docs atLeast
-
-
-# modify
-
-@docs add, sub, addIn, subIn
 
 
 # transform

@@ -1,7 +1,7 @@
 module MinNat exposing
-    ( is, isAtLeast, isAtMost
+    ( sub, add, subMax, addMin
+    , is, isAtLeast, isAtMost
     , atLeast
-    , sub, add, subMax, addMin
     , serialize
     , Error, errorToString, generalizeError
     )
@@ -20,6 +20,11 @@ module MinNat exposing
             ...
 
 
+# modify
+
+@docs sub, add, subMax, addMin
+
+
 # compare
 
 @docs is, isAtLeast, isAtMost
@@ -28,11 +33,6 @@ module MinNat exposing
 ## clamp
 
 @docs atLeast
-
-
-# modify
-
-@docs sub, add, subMax, addMin
 
 
 # transform
