@@ -4,7 +4,6 @@ module MinNatTests exposing (suite)
 -}
 
 import Expect
-import InNat
 import MinNat
 import Nat exposing (ArgIn, In, Min, Nat)
 import Nats exposing (..)
