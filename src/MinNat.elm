@@ -133,7 +133,7 @@ subMax maxSubtracted inNatToSubtract =
 -- # compare
 
 
-{-| Is the `Nat` `LessOrEqualOrGreater` than a given number?
+{-| Is the `Nat` [`LessOrEqualOrGreater`](Nat#LessOrEqualOrGreater) than a given number?
 
 `lowest` can be a number <= the minimum.
 
@@ -185,7 +185,7 @@ is valueToCompareAgainst =
             >> fromInternalLessOrEqualOrGreater
 
 
-{-| Is the `Nat` `BelowOrAtLeast` a given number?
+{-| Is the `Nat` [`BelowOrAtLeast`](Nat#BelowOrAtLeast) a given number?
 
     factorial : Nat (ArgIn min_ max_ ifN_) -> Nat (Min Nat1)
     factorial =
@@ -232,7 +232,7 @@ isAtLeast lowerBound =
             >> fromInternalBelowOrAtLeast
 
 
-{-| Is the `Nat` `AtMostOrAbove` a given number?
+{-| Is the `Nat` [`AtMostOrAbove`](Nat#AtMostOrAbove) a given number?
 
     goToU18Party : { age : Nat (ArgIn min_ Nat17 ifN_) } -> Snack
 

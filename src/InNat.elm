@@ -51,7 +51,7 @@ import Typed exposing (val)
 -- # compare
 
 
-{-| Is the `Nat` `BelowOrAtLeast` as big as a given number?
+{-| Is the `Nat` [`BelowOrAtLeast`](Nat#BelowOrAtLeast) as big as a given number?
 
 `lowest` can be a number <= the minimum.
 
@@ -98,7 +98,7 @@ isAtLeast lowerBound =
             >> fromInternalBelowOrAtLeast
 
 
-{-| Is the `Nat` `AtMostOrAbove` a given number?
+{-| Is the `Nat` [`AtMostOrAbove`](Nat#AtMostOrAbove) a given number?
 
 `lowest` can be a number <= the minimum.
 
@@ -142,7 +142,7 @@ isAtMost upperBound =
             >> fromInternalAtMostOrAbove
 
 
-{-| Is the `Nat` `LessOrEqualOrGreater` than a given number?
+{-| Is the `Nat` [`LessOrEqualOrGreater`](Nat#LessOrEqualOrGreater) than a given number?
 
 `lowest` can be a number <= the minimum.
 
@@ -194,7 +194,7 @@ is valueToCompareAgainst =
             >> fromInternalLessOrEqualOrGreater
 
 
-{-| Compared to a range from a lower to an upper bound, is the `Nat` `BelowOrInOrAboveRange`?
+{-| Compared to a range from a lower to an upper bound, is the `Nat` [`BelowOrInOrAboveRange`](Nat#BelowOrInOrAboveRange)?
 
 `lowest` can be a number <= the minimum.
 

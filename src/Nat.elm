@@ -382,7 +382,7 @@ random lowest highest =
     Internal.random lowest highest
 
 
-{-| Compared to a range from a lower to an upper bound, is the `Int` `BelowOrInOrAboveRange`?
+{-| Compared to a range from a lower to an upper bound, is the `Int` [`BelowOrInOrAboveRange`](Nat#BelowOrInOrAboveRange)?
 
     rejectOrAcceptUserInt :
         Int
