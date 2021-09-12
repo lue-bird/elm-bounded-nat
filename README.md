@@ -1,7 +1,8 @@
 ## bounded-nat
 
-Type-safe natural numbers >= 0 that can ensure is in a given range _at compile-time_.
+A typed natural number >= 0 that has extra information about its range _at compile-time_.
 
+#### Appetizer:
 ```elm
 toHexChar :
     Nat (ArgIn anyMinimum_ Nat15 couldBeExact_)
@@ -10,54 +11,34 @@ toHexChar :
 
 **Only numbers from 0 to 15** can be passed in as an argument!
 
-# examples
-
-```noformatingples
-elm install lue-bird/elm-typed-value
-elm install lue-bird/elm-bounded-nat
-```
-
-```elm
-import Nat exposing (Nat, Min, In, ArgIn)
-import InNat
-import MinNat
-import Nats exposing (..)
-    -- nat0-160, Nat0-160 & -Plus
-
-import Typed
-```
-
-
-## percent
+## example: percent
 
 ```elm
 percent : Float -> Length
 ```
-is common.
-- _the one implementing_ it has to handle the cases where a value is not between 0 and 1
-- the _type_ doesn't tell us that a `Float` between 0 & 1 is wanted
 
-with `bounded-nat`
+- the _type_ doesn't tell us that a `Float` between 0 & 1 is wanted
+- _the one implementing_ it has to handle the cases where a value is not between 0 & 1
+
+with `bounded-nat`:
 ```elm
 percent :
     Nat (ArgIn min_ Nat100 ifN_)
     -> Length
 ```
-- _the user_ it must prove that the numbers are actually between 0 and 100
-- the type tells us that a number 0 to 100 is wanted
+- the type tells us that a number between 0 & 100 is wanted
+- _the user_ it must prove that the number is actually between 0 & 100
 
-The type
+The type of the argument
 ```elm
 Nat (ArgIn min_ Nat100 ifN_)
 ```
-is saying it wants:
-
-an integer >= 0: `Nat` 
+Says: Give me an integer >= 0: `Nat` 
 
 - in a range: `ArgIn`
-    - at least 0 → any minimum value: `min_`
+    - at least 0 → any minimum value is fine: `min_`
     - at most 100: `Nat100`
-    - which might be exact: `ifN_`
+    - which might be `nat0`, `nat1`, ...: `ifN_`
 
 Users can prove this by
 
@@ -90,7 +71,7 @@ Users can prove this by
 &emsp;
 
 
-## digit
+## example: digit
 
 ```elm
 toDigit : Char -> Maybe Int
@@ -116,7 +97,7 @@ The type of a value reflects how much you know.
 &emsp;
 
 
-## factorial
+## example: factorial
 
 ```elm
 intFactorial : Int -> Int
@@ -137,26 +118,25 @@ factorial : Nat (ArgIn min_ max_ ifN_) -> Nat (Min Nat1)
 factorial =
     factorialBody
 ```
-Says: for every natural number `n >= 0`, `n! >= 1`.
+Says: For every `n >= 0`, `n! >= 1`.
 ```elm
-factorialBody : -- as in factorial
-factorialBody =
+factorialBody : Nat (ArgIn min_ max_ ifN_) -> Nat (Min Nat1)
+factorialBody x =
     case x |> MinNat.isAtLeast nat1 { lowest = nat0 } of
         Nat.Below _ ->
             Nat.toMin nat1
 
         Nat.EqualOrGreater atLeast1 ->
-            -- atLeast1 is a Nat (Min Nat1)
-            Nat.mul atLeast1
-                (factorial
-                    (atLeast1 |> MinNat.sub nat1)
-                    -- so we can subtract 1
-                )
+            -- atLeast1 --> : Nat (Min Nat1)
+            -- so subtracting 1, we're still >= 0
+            factorial
+                (atLeast1 |> MinNat.sub nat1)
+                |> Nat.mul atLeast1
 
 factorial nat4 --> Nat 24
 ```
 
-→ There is no way to put a negative number in.
+→ You can't put a negative number in.
 
 → We have the extra promise, that every result is `>= 1`
 
@@ -173,6 +153,23 @@ safeFactorial =
 
 No extra work.
 
+## setup
+
+```noformatingples
+elm install lue-bird/elm-typed-value
+elm install lue-bird/elm-bounded-nat
+```
+
+```elm
+import Nat exposing (Nat, Min, In, ArgIn)
+import InNat
+import MinNat
+import Nats exposing (..)
+    -- nat0-160, Nat0-160 & -Plus
+
+import Typed
+```
+
 
 ## tips
 
@@ -180,7 +177,7 @@ No extra work.
 
   - keep your _function annotations as general as possible_
     
-    Instead of accepting only exact values
+    Instead of accepting only `nat0`, `nat1`, ... values in a range
 
     ```elm
     percent :
@@ -199,7 +196,7 @@ No extra work.
     charFromCode : Nat (Min min_) -> Char
     ```
 
-    which you should also never do, allow `Nat (In min ...)` with any max & `Nat (N ...)` to fit in as well!
+    which you should also never do, allow `Nat (In min_ ...)` with any max & `Nat (N ...)` to fit in as well:
 
     ```elm
     charFromCode : Nat (ArgIn min_ max_ ifN_) -> Char
