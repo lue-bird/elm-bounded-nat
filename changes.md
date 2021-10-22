@@ -1,5 +1,9 @@
 # changelog
 
+#### 20.0.1
+
+- updated `typed-value` to 6.0.0
+
 ### 20.0.0
 
 - removed `Nat.theGreater` and `Nat.theSmaller` in favor of the more general versions `Typed.max` & `Typed.min`
