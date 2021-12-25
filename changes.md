@@ -1,3 +1,9 @@
+## 21.0.0 plans
+
+- rename `Nat<x>` types to `N<x>`
+- remove `Nat<x>` and `nat<x>` for x > 16
+- add `Nat.Generator` that auto-generates `Nat<x>` and `nat<x>` for x > 16
+
 # changelog
 
 #### 20.0.1
