@@ -1,8 +1,9 @@
 ## 21.0.0 plans
 
+- rename `Nat` module and type to `NatIs`
 - rename `Nat<x>` types to `N<x>`
-- remove `Nat<x>` and `nat<x>` for x > 16
-- add `Nat.Generator` that auto-generates `Nat<x>` and `nat<x>` for x > 16
+- remove `Nat<x>` and `nat<x>` for x >= 17
+- add `Nat.Generator` that auto-generates `Nat<x>` and `nat<x>` for x >= 17
 
 # changelog
 
@@ -10,7 +11,7 @@
 
 - updated `typed-value` to 6.0.0
 
-### 20.0.0
+## 20.0.0
 
 - removed `Nat.theGreater` and `Nat.theSmaller` in favor of the more general versions `Typed.max` & `Typed.min`
 - exposed `Nat.NoMax`
