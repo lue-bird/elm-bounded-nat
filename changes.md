@@ -5,6 +5,14 @@
 - remove `Nat<x>` and `nat<x>` for x >= 17
 - add `Nat.Generator` that auto-generates `Nat<x>` and `nat<x>` for x >= 17
 
+### considering
+
+- rename `N<x>Plus` to `N<x>𐊛`
+    - 👎 `𐊛` must be copied
+    - 👎 `𐊛` is confusing
+    - 👍 `𐊛` is readable
+    - → leaning towards no
+
 # changelog
 
 #### 20.0.1
