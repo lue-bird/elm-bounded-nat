@@ -7,10 +7,10 @@
 
 ### considering
 
-- rename `N<x>Plus` to `N<x>𐊛`
-    - 👎 `𐊛` must be copied
-    - 👎 `𐊛` is confusing
-    - 👍 `𐊛` is readable
+- rename `Nat` to `ℕ` and `N<x>Plus` to `ℕ<x>𐊛`
+    - 👎 must be copied
+    - 👎 is confusing
+    - 👍 is readable
     - → leaning towards no
 
 # changelog
