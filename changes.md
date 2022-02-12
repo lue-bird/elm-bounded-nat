@@ -1,17 +1,34 @@
 ## 21.0.0 plans
 
-- rename `Nat` module and type to `NatIs`
-- rename `Nat<x>` types to `N<x>`
-- remove `Nat<x>` and `nat<x>` for x >= 17
-- add `Nat.Generator` that auto-generates `Nat<x>` and `nat<x>` for x >= 17
+  - rename `Nat` module and type to `NThat`
+      - rename `Min` to `IsMin`
+      - rename `In` to `IsIn`
+  - remove `Nats` module, moving content to `NThat`
+      - rename `Nat`<x> types to `N`<x>
+      - rename `Nat`<x>`Plus` types to `Add`<x>
+      - remove `Nat`<x> and `nat`<x> for x >= 17
+      - redefine `Z` as
+        ```elm
+        type alias O =
+            CanBe OTag
+        
+        type OTag
+            = OTag Never
+        ```
+      - redefine `S` as
+        ```elm
+        type alias S n =
+            Isnt OTag
+        ```
+  - add `Nat.Generator` that auto-generates `N`<x>, `N`<x>(`Plus`) and `n`<x> for x >= 17
 
-### considering
+### rejected
 
-- rename `Nat` to `ℕ` and `N<x>Plus` to `ℕ<x>𐊛`
-    - 👎 must be copied
-    - 👎 is confusing
-    - 👍 is readable
-    - → leaning towards no
+  - rename `Nat` to `ℕ` and `N`<x>`Plus` to `ℕ`<x>`𐊛`
+      - 👎 must be copied
+      - 👎 is confusing
+      - 👍 is readable
+      - → no
 
 # changelog
 
