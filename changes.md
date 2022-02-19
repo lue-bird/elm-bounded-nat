@@ -1,26 +1,39 @@
 ## 21.0.0 plans
 
-  - rename `Nat` module and type to `NThat`
-      - rename `Min` to `IsMin`
-      - rename `In` to `IsIn`
-  - remove `Nats` module, moving content to `NThat`
+  - rename `Nat` module and type to `N`
+  - remove `Nats` module, moving content to `N`
       - rename `Nat`<x> types to `N`<x>
       - rename `Nat`<x>`Plus` types to `Add`<x>
       - remove `Nat`<x> and `nat`<x> for x >= 17
-      - redefine `Z` as
+      - add `allowable-state` dependency
+      - replace `Z` with `N0`, `S` with `Add1`:
         ```elm
-        type alias O =
-            CanBe OTag
+        type alias N0 =
+            Zero Possibly Never
         
-        type OTag
-            = OTag Never
+        type alias Add1 more =
+            Zero Never more
+        
+        type Zero possiblyOrNever ifPossible
+            = Add1 ifPossible
+            | Zero possiblyOrNever
         ```
-      - redefine `S` as
+      - expose `Zero(..)`
+      - redefine `N` as
         ```elm
-        type alias S n =
-            Isnt OTag
+        type alias N range =
+            Typed
+                Checked
+                NTag
+                Public
+                { int : Int, range : range )
+        
+        type NTag
+            = NTag
         ```
-  - add `Nat.Generator` that auto-generates `N`<x>, `N`<x>(`Plus`) and `n`<x> for x >= 17
+      - readd `toInt`
+      - add `range`
+  - add `N.Generator` that auto-generates `N`<x>, `Add`<x> and `n`<x> for x >= 17
 
 ### rejected
 
