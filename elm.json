@@ -1,7 +1,7 @@
 {
     "type": "package",
     "name": "lue-bird/elm-bounded-nat",
-    "summary": "natural number in a range at compile-time",
+    "summary": "number in a typed range",
     "license": "MIT",
     "version": "20.0.1",
     "exposed-modules": [
