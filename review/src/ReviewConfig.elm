@@ -52,7 +52,6 @@ config =
         |> Rule.ignoreErrorsForDirectories [ "tests/" ]
     , NoExposingEverything.rule
     , NoForbiddenWords.rule [ "REPLACEME", "TODO", "todo" ]
-    , NoImportingEverything.rule [ "Nats" ]
     , NoMissingTypeAnnotation.rule
     , NoMissingTypeExpose.rule
     , NoUnused.CustomTypeConstructors.rule []
