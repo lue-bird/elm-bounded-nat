@@ -46,7 +46,7 @@ Users can prove this by
     ```elm
     toPositive : Int -> Maybe (N (Min N1))
     toPositive =
-        N.isIntAtLeast n1
+        N.intIsAtLeast n1
     ```
 
   - clamping
