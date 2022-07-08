@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="210mm"
+   height="297mm"
+   viewBox="0 0 210 297"
+   version="1.1"
+   id="svg1889"
+   inkscape:version="1.1.2 (0a00cf5339, 2022-02-04)"
+   sodipodi:docname="elm-bounded-nat tumbnail.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1891"
+     pagecolor="#505050"
+     bordercolor="#ffffff"
+     borderopacity="1"
+     inkscape:showpageshadow="0"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="1"
+     inkscape:deskcolor="#505050"
+     inkscape:document-units="mm"
+     showgrid="false"
+     showborder="false"
+     inkscape:zoom="0.2973261"
+     inkscape:cx="3149.7403"
+     inkscape:cy="475.90844"
+     inkscape:window-width="1920"
+     inkscape:window-height="1016"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1"
+     inkscape:pageshadow="0" />
+  <defs
+     id="defs1886">
+    <rect
+       x="3450.1391"
+       y="941.12261"
+       width="2274.8066"
+       height="576.51872"
+       id="rect38122" />
+    <rect
+       x="-656.09135"
+       y="354.4755"
+       width="1021.6463"
+       height="410.30708"
+       id="rect3922" />
+    <rect
+       x="-656.09137"
+       y="354.47549"
+       width="1021.6463"
+       height="410.30707"
+       id="rect3922-7" />
+    <rect
+       x="-656.09137"
+       y="354.47549"
+       width="1094.9269"
+       height="574.51804"
+       id="rect3922-8" />
+    <rect
+       x="-656.09137"
+       y="354.47549"
+       width="1021.6463"
+       height="410.30707"
+       id="rect3922-4" />
+    <rect
+       x="-656.09137"
+       y="354.47549"
+       width="1094.9269"
+       height="574.51807"
+       id="rect3922-8-3" />
+    <rect
+       x="-656.09137"
+       y="354.47549"
+       width="1021.6463"
+       height="410.30707"
+       id="rect3922-7-0" />
+    <rect
+       x="-656.09137"
+       y="354.47549"
+       width="1094.9269"
+       height="574.51807"
+       id="rect3922-8-6" />
+    <rect
+       x="-656.09137"
+       y="354.47549"
+       width="1094.9269"
+       height="574.51807"
+       id="rect3922-8-6-7" />
+  </defs>
+  <g
+     inkscape:groupmode="layer"
+     id="layer2"
+     inkscape:label="Layer 2">
+    <rect
+       style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:6.63522;stroke-opacity:0.954434;paint-order:fill markers stroke"
+       id="rect4173"
+       width="664.17267"
+       height="410.48126"
+       x="-212.58322"
+       y="-51.386581" />
+  </g>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <path
+       id="rect1541-4-0-5-5-2-5"
+       style="fill:#00824e;fill-opacity:1;stroke-width:14.3634;stroke-linecap:round;paint-order:markers stroke fill"
+       d="m -212.58322,-51.386581 c 0,0 4e-4,255.974821 0,383.961101 L -20.60334,140.59408 Z" />
+    <path
+       id="rect1541-4-0-5-5-2-5-3"
+       style="fill:#00824e;fill-opacity:1;stroke-width:14.3634;stroke-linecap:round;paint-order:markers stroke fill"
+       d="m 451.58945,-24.866429 c 0,0 -4e-4,255.974819 0,383.961099 L 259.60957,167.11423 Z" />
+    <text
+       xml:space="preserve"
+       transform="matrix(0.47592367,0,0,0.47592367,180.12852,-82.941783)"
+       id="text3920-4"
+       style="font-size:192px;line-height:1;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;white-space:pre;shape-inside:url(#rect3922-8);display:inline;fill:#9c0036;fill-opacity:1"
+       x="390.52713"
+       y="0"><tspan
+         x="-511.8269"
+         y="502.83825"
+         id="tspan55277"><tspan
+           style="font-weight:800;font-family:'JetBrains Mono NL';-inkscape-font-specification:'JetBrains Mono NL Ultra-Bold';text-align:center;text-anchor:middle;fill:#ffffff"
+           id="tspan55275">bounded
+</tspan></tspan><tspan
+         x="-281.42749"
+         y="697.32689"
+         id="tspan55281"><tspan
+           style="font-weight:800;font-family:'JetBrains Mono NL';-inkscape-font-specification:'JetBrains Mono NL Ultra-Bold';text-align:center;text-anchor:middle;fill:#ffffff"
+           id="tspan55279">nat</tspan></tspan></text>
+    <rect
+       style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:6.63522;stroke-opacity:0.954434;paint-order:fill markers stroke"
+       id="rect4173-7"
+       width="664.17267"
+       height="410.48126"
+       x="542.47754"
+       y="-48.771927"
+       inkscape:export-filename="/home/pascal/Desktop/code/lue/elm-bounded-nat/thumbnail/elm-bounded-nat thumbnail.png"
+       inkscape:export-xdpi="125"
+       inkscape:export-ydpi="125" />
+    <text
+       xml:space="preserve"
+       transform="matrix(0.47592367,0,0,0.47592367,927.05068,-142.96159)"
+       id="text3920-4-5"
+       style="font-size:192px;line-height:1;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;white-space:pre;shape-inside:url(#rect3922-8-6);display:inline;fill:#ff4d24;fill-opacity:1"
+       x="390.52713"
+       y="0"
+       inkscape:export-filename="/home/pascal/Desktop/code/lue/elm-bounded-nat/thumbnail/elm-bounded-nat thumbnail.png"
+       inkscape:export-xdpi="125"
+       inkscape:export-ydpi="125"><tspan
+         x="-511.8269"
+         y="502.83825"
+         id="tspan55285"><tspan
+           style="font-weight:800;font-family:'JetBrains Mono NL';-inkscape-font-specification:'JetBrains Mono NL Ultra-Bold';text-align:center;text-anchor:middle"
+           id="tspan55283">bounded
+</tspan></tspan></text>
+    <text
+       xml:space="preserve"
+       transform="matrix(0.47592367,0,0,0.47592367,928.24214,-65.354421)"
+       id="text3920-4-5-0"
+       style="font-size:192px;line-height:1;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;white-space:pre;shape-inside:url(#rect3922-8-6-7);display:inline;fill:#51b3ff;fill-opacity:1"
+       x="546.81482"
+       y="0"
+       inkscape:export-filename="/home/pascal/Desktop/code/lue/elm-bounded-nat/thumbnail/elm-bounded-nat thumbnail.png"
+       inkscape:export-xdpi="125"
+       inkscape:export-ydpi="125"><tspan
+         x="-281.42749"
+         y="502.83825"
+         id="tspan55289"><tspan
+           style="font-weight:800;font-family:'JetBrains Mono NL';-inkscape-font-specification:'JetBrains Mono NL Ultra-Bold';text-align:center;text-anchor:middle"
+           id="tspan55287">nat</tspan></tspan></text>
+    <rect
+       style="fill:#51b3ff;fill-opacity:0.362482;stroke-width:3.67949;stroke-opacity:0.954434;paint-order:fill markers stroke"
+       id="rect24325"
+       width="129.39101"
+       height="50.359062"
+       x="652.802"
+       y="123.29066"
+       inkscape:export-filename="/home/pascal/Desktop/code/lue/elm-bounded-nat/thumbnail/elm-bounded-nat thumbnail.png"
+       inkscape:export-xdpi="125"
+       inkscape:export-ydpi="125" />
+    <rect
+       style="fill:#51b3ff;fill-opacity:0.362482;stroke-width:3.66391;stroke-opacity:0.954434;paint-order:fill markers stroke"
+       id="rect24325-3"
+       width="128.297"
+       height="50.359062"
+       x="969.94507"
+       y="122.96724"
+       inkscape:export-filename="/home/pascal/Desktop/code/lue/elm-bounded-nat/thumbnail/elm-bounded-nat thumbnail.png"
+       inkscape:export-xdpi="125"
+       inkscape:export-ydpi="125" />
+    <rect
+       style="fill:#ff4d24;fill-opacity:1;stroke-width:1.86813;stroke-opacity:0.954434;paint-order:fill markers stroke"
+       id="rect24325-3-0"
+       width="29.447317"
+       height="57.039165"
+       x="1114.6465"
+       y="-134.68437"
+       transform="scale(1,-1)"
+       inkscape:export-filename="/home/pascal/Desktop/code/lue/elm-bounded-nat/thumbnail/elm-bounded-nat thumbnail.png"
+       inkscape:export-xdpi="125"
+       inkscape:export-ydpi="125" />
+    <rect
+       style="fill:#ff4d24;fill-opacity:1;stroke-width:1.38652;stroke-opacity:0.954434;paint-order:fill markers stroke"
+       id="rect24325-3-0-6"
+       width="29.447317"
+       height="31.420473"
+       x="-107.09227"
+       y="-1114.6465"
+       transform="matrix(0,-1,-1,0,0,0)"
+       inkscape:export-filename="/home/pascal/Desktop/code/lue/elm-bounded-nat/thumbnail/elm-bounded-nat thumbnail.png"
+       inkscape:export-xdpi="125"
+       inkscape:export-ydpi="125" />
+    <rect
+       style="fill:#ff4d24;fill-opacity:1;stroke-width:1.86813;stroke-opacity:0.954434;paint-order:fill markers stroke"
+       id="rect24325-3-0-2"
+       width="29.447317"
+       height="57.039165"
+       x="607.08002"
+       y="77.968292"
+       inkscape:export-filename="/home/pascal/Desktop/code/lue/elm-bounded-nat/thumbnail/elm-bounded-nat thumbnail.png"
+       inkscape:export-xdpi="125"
+       inkscape:export-ydpi="125" />
+    <rect
+       style="fill:#ff4d24;fill-opacity:1;stroke-width:1.38652;stroke-opacity:0.954434;paint-order:fill markers stroke"
+       id="rect24325-3-0-6-6"
+       width="29.447317"
+       height="31.420473"
+       x="77.968239"
+       y="-667.94781"
+       transform="rotate(90)"
+       inkscape:export-filename="/home/pascal/Desktop/code/lue/elm-bounded-nat/thumbnail/elm-bounded-nat thumbnail.png"
+       inkscape:export-xdpi="125"
+       inkscape:export-ydpi="125" />
+    <text
+       xml:space="preserve"
+       transform="matrix(0.26458333,0,0,0.26458333,-278.46669,-23.702523)"
+       id="text38120"
+       style="font-size:333.333px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;white-space:pre;shape-inside:url(#rect38122)"
+       inkscape:export-filename="/home/pascal/Desktop/code/lue/elm-bounded-nat/thumbnail/elm-bounded-nat thumbnail.png"
+       inkscape:export-xdpi="125"
+       inkscape:export-ydpi="125"><tspan
+         x="3450.1387"
+         y="1240.4603"
+         id="tspan55293"><tspan
+           style="font-weight:800;font-family:Cantarell;-inkscape-font-specification:'Cantarell Ultra-Bold';fill:#ffffff"
+           id="tspan55291">typed range</tspan></tspan></text>
+  </g>
+</svg>
