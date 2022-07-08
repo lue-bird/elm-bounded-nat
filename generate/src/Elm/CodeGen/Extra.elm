@@ -1,6 +1,6 @@
 module Elm.CodeGen.Extra exposing
     ( aliasExpose, funExpose
-    , arrayAnn, neverAnn, funAnn
+    , arrayType, neverType, funType
     , Declaration(..), Doc, ExposedOrLocal(..), Module, ModuleRoleInPackage(..), PackageExposed(..), PackageInternal(..), PackageInternalDeclaration, PackageInternalModule, TypeConstructorExposed(..), aliasDeclaration, docTagsFrom, exposedToJust, exposingAll, exposingExplicit, funDeclaration, importAlias, localAliasDecl, localFunDecl, localTypeDecl, noAlias, noExposing, packageExposedAliasDecl, packageExposedFunDecl, packageExposedTypeDecl, packageInternalExposedAliasDecl, packageInternalExposedFunDecl, packageInternalExposedTypeDecl, stringFromModuleFile, toDeclaration, toDocComment, toModuleComment, typeDecl, zipEntryFromModule
     )
 
@@ -17,7 +17,7 @@ module Elm.CodeGen.Extra exposing
 
 ### ann
 
-@docs arrayAnn, neverAnn, funAnn
+@docs arrayType, neverType, funType
 
 -}
 
@@ -28,7 +28,7 @@ import Time
 import Zip.Entry
 
 
-{-| Content to create a `Elm.GodeGen.file`.
+{-| Content to create an `Elm.CodeGen.file`.
 -}
 type alias Module tag =
     { name : Generation.ModuleName
@@ -200,13 +200,13 @@ funDeclaration :
     -> List Generation.Pattern
     -> Generation.Expression
     -> Declaration tag
-funDeclaration exposedOrLocal comment typeAnn name argumentPatterns expression =
+funDeclaration exposedOrLocal comment typeType name argumentPatterns expression =
     { name = name
     , make =
         \name_ ->
             Generation.funDecl
                 (comment |> Maybe.map toDocComment)
-                (Just typeAnn)
+                (Just typeType)
                 name_
                 argumentPatterns
                 expression
@@ -224,10 +224,10 @@ packageExposedFunDecl :
     -> List String
     -> Generation.Expression
     -> Declaration tag
-packageExposedFunDecl tag comment typeAnn name argumentNames expression =
+packageExposedFunDecl tag comment typeType name argumentNames expression =
     funDeclaration (Exposed (Just tag))
         (Just comment)
-        typeAnn
+        typeType
         name
         (argumentNames |> List.map Generation.varPattern)
         expression
@@ -239,8 +239,8 @@ localFunDecl :
     -> List Generation.Pattern
     -> Generation.Expression
     -> Declaration tag_
-localFunDecl typeAnn name argumentPatterns expression =
-    funDeclaration Local Nothing typeAnn name argumentPatterns expression
+localFunDecl typeType name argumentPatterns expression =
+    funDeclaration Local Nothing typeType name argumentPatterns expression
 
 
 packageInternalExposedFunDecl :
@@ -249,8 +249,8 @@ packageInternalExposedFunDecl :
     -> List Generation.Pattern
     -> Generation.Expression
     -> PackageInternalDeclaration
-packageInternalExposedFunDecl typeAnn name argumentPatterns expression =
-    funDeclaration (Exposed Nothing) Nothing typeAnn name argumentPatterns expression
+packageInternalExposedFunDecl typeType name argumentPatterns expression =
+    funDeclaration (Exposed Nothing) Nothing typeType name argumentPatterns expression
 
 
 aliasDeclaration :
@@ -458,21 +458,21 @@ stringFromModuleFile moduleFile =
 --
 
 
-arrayAnn : Generation.TypeAnnotation -> Generation.TypeAnnotation
-arrayAnn element =
+arrayType : Generation.TypeAnnotation -> Generation.TypeAnnotation
+arrayType element =
     Generation.typed "Array" [ element ]
 
 
-funAnn :
+funType :
     List Generation.TypeAnnotation
     -> Generation.TypeAnnotation
     -> Generation.TypeAnnotation
-funAnn parameters result =
+funType parameters result =
     parameters
         |> List.foldr Generation.funAnn
             result
 
 
-neverAnn : List Generation.TypeAnnotation
-neverAnn =
+neverType : List Generation.TypeAnnotation
+neverType =
     [ Generation.typed "Never" [] ]
