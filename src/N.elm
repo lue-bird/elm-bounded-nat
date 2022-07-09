@@ -2265,24 +2265,25 @@ n0 =
             { min = N0 Possible
             , max =
                 \() ->
-                    -- if you find a way to have max unify with higher `N<x>`s
-                    -- without this hack which also makes elm crash on `==`
-                    -- please PR!
-                    --
-                    --     N0 Possible
-                    -- is impossible for example because
-                    --     N0able atLeast Possibly
-                    -- correctly doesn't unify with any `N< x>=1 >`
-                    --
-                    -- ideas:
-                    --   - 👎 define
-                    --         n<x> : N (In (Add<x> atLeast_) N<x> ...)
-                    --         N<x> = Add<x> Never  -- to forbid > max
-                    --         N0able s = [ N0 | Add1 s ]
-                    --       - `Diff` `sub` becomes impossible to implement
-                    --   - 👎 adding an escape hatch
-                    --        N0able s possiblyOrNever = [ N0AtLeast | N0 possiblyOrNever | Add1 s ]
-                    --       - `Diff` `sub` becomes impossible to implement
+                    {- if you find a way to have max unify with higher `N<x>`s
+                       without this hack which also makes elm crash on `==`
+                       please PR!
+
+                           N0 Possible
+                       is impossible for example because
+                           N0able atLeast Possibly
+                       correctly doesn't unify with any `N< x>=1 >`
+
+                       ideas:
+                         - 👎 define
+                               n<x> : N (In (Add<x> atLeast_) N<x> ...)
+                               N<x> = Add<x> Never  -- to forbid > max
+                               N0able s = [ N0 | Add1 s ]
+                             - `Diff` `sub` becomes impossible to implement
+                         - 👎 adding an escape hatch
+                              N0able s possiblyOrNever = [ N0AtLeast | N0 possiblyOrNever | Add1 s ]
+                             - `Diff` `sub` becomes impossible to implement
+                    -}
                     failLoudlyWithStackOverflow
                         [ "internal minimum evaluated or leaked somewhere through `N`'s API."
                         , "💙 Please report under https://github.com/lue-bird/elm-bounded-nat/issues"
