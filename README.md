@@ -1,6 +1,6 @@
 ## bounded-nat
 
-A natural number >= 0 that has extra information about its range _at compile-time_
+A natural number ≥ 0 that has extra information about its range _at compile-time_
 
 ## example: `toHexChar`
 
@@ -8,37 +8,33 @@ A natural number >= 0 that has extra information about its range _at compile-tim
 toHexChar : Int -> Char
 ```
 
-- the _type_ doesn't tell us that a `Float` between 0 & 15 is wanted
-- _the one implementing_ it has to handle the cases where a value is not between 0 & 15
+- the _type_ doesn't tell us that an `Int` between 0 & 15 is wanted
+- _the one implementing_ `toHexChar` has to handle the cases where the argument isn't between 0 & 15
+    - either by introducing `Maybe` which will be carried throughout your program
+    - or by providing silent default error values like `'?'` or even worse `'0'`
+- the `Int` range promise of the argument is lost after the operation
 
 with `bounded-nat`:
 ```elm
 toHexChar : N (In anyMinimum_ N15 difference_) -> Char
 ```
 
-- the type tells us that a number between 0 & 15 is wanted
-- _the user_ it must prove that the number is actually between 0 & 15
+- the _type_ tells us that a number between 0 & 15 is wanted
+- the _user_ proves that the number is actually between 0 & 15
 
-The type of the argument
-```elm
-N (In min_ N15 difference_)
-```
-Says: Give me an integer >= 0: `N` 
+The argument type says: Give me an integer ≥ 0 `N` `In` range
+  - `≥ 0`; `anyMinimum_` value allowed
+  - `≤` `N15`
+  - which might be a [specific value like `n0`, `n1`, ... which has a `difference_`](N#Is)
+`)`
 
-- in a range: `In`
-    - at least 0 → any minimum value is fine: `min_`
-    - at most 15: `N15`
-    - which might be `n0`, `n1`, ...: `difference_`
-
-Users can prove this by
+Users can prove this by explicitly
 
   - using exact values
 
     ```elm
-    toHexChar n2
-    --> 'c'
-
-    red = rgbPercent n100 n0 n0 -- 👍
+    toHexChar n2 --→ 'c'
+    red = rgbPercent n100 n0 n0  --👍
     ```
 
   - handling the possibility that a number isn't in the expected range
@@ -53,8 +49,7 @@ Users can prove this by
 
     ```elm
     floatPercent float =
-        N.intInRange n0 n100
-            (float * 100 |> round)
+        float * 100 |> round |> N.intInRange n0 n100
     ```
 
   - There are more ways, but you get the idea 🙂
@@ -74,15 +69,15 @@ You might be able to do anything with this `Int` value, but you lost useful info
 - Can the result even have multiple digits?
 
 ```elm
-toDigit : Char -> Maybe (N (In N0 (N9Plus a_) {}))
+toDigit : Char -> Maybe (N (In N0 (Add9 a_) {}))
 ```
 
-The type of a value reflects how much you know.
+The type of an [`N`](N#N) value will reflect how much you and the compiler know
 
-- at least a minimum value: `Min`
-- between a minimum & maximum value: `In`
-- exact value: `N`
-    - can describe the difference between 2 values → useful for adding/subtracting/...
+  - at least a minimum value? [`Min`](N#Min)
+  - between a minimum & maximum value? [`In`](N#In)
+  - a specific value? [`N (In ... (Is ...))`](N#Is)
+    - allows precise adding, subtracting, ...
 
 
 &emsp;
@@ -93,11 +88,12 @@ The type of a value reflects how much you know.
 ```elm
 intFactorial : Int -> Int
 intFactorial x =
-    if x == 0 then
-        1
+    case x of
+        0 ->
+            1
 
-    else
-        x * intFactorial (x - 1)
+        non0 ->
+            non0 * intFactorial (non0 - 1)
 ```
 
 This forms an infinite loop if we call `intFactorial -1`...
@@ -109,32 +105,31 @@ factorial : N (In min_ max_ difference_) -> N (Min N1)
 factorial =
     factorialBody
 ```
-Says: For every `n >= 0`, `n! >= 1`.
+Says: For every `n ≥ 0`, `n! ≥ 1`.
 ```elm
 factorialBody : N (In min_ max_ difference_) -> N (Min N1)
 factorialBody x =
-    case x |> MinDiff.isAtLeast n1 { lowest = n0 } of
-        N.Below _ ->
-            N.toMin n1
+    case x |> N.minIsAtLeast n1 { bottom = n0 } of
+        Err _ ->
+            n1 |> N.noMax
 
-        N.EqualOrGreater atLeast1 ->
-            -- atLeast1 --> : N (Min N1)
-            -- so subtracting 1, we're still >= 0
-            factorial
-                (atLeast1 |> MinDiff.sub n1)
+        Ok atLeast1 ->
+            -- atLeast1 : N (Min N1)
+            -- so subtracting 1, we're still ≥ 0
+            factorial (atLeast1 |> N.minSub n1)
                 |> N.mul atLeast1
 
-factorial n4 --> N 24
+factorial n4 |> N.toInt --→ 24
 ```
 
-→ You can't put a negative number in.
+→ You can't put a negative number in
 
-→ We have the extra promise, that every result is `>= 1`
+→ We have an extra promise! every result is `≥ 1`
 
 Sadly, we need separate `factorial` & `factorialBody` because there's [no support for polymorphic recursion](https://github.com/elm/compiler/issues/2180).
 
 But we can do even better!
-`!19` is already > the maximum safe `Int` `2^53 - 1`.
+`!19` is already `>` the maximum safe `Int` `2^53 - 1`.
 
 ```elm
 safeFactorial : N (In min_ N18 difference_) -> N (Min N1)
@@ -144,35 +139,20 @@ safeFactorial =
 
 No extra work.
 
-## setup
-
-```noformatingples
-elm install lue-bird/elm-typed-value
-elm install lue-bird/elm-bounded-n
-```
-
-```elm
-import N exposing (N, Min, In, In)
-import InDiff
-import MinDiff
-import Ns exposing (..)
-    -- n0-160, N0-160 & -Plus
-
-import Typed
-```
-
 
 ## tips
 
-  - keep _as much type information as possible_ and drop it only where you need to: ["Wrap early, unwrap late"](https://sporto.github.io/elm-patterns/basic/wrap-early.html)
+  - keep _as much type information as possible_ and drop it only where you need to: "Wrap early, unwrap late"
+      - [`elm-radio`](https://elm-radio.com/episode/wrap-early-unwrap-late/)
+      - [`elm-patterns`](https://sporto.github.io/elm-patterns/basic/wrap-early.html)
 
-  - keep your _function annotations as general as possible_
+  - keep _argument types as broad as possible_
     
     Instead of accepting only `n0`, `n1`, ... values in a range
 
     ```elm
     percent :
-        N (N p_ atLeast_ (Is to100_ To N100) is_)
+        N (In p_ atLeast_ (Is (Diff to100_ To N100) diff1_))
         -> Length
     ```
     accept values that are somewhere in a range.
@@ -181,7 +161,9 @@ import Typed
     percent : N (In min_ N100 difference_) -> Length
     ```
 
-    `difference_` says that it _can_ be exact anyway. Or instead of
+    `difference_` says that it _can_ be exact anyway.
+    
+    Or instead of
 
     ```elm
     charFromCode : N (Min min_) -> Char
@@ -195,10 +177,8 @@ import Typed
 
 ## ready? go!
 
-- Take a **look at [`typesafe-array`][typesafe-array]** to see a lot of this in action!
-
-    You get to know that
-    - a `N (In ...)` is very useful as an index
-    - `In`, `Min`, `Only` can also describe the array length
+- 👀 **[`typesafe-array`][typesafe-array]** shows that
+    - `N (In ...)` is very useful as an index
+    - `In`, `Min`, `Exactly` can also describe a length
 
 [typesafe-array]: https://package.elm-lang.org/packages/lue-bird/elm-typesafe-array/latest/

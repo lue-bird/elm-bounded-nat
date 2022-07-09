@@ -1,4 +1,4 @@
-## 21.0.0 plans
+## 22.0.0 plans
 
   - rename `Nat` module and type to `N`
   - remove `Nats` module, moving content to `N`
@@ -44,6 +44,37 @@
       - → no
 
 # changelog
+
+## 21.0.0
+
+  - every `module` merge → `N`
+      - `MinNat` members prefixed with `min`-
+      - `NNat` members prefixed with `diff`-
+      - `Nats` >= 17 remove
+          - https://github.com/lue-bird/elm-typesafe-array/issues/2
+          - in favor of generating locally
+      - `Nat<x>Plus` → `Add<x>`
+      - `Nat<x>` → `N<x>`
+      - `MinNat.atLeast lowerLimit` remove
+          - in favor of `N.atLeast (lowerLimit |> noMax)`
+      - `.serialize`, `.Error`, ... remove
+          - easy to implement yourself
+      - `type LessOrEqualOrGreater l e g` replace with
+        `Result e (BelowOrAbove l g)`
+      - `type BelowOrInOrAboveRange l e g` replace with
+        `Result e (BelowOrAbove l g)`
+      - `type BelowOrAtLeast l ge` replace with
+        `Result ge l`
+      - `type AtMostOrAbove le g` replace with
+        `Result le g`
+      - `InNat.addIn`, `InNat.subIn`, `Nat.random`, `Nat.range`, ... range arguments → tuple
+      - arguments `{ lowest }` replaced with `{ bottom }`
+      - `toMin` rename to `noMax`
+      - `toIn` rename to `noDiff`
+      - `restoreMax` rename to `maxOpen`
+      - `lowerMin` rename to `minDown`
+      - `maxUp` add
+      - `type BelowOrAbove l g` add
 
 #### 20.0.1
 
@@ -101,7 +132,7 @@
 ## 13.0.0
 
 - removed `ArgOnly`
-- made `Nat.lowerMin natX` before `|> ...Nat.is... { min = natX }` redundant by replacing `min` with `{ lowest }` which can be <=, not = the minimum. Changed functions:
+- made `Nat.lowerMin natX` before `|> ...Nat.is... { min = natX }` redundant by replacing `min` with `{ lowest }` which can be ≤, not = the minimum. Changed functions:
   - `InNat`: `isAtLeast`, `is`, `isAtMost`, `isInRange`, `atMost`
   - `MinNat`: `isAtLeast`, `is`, `isAtMost`
 

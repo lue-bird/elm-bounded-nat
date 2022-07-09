@@ -1,7 +1,8 @@
 module N.Test exposing (suite)
 
 import Expect
-import N exposing (Diff, In, Is, Min, N, To, toInt)
+import N exposing (Add11, Add16, Add4, Add9, In, Min, N, N0, N0able, N1, N10, N11, N15, N3, N4, N7, n0, n1, n10, n11, n12, n14, n16, n2, n3, n4, n5, n6, n7, n9)
+import Possibly exposing (Possibly)
 import Test exposing (Test, describe, test)
 
 
@@ -16,12 +17,12 @@ suite =
 
 nDiffTest : Test
 nDiffTest =
-    describe "NDiff"
-        [ test "add & sub"
+    describe "with differences"
+        [ test "add"
             (\() ->
                 n11
-                    |> N.diffAdd ( n9, n9 )
-                    |> Expect.equal n20
+                    |> N.diffAdd ( n3, n3 )
+                    |> Expect.equal n14
             )
         , test "sub"
             (\() ->
@@ -30,79 +31,6 @@ nDiffTest =
                     |> Expect.equal n2
             )
         ]
-
-
-test0 :
-    N
-        (In
-            (N160Plus N160)
-            (N160Plus (N160Plus a_))
-            (Is
-                (Diff a To (N160Plus (N160Plus a)))
-                (Diff b To (N160Plus (N160Plus b)))
-            )
-        )
-test0 =
-    n160 |> N.diffAdd ( n160, n160 )
-
-
-test1 :
-    N
-        (In
-            (N160Plus N160)
-            (N160Plus (N160Plus a_))
-            (Is
-                (Diff a To (N160Plus (N160Plus a)))
-                (Diff b To (N160Plus (N160Plus b)))
-            )
-        )
-test1 =
-    n160 |> N.diffAdd ( n160, n160 )
-
-
-test2 :
-    N
-        (In
-            (N160Plus N160)
-            (N160Plus (N160Plus a_))
-            (Is
-                (Diff a To (N160Plus (N160Plus a)))
-                (Diff b To (N160Plus (N160Plus b)))
-            )
-        )
-test2 =
-    n160 |> N.diffAdd ( n160, n160 )
-
-
-test3 :
-    N
-        (In
-            (N160Plus N159)
-            (N160Plus (N159Plus a_))
-            (Is
-                (Diff a To (N160Plus (N159Plus a)))
-                (Diff b To (N160Plus (N159Plus b)))
-            )
-        )
-test3 =
-    n160 |> N.diffAdd ( n159, n159 )
-
-
-testBig :
-    N
-        (In
-            (N160Plus (N159Plus (N160Plus (N160Plus (N160Plus (N160Plus (N160Plus N160)))))))
-            (N160Plus (N159Plus (N160Plus (N160Plus (N160Plus (N160Plus (N160Plus (N160Plus a_))))))))
-            (Is
-                (Diff a To (N160Plus (N159Plus (N160Plus (N160Plus (N160Plus (N160Plus (N160Plus (N160Plus a)))))))))
-                (Is b To (N160Plus (N159Plus (N160Plus (N160Plus (N160Plus (N160Plus (N160Plus (N160Plus b)))))))))
-            )
-        )
-testBig =
-    test0
-        |> N.diffAdd ( test1, test1 )
-        |> N.diffAdd ( test2, test2 )
-        |> N.diffAdd ( test3, test3 )
 
 
 
@@ -118,10 +46,10 @@ maximumUnconstrainedTest =
                     |> N.toInt
                     |> Expect.equal 4
             )
-        , test "ultraSafeFactorial"
+        , test "factorial"
             (\() ->
-                ultraSafeFactorial n4
-                    |> Expect.equal (n24 |> N.noMax |> N.minLower n1)
+                factorial n3
+                    |> Expect.equal (n6 |> N.minDown n1 |> N.noMax)
             )
         ]
 
@@ -129,22 +57,8 @@ maximumUnconstrainedTest =
 listLength : List a_ -> N (Min N0)
 listLength =
     List.foldl
-        (\_ ->
-            N.minAdd n1
-                >> N.minLower n0
-        )
+        (\_ -> N.minAdd n1 >> N.minDown n0)
         (n0 |> N.noMax)
-
-
-{-| recurses indefinitely for negative integers
--}
-intFactorial : Int -> Int
-intFactorial x =
-    if x == 0 then
-        1
-
-    else
-        x * intFactorial (x - 1)
 
 
 factorial : N (In min_ max_ difference_) -> N (Min N1)
@@ -154,20 +68,39 @@ factorial =
 
 factorialBody : N (In min_ max_ difference_) -> N (Min N1)
 factorialBody x =
-    case x |> N.minIsAtLeast n1 { lowest = n0 } of
-        N.Below _ ->
-            N.noMax n1
+    case x |> N.minIsAtLeast n1 { bottom = n0 } of
+        Err _ ->
+            n1 |> N.noMax
 
-        N.EqualOrGreater atLeast1 ->
-            N.mul atLeast1
-                (factorial
-                    (atLeast1 |> N.minSub n1)
+        Ok atLeast1 ->
+            factorial (atLeast1 |> N.minSub n1)
+                |> N.mul atLeast1
+
+
+
+--
+
+
+maximumConstrainedTest : Test
+maximumConstrainedTest =
+    describe "InDiff"
+        [ describe "toDigit"
+            [ test "from invalid char"
+                (\() ->
+                    [ 'a', '/', ':' ]
+                        |> List.map (toDigit >> Result.toMaybe)
+                        |> Expect.equalLists
+                            (List.repeat 3 Nothing)
                 )
-
-
-ultraSafeFactorial : N (In min_ N18 difference_) -> N (Min N1)
-ultraSafeFactorial =
-    factorial
+            , test "from valid char"
+                (\() ->
+                    [ '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' ]
+                        |> List.map toDigit
+                        |> Expect.equalLists
+                            (N.up n10 |> List.map Ok)
+                )
+            ]
+        ]
 
 
 minAddMinTest : N (Min N4)
@@ -184,103 +117,54 @@ minAddTest =
         |> N.minAdd n9
 
 
-testSubN : N (Min N7)
-testSubN =
+minSubTest : N (Min N7)
+minSubTest =
     17
         |> N.intAtLeast n16
-        |> MinDiffOldat.sub n9
+        |> N.minSub n9
 
 
-minLowerTest : List (N (In N3 (N4Plus a_) {}))
-minLowerTest =
-    [ n3 |> N.noMax
-    , n4 |> N.minLower n3
+minDownTest : List (N (In N3 (Add4 (N0able a_ Possibly)) {}))
+minDownTest =
+    [ n3 |> N.noDiff
+    , n4 |> N.minDown n3
     ]
 
 
-
---
-
-
-maximumConstrainedTest : Test
-maximumConstrainedTest =
-    describe "InDiff"
-        [ describe "toDigit"
-            [ test "from invalid char"
-                (\() ->
-                    [ 'a', '/', ':' ]
-                        |> List.map toDigit
-                        |> Expect.equalLists
-                            (List.repeat 3 Nothing)
-                )
-            , test "from valid char"
-                (\() ->
-                    [ '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' ]
-                        |> List.map toDigit
-                        |> Expect.equalLists
-                            (N.range n0 n9 |> List.map Just)
-                )
-            ]
-        ]
+addInTest : N (In N4 (Add16 a_) {})
+addInTest =
+    N.intInRange ( n3, n10 ) 7
+        |> N.addIn ( n1, n6 ) (N.intInRange ( n1, n6 ) 5)
 
 
-
---
-
-
-testAddIn : N (In N4 (N22Plus a_))
-testAddIn =
-    N.intInRange n3 n10 7
-        |> N.inAddIn n1 n12 (N.intInRange n1 n12 9)
+addTest : N (In N11 (Add16 a_) {})
+addTest =
+    N.intInRange ( n2, n7 ) 7
+        |> N.add n9
 
 
-testInAdd : N (In N15 (N19Plus a_))
-testInAdd =
-    N.intInRange n6 n10 7
-        |> N.inAdd n9
+subInTest : N (In N1 (Add9 a_) {})
+subInTest =
+    N.intInRange ( n6, n10 ) 7
+        |> N.subIn ( n1, n5 ) (N.intInRange ( n1, n5 ) 4)
 
 
-testInSubIn : N (In N1 (N9Plus a_) {})
-testInSubIn =
-    N.intInRange n6 n10 7
-        |> N.inSubIn n1 n5 (N.intInRange n1 n5 4)
+subTest : N (In N7 (Add11 a_) {})
+subTest =
+    N.intInRange ( n12, n16 ) 1
+        |> N.sub n5
 
 
-testSub : N (In N7 (N11Plus a_) {})
-testSub =
-    N.intInRange n16 n20 17
-        |> N.inSub n9
-
-
-rgbPer100 :
-    N (In rMin_ N100 ifRN_)
-    -> N (In gMin_ N100 ifGN_)
-    -> N (In bMin_ N100 ifBN_)
-    -> ()
-rgbPer100 _ _ _ =
-    ()
-
-
-grey : Float -> ()
-grey float =
-    let
-        greyLevel =
-            N.intInRange ( n0, n100 ) (float * 100 |> round)
-    in
-    rgbPer100 greyLevel greyLevel greyLevel
-
-
-toDigit : Char -> Maybe (N (In N0 (N9Plus a_) {}))
+toDigit :
+    Char
+    ->
+        Result
+            (N.BelowOrAbove
+                Int
+                (N (Min N10))
+            )
+            (N (In N0 (Add9 atLeast_) {}))
 toDigit char =
-    case
-        (Char.toCode char - Char.toCode '0')
-            |> N.isIntInRange n0 n9
-    of
-        N.InRange digit ->
-            digit |> Just
-
-        N.BelowRange _ ->
-            Nothing
-
-        N.AboveRange _ ->
-            Nothing
+    ((char |> Char.toCode) - ('0' |> Char.toCode))
+        |> N.intIsInRange ( n0, n9 )
+        |> Result.map (N.maxOpen n9)
