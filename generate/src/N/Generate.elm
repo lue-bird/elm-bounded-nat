@@ -392,7 +392,7 @@ nBinaryModule n =
                     |> List.reverse
              of
                 [] ->
-                    Generation.string "the number to generate for must be >= 1"
+                    Generation.string "the number to generate for must be ≥ 1"
 
                 greatestPower :: smallerPowers ->
                     let
@@ -545,7 +545,7 @@ nLinearModule n =
                     |> List.reverse
              of
                 [] ->
-                    Generation.string "the number to generate for must be >= 1"
+                    Generation.string "the number to generate for must be ≥ 1"
 
                 greatestPower :: smallerPowers ->
                     let
