@@ -2278,10 +2278,10 @@ n0 =
                     --   - 👎 define
                     --         n<x> : N (In (Add<x> atLeast_) N<x> ...)
                     --         N<x> = Add<x> Never  -- to forbid > max
-                    --         N0able s = N0 | Add1 s
+                    --         N0able s = [ N0 | Add1 s ]
                     --       - `Diff` `sub` becomes impossible to implement
                     --   - 👎 adding an escape hatch
-                    --        N0able s possiblyOrNever = N0AtLeast | N0 possiblyOrNever | Add1 s
+                    --        N0able s possiblyOrNever = [ N0AtLeast | N0 possiblyOrNever | Add1 s ]
                     --       - `Diff` `sub` becomes impossible to implement
                     failLoudlyWithStackOverflow
                         [ "internal minimum evaluated or leaked somewhere through `N`'s API."
