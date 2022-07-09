@@ -2284,13 +2284,14 @@ n0 =
                           N0able s possiblyOrNever = [ N0AtLeast | N0 possiblyOrNever | Add1 s ]
                          - `Diff` `sub` becomes impossible to implement
 
-                   If you happen to have more ideas
-                   to avoid this hack (which also makes elm crash on `==`)
-                   please PR!
+                   Happen to have more ideas
+                   on how to avoid this ↓ hack (which also makes elm crash on `==`)?
+                   → please PR
+
                 -}
                 \() ->
                     failLoudlyWithStackOverflow
-                        [ "internal minimum evaluated or leaked somewhere through `N`'s API."
+                        [ "internal minimum evaluated or leaked somewhere from `N`'s API."
                         , "💙 Please report under https://github.com/lue-bird/elm-bounded-nat/issues"
                         ]
             , diff = { diff0 = n0Difference, diff1 = n0Difference }
