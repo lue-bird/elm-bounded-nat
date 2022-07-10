@@ -43,6 +43,12 @@
       - 👍 is readable
       - → no
 
+## 21.1.0 plans
+
+  - add `fuzzIn ( min, max ) : ... -> Fuzzer (N (In ...))`
+      - currently waiting for `elm-test` major version 2
+        to avoid a major version bump as a result
+
 # changelog
 
 ## 21.0.0
