@@ -10,7 +10,7 @@
   - `fuzzIn ( min, max ) : ... -> Fuzzer (N (In ...))` add
       - currently waiting for `elm-test` major version 2
         to avoid a major version bump as a result
-  - `N.Generator` that auto-generates `N`<x>, `Add`<x> and `n`<x> for x >= 17 add
+  - `N.Generator` that auto-generates `N<x>`, `Add<x>` and `n<x>` for x >= 17 add
 
 # changelog
 
