@@ -84,7 +84,7 @@ factorialBody x =
 
 maximumConstrainedTest : Test
 maximumConstrainedTest =
-    describe "InDiff"
+    describe "maximum constraint unknown"
         [ describe "toDigit"
             [ test "from invalid char"
                 (\() ->
