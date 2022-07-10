@@ -112,11 +112,11 @@ factorialBody x =
         Err _ ->
             n1 |> N.noMax
 
-        Ok positive ->
-            -- positive : N (Min N1)
+        Ok n1AtLeast ->
+            -- n1AtLeast : N (Min N1)
             -- so subtracting 1, we're still ≥ 0
-            factorial (positive |> N.minSub n1)
-                |> N.mul positive
+            factorial (n1AtLeast |> N.minSub n1)
+                |> N.mul n1AtLeast
 
 factorial n4 |> N.toInt --→ 24
 ```
