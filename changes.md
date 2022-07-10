@@ -69,6 +69,8 @@
         `Result le g`
       - `InNat.addIn`, `InNat.subIn`, `Nat.random`, `Nat.range`, ... range arguments → tuple
       - arguments `{ lowest }` replaced with `{ bottom }`
+      - `range a b` replace with
+        `up (b - a) |> List.map (add a)`
       - `toMin` rename to `noMax`
       - `toIn` rename to `noDiff`
       - `restoreMax` rename to `maxOpen`

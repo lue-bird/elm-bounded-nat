@@ -1,6 +1,6 @@
 module N.Test exposing (suite)
 
-import Expect
+import Expect exposing (Expectation)
 import N exposing (Add11, Add16, Add4, Add9, In, Min, N, N0, N0able, N1, N10, N11, N15, N3, N4, N7, n0, n1, n10, n11, n12, n14, n16, n2, n3, n4, n5, n6, n7, n9)
 import Possibly exposing (Possibly)
 import Test exposing (Test, describe, test)
@@ -11,26 +11,25 @@ suite =
     describe "N"
         [ maximumUnconstrainedTest
         , maximumConstrainedTest
-        , nDiffTest
         ]
 
 
-nDiffTest : Test
-nDiffTest =
-    describe "with differences"
-        [ test "add"
-            (\() ->
-                n11
-                    |> N.diffAdd ( n3, n3 )
-                    |> Expect.equal n14
-            )
-        , test "sub"
-            (\() ->
-                n11
-                    |> N.diffSub ( n9, n9 )
-                    |> Expect.equal n2
-            )
-        ]
+
+--
+
+
+diffSubTypeChecks : Expectation
+diffSubTypeChecks =
+    n11
+        |> N.diffSub ( n9, n9 )
+        |> Expect.equal n2
+
+
+diffAddTypeChecks : Expectation
+diffAddTypeChecks =
+    n11
+        |> N.diffAdd ( n3, n3 )
+        |> Expect.equal n14
 
 
 
@@ -49,7 +48,9 @@ maximumUnconstrainedTest =
         , test "factorial"
             (\() ->
                 factorial n3
-                    |> Expect.equal (n6 |> N.minDown n1 |> N.noMax)
+                    -- == n6 |> N.minDown n1 |> N.noMax
+                    |> N.toInt
+                    |> Expect.equal 6
             )
         ]
 
@@ -96,8 +97,10 @@ maximumConstrainedTest =
                 (\() ->
                     [ '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' ]
                         |> List.map toDigit
+                        -- == N.up n10 |> List.map Ok
+                        |> List.map (Result.map N.toInt)
                         |> Expect.equalLists
-                            (N.up n10 |> List.map Ok)
+                            (List.range 0 9 |> List.map Ok)
                 )
             ]
         ]

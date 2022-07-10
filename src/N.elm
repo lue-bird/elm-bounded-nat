@@ -516,8 +516,11 @@ abs int =
 {-| [`N`](#N)s increasing from 0 to last n - 1.
 In the end, there are length numbers
 
-    N.up n7 |> List.map (N.add n3)
-    --: List (N (In N3 (Add10 a_)))
+    N.up n7
+        |> List.map (N.add n3)
+        --: List (N (In N3 (Add9 a_)))
+        |> List.map N.toInt
+    --> [ 3, 4, 5, 6, 7, 8, 9 ]
 
     N.up atLeast7 |> List.map (N.add n3)
     --: List (N (Min N3))
@@ -529,17 +532,7 @@ up :
     N (In min_ (Add1 maxMinus1) difference_)
     -> List (N (In N0 maxMinus1 {}))
 up length =
-    case length |> isAtLeast n1 { bottom = n0 } of
-        Err _ ->
-            []
-
-        Ok lengthAtLeast1 ->
-            let
-                lengthMinus1 =
-                    lengthAtLeast1 |> sub n1
-            in
-            lengthMinus1
-                :: (lengthMinus1 |> maxUp n1 |> upRecursive)
+    downBelow length |> List.reverse
 
 
 {-| Have a specific maximum in mind? → [`maxOpen`](#maxOpen)
@@ -550,12 +543,12 @@ Want to increase the upper bound by a fixed amount? ↓
     maxUp4 =
         N.maxUp n4
 
-When is this useful? Very rarely. This is how [`up`](#up) is defined
+When is this useful? Very rarely. This is how [`up`](#up) reverse could be implemented
 
-    up :
+    down :
         N (In min (Add1 maxMinus1) difference_)
         -> List (N (In N0 maxMinus1 {}))
-    up length =
+    down length =
         case length |> isAtLeast n1 { bottom = n0 } of
             Err _ ->
                 []
@@ -592,11 +585,28 @@ maxUp maxRelativeIncrease =
                 }
 
 
-upRecursive :
+downBelow :
     N (In minimum_ (Add1 maxMinus1) difference_)
     -> List (N (In N0 maxMinus1 {}))
-upRecursive =
-    up
+downBelow length =
+    case length |> isAtLeast n1 { bottom = n0 } of
+        Err _ ->
+            []
+
+        Ok lengthAtLeast1 ->
+            let
+                lengthMinus1 =
+                    lengthAtLeast1 |> sub n1
+            in
+            lengthMinus1
+                :: (lengthMinus1 |> maxUp n1 |> downBelowRecursive)
+
+
+downBelowRecursive :
+    N (In minimum_ (Add1 maxMinus1) difference_)
+    -> List (N (In N0 maxMinus1 {}))
+downBelowRecursive length =
+    downBelow length
 
 
 {-| Generate a random `N` in a range.
@@ -640,8 +650,8 @@ random ( bottom, highest ) =
 
 -}
 intIsInRange :
-    ( N (In minDownLimit minUpperLimit lowerLimitDifference_)
-    , N (In minUpperLimit maxUpperLimit upperLimitDifference_)
+    ( N (In minDownLimit maxUpperLimit lowerLimitDifference_)
+    , N (In maxUpperLimit maxUpperLimitAtLeast upperLimitDifference_)
     )
     ->
         (Int
@@ -651,7 +661,7 @@ intIsInRange :
                     Int
                     (N (Min (Add1 maxUpperLimit)))
                 )
-                (N (In minDownLimit maxUpperLimit {}))
+                (N (In minDownLimit maxUpperLimitAtLeast {}))
         )
 intIsInRange ( lowerLimit, upperLimit ) =
     \int ->
@@ -662,7 +672,7 @@ intIsInRange ( lowerLimit, upperLimit ) =
             int
                 |> NLimitedTo
                     { min =
-                        (upperLimit |> maximum)
+                        (upperLimit |> minimum)
                             |> addDifference (n1 |> difference0)
                     , max = \() -> MaximumUnknown
                     , diff = {}
@@ -1717,7 +1727,7 @@ isAtMost upperLimit { bottom } =
 {-| The `N (In ... (Is ...))` plus another `N (In ... (Is ...))`. Give the added value twice as a tuple.
 
     n6 |> N.diffAdd ( n5, n5 )
-    --> n11
+    --→ n11
     --: N
     --:     (In
     --:         N11
@@ -1913,7 +1923,7 @@ addIn ( minAdded, maxAdded ) toAdd =
 {-| The `N (In ... (Is ...)` minus another `N (In ... (Is ...))`. Give the subtracted value twice as a tuple.
 
     n6 |> N.diffSub ( n5, n5 )
-    --> n1
+    --→ n1
     --: N
     --:     (In
     --:         N1
@@ -2279,6 +2289,7 @@ n0 =
                            n<x> : N (In (Add<x> atLeast_) N<x> ...)
                            N<x> = Add<x> Never  -- to forbid > max
                            N0able s = [ N0 | Add1 s ]
+                         - requirements for minimum can't be expressed
                          - `Diff` `sub` becomes impossible to implement
                      - 👎 adding an escape hatch
                           N0able s possiblyOrNever = [ N0AtLeast | N0 possiblyOrNever | Add1 s ]
