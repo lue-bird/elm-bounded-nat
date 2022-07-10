@@ -2,7 +2,9 @@ module N.Internal exposing
     ( N, NoMax(..)
     , minWith
     , toInt, differences, minimum
-    , maxMap, maxFrom, differenceTo
+    , maxMap, maxFrom
+    , minMap
+    , differenceTo
     )
 
 {-|
@@ -22,7 +24,9 @@ module N.Internal exposing
 
 ## alter
 
-@docs maxMap, maxFrom, differenceTo
+@docs maxMap, maxFrom
+@docs minMap
+@docs differenceTo
 
 -}
 
@@ -99,9 +103,6 @@ maxFrom toTransferMaxFrom =
 
 
 {-| Change its greatest allowed number promised by the range type with another from a given [`N`](#N).
-
-**Should not be exposed!**
-
 -}
 maxMap :
     (max -> maxMapped)
@@ -116,6 +117,24 @@ maxMap maxChange =
                 { min = nLimits.min
                 , max =
                     \() -> nLimits.max () |> maxChange
+                , diff = nLimits.diff
+                }
+
+
+{-| Change its smallest allowed number promised by the range type with another from a given [`N`](#N).
+-}
+minMap :
+    (min -> minMapped)
+    ->
+        (N (In min max difference)
+         -> N (In minMapped max difference)
+        )
+minMap minChange =
+    \(NLimitedTo nLimits int) ->
+        int
+            |> NLimitedTo
+                { min = nLimits.min |> minChange
+                , max = nLimits.max
                 , diff = nLimits.diff
                 }
 

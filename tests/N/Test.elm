@@ -69,7 +69,7 @@ factorial =
 
 factorialBody : N (In min_ max_ difference_) -> N (Min N1)
 factorialBody x =
-    case x |> N.minIsAtLeast n1 { bottom = n0 } of
+    case x |> N.isAtLeast n1 of
         Err _ ->
             n1 |> N.noMax
 
@@ -106,11 +106,11 @@ maximumConstrainedTest =
         ]
 
 
-minAddMinTest : N (Min N4)
-minAddMinTest =
+addMinTest : N (Min N4)
+addMinTest =
     7
         |> N.intAtLeast n3
-        |> N.minAddMin n1 (N.intAtLeast n1 9)
+        |> N.addMin n1 (N.intAtLeast n1 9)
 
 
 minAddTest : N (Min N15)
@@ -136,25 +136,25 @@ minDownTest =
 
 addInTest : N (In N4 (Add16 a_) {})
 addInTest =
-    N.intInRange ( n3, n10 ) 7
-        |> N.addIn ( n1, n6 ) (N.intInRange ( n1, n6 ) 5)
+    N.intIn ( n3, n10 ) 7
+        |> N.addIn ( n1, n6 ) (N.intIn ( n1, n6 ) 5)
 
 
 addTest : N (In N11 (Add16 a_) {})
 addTest =
-    N.intInRange ( n2, n7 ) 7
+    N.intIn ( n2, n7 ) 7
         |> N.add n9
 
 
 subInTest : N (In N1 (Add9 a_) {})
 subInTest =
-    N.intInRange ( n6, n10 ) 7
-        |> N.subIn ( n1, n5 ) (N.intInRange ( n1, n5 ) 4)
+    N.intIn ( n6, n10 ) 7
+        |> N.subIn ( n1, n5 ) (N.intIn ( n1, n5 ) 4)
 
 
 subTest : N (In N7 (Add11 a_) {})
 subTest =
-    N.intInRange ( n12, n16 ) 1
+    N.intIn ( n12, n16 ) 1
         |> N.sub n5
 
 
@@ -169,5 +169,5 @@ toDigit :
             (N (In N0 (Add9 atLeast_) {}))
 toDigit char =
     ((char |> Char.toCode) - ('0' |> Char.toCode))
-        |> N.intIsInRange ( n0, n9 )
+        |> N.intIsIn ( n0, n9 )
         |> Result.map (N.maxOpen n9)

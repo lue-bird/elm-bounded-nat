@@ -68,13 +68,18 @@
       - `type AtMostOrAbove le g` replace with
         `Result le g`
       - `InNat.addIn`, `InNat.subIn`, `Nat.random`, `Nat.range`, ... range arguments → tuple
-      - arguments `{ lowest }` replaced with `{ bottom }`
+      - compare operations remove requirements of what to compare against
+          - to simplify
+      - `min-` compare operations remove
+          - because normal operations now work as well
       - `range a b` replace with
         `up (b - a) |> List.map (add a)`
-      - `toMin` rename to `noMax`
-      - `toIn` rename to `noDiff`
-      - `restoreMax` rename to `maxOpen`
-      - `lowerMin` rename to `minDown`
+      - -`InRange` operations rename → -`In`
+      - `minAddMin` rename → `addMin`
+      - `toMin` rename → `noMax`
+      - `toIn` rename → `noDiff`
+      - `restoreMax` rename → `maxOpen`
+      - `lowerMin` rename → `minDown`
       - `maxUp` add
       - `type BelowOrAbove l g` add
 

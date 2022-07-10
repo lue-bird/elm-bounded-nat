@@ -22,9 +22,9 @@ toHexChar : N (In anyMinimum_ N15 difference_) -> Char
   - the _type_ tells us that a number between 0 & 15 is wanted
   - the _user_ proves that the number is actually between 0 & 15
 
-The argument type says: Give me an integer ≥ 0 `N` `In` range
+The argument type says: Give me an integer ≥ 0 [`N`](N#N) [`In`](N#In) range
   - `≥ 0`; `anyMinimum_` value allowed
-  - `≤` `N15`
+  - `≤` [`N15`](N#N15)
   - which might be a [specific value like `n0`, `n1`, ... which has a `difference_`](N#Is) `)`
 
 Users can prove this by explicitly
@@ -48,7 +48,7 @@ Users can prove this by explicitly
 
     ```elm
     floatPercent float =
-        float * 100 |> round |> N.intInRange n0 n100
+        float * 100 |> round |> N.intIn n0 n100
     ```
 
   - There are more ways, but you get the idea 🙂
@@ -108,7 +108,7 @@ Says: For every `n ≥ 0`, `n! ≥ 1`.
 ```elm
 factorialBody : N (In min_ max_ difference_) -> N (Min N1)
 factorialBody x =
-    case x |> N.minIsAtLeast n1 { bottom = n0 } of
+    case x |> N.isAtLeast n1 of
         Err _ ->
             n1 |> N.noMax
 

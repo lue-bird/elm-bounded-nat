@@ -6,14 +6,14 @@ module N exposing
     , N0able(..), Add1, Add2, Add3, Add4, Add5, Add6, Add7, Add8, Add9, Add10, Add11, Add12, Add13, Add14, Add15, Add16
     , n0, n1, n2, n3, n4, n5, n6, n7, n8, n9, n10, n11, n12, n13, n14, n15, n16
     , BelowOrAbove(..)
-    , intAtLeast, intInRange
-    , intIsInRange, intIsAtLeast
+    , intAtLeast, intIn
+    , intIsIn, intIsAtLeast
     , atLeast, atMost
-    , is, isInRange, isAtLeast, isAtMost
-    , minIs, minIsAtLeast, minIsAtMost
-    , add, sub, toPower, remainderBy, mul, div
-    , addIn, subIn
-    , minSub, minAdd, minSubMax, minAddMin
+    , is, isIn, isAtLeast, isAtMost
+    , add, addIn
+    , sub, subIn
+    , toPower, remainderBy, mul, div
+    , minSub, minAdd, minSubMax, addMin
     , toInt, toFloat
     , minDown, noDiff, noMax, maxOpen, maxUp
     , Is, Diff(..), To
@@ -79,12 +79,12 @@ In the future, [`elm-generate`](https://github.com/lue-bird/generate-elm) will a
 
 ### int clamp
 
-@docs intAtLeast, intInRange
+@docs intAtLeast, intIn
 
 
 ## int compare
 
-@docs intIsInRange, intIsAtLeast
+@docs intIsIn, intIsAtLeast
 
 
 ## clamp
@@ -94,27 +94,19 @@ In the future, [`elm-generate`](https://github.com/lue-bird/generate-elm) will a
 
 ## compare maximum constrained
 
-@docs is, isInRange, isAtLeast, isAtMost
-
-
-## compare maximum unconstrained
-
-@docs minIs, minIsAtLeast, minIsAtMost
+@docs is, isIn, isAtLeast, isAtMost
 
 
 # alter
 
-@docs add, sub, toPower, remainderBy, mul, div
-
-
-## alter maximum constrained
-
-@docs addIn, subIn
+@docs add, addIn
+@docs sub, subIn
+@docs toPower, remainderBy, mul, div
 
 
 ## alter maximum unconstrained
 
-@docs minSub, minAdd, minSubMax, minAddMin
+@docs minSub, minAdd, minSubMax, addMin
 
 
 ## broaden
@@ -158,7 +150,7 @@ Operations used with [`n0`](N#n0), [`n1`](N#n1), ... `: N (In ... (Is ...))`.
 -}
 
 import Help exposing (valueElseOnError)
-import N.Internal exposing (differenceTo, maxFrom, maxMap, minWith)
+import N.Internal exposing (differenceTo, maxFrom, maxMap, minMap, minWith)
 import Possibly exposing (Possibly(..))
 import Random
 import RecordWithoutConstructorFunction exposing (RecordWithoutConstructorFunction)
@@ -304,7 +296,7 @@ type alias Min lowestPossibleValue =
 {-| Allow only a specific number.
 
 Useful as an **argument & storage** type in combination with [`typesafe-array`](https://package.elm-lang.org/packages/lue-bird/elm-typesafe-array/latest/)s,
-not with `N`s.
+not with [`N`](N)s.
 
     byte : Arr (Exactly N8) Bit -> Byte
 
@@ -363,7 +355,7 @@ type To
     = To Never
 
 
-{-| Don't check if this number is below a maximum.
+{-| Flag "The number's maximum limit is unknown".
 
     type alias Min min =
         In minimum NoMax {}
@@ -380,11 +372,14 @@ An example where this is useful using [typesafe-array](https://package.elm-lang.
                 (Maybe (Tree childCountMax element))
             )
 
+    type alias TreeBinary element =
+        Tree N2 element
+
     type alias TreeMulti element =
         Tree NoMax element
 
-    type alias TreeBinary element =
-        Tree N2 element
+Remember: ↑ and other [`Min`](#Min)/[`NoMax`](#NoMax) are result/storage types, not argument types.
+You can just use a variable `Tree childCountMax_ element` if you don't care about an enforced maximum.
 
 -}
 type alias NoMax =
@@ -400,7 +395,7 @@ type alias NoMax =
     between70And100 |> N.add n7
     --: N (In N77 (Add107 a_) {})
 
-Use [`addIn`](#addIn) if you want to add a `N` that isn't a `N (In ... (Is ...))`.
+Use [`addIn`](#addIn) if you want to add an [`N`](N) that isn't a `N (In ... (Is ...))`.
 
 -}
 add :
@@ -434,7 +429,7 @@ add toAdd =
     between7And10 |> N.sub n7
     --: N (In N0 (Add3 a_) {})
 
-Use [`subIn`](#subIn) if you want to subtract a `N` that isn't a `N (In ... (Is ...))`.
+Use [`subIn`](#subIn) if you want to subtract an [`N`](N) that isn't a `N (In ... (Is ...))`.
 
 -}
 sub :
@@ -499,8 +494,8 @@ abs int =
         |> minWith (n0 |> minimum)
 
 
-{-| [`N`](#N)s increasing from 0 to last n - 1.
-In the end, there are length numbers
+{-| [`N`](#N)s increasing from `0` to `n - 1`.
+In the end, there are `n` numbers.
 
     N.up n7
         |> List.map (N.add n3)
@@ -535,7 +530,7 @@ When is this useful? Very rarely. This is how [`up`](#up) reverse could be imple
         N (In min (Add1 maxMinus1) difference_)
         -> List (N (In N0 maxMinus1 {}))
     down length =
-        case length |> isAtLeast n1 { bottom = n0 } of
+        case length |> isAtLeast n1 of
             Err _ ->
                 []
 
@@ -559,18 +554,15 @@ maxUp :
          -> N (In min maxIncreased {})
         )
 maxUp maxRelativeIncrease =
-    \n ->
-        (n |> toInt)
-            |> minWith (n |> minimum)
-            |> maxFrom n
-            |> maxMap (addDifference (maxRelativeIncrease |> difference0))
+    maxMap (addDifference (maxRelativeIncrease |> difference0))
+        >> noDiff
 
 
 downBelow :
     N (In minimum_ (Add1 maxMinus1) difference_)
     -> List (N (In N0 maxMinus1 {}))
 downBelow length =
-    case length |> isAtLeast n1 { bottom = n0 } of
+    case length |> isAtLeast n1 of
         Err _ ->
             []
 
@@ -584,13 +576,13 @@ downBelow length =
 
 
 downBelowRecursive :
-    N (In minimum_ (Add1 maxMinus1) difference_)
+    N (In min_ (Add1 maxMinus1) difference_)
     -> List (N (In N0 maxMinus1 {}))
 downBelowRecursive length =
     downBelow length
 
 
-{-| Generate a random `N` in a range.
+{-| Generate a random [`N`](N) in a range.
 
     N.random ( n1, n10 )
     --: Random.Generator (N (In N1 (Add10 a_) {}))
@@ -603,11 +595,11 @@ random :
     ->
         Random.Generator
             (N (In lowerLimitMin upperLimitMax {}))
-random ( bottom, highest ) =
-    Random.int (bottom |> toInt) (highest |> toInt)
+random ( lowestPossible, highestPossible ) =
+    Random.int (lowestPossible |> toInt) (highestPossible |> toInt)
         |> Random.map
-            (minWith (bottom |> minimum)
-                >> maxFrom highest
+            (minWith (lowestPossible |> minimum)
+                >> maxFrom highestPossible
             )
 
 
@@ -615,7 +607,7 @@ random ( bottom, highest ) =
 
     inputIntJudge : Int -> Result String (N (In N1 (Add10 a_) {}))
     inputIntJudge int =
-        case int |> N.intIsInRange ( n1, n10 ) of
+        case int |> N.intIsIn ( n1, n10 ) of
             Ok inRange ->
                 inRange |> N.maxOpen n10 |> Ok
             Err (N.Below _) ->
@@ -627,7 +619,7 @@ random ( bottom, highest ) =
     --> Err "must be ≥ 1"
 
 -}
-intIsInRange :
+intIsIn :
     ( N (In minDownLimit maxUpperLimit lowerLimitDifference_)
     , N (In maxUpperLimit maxUpperLimitAtLeast upperLimitDifference_)
     )
@@ -641,7 +633,7 @@ intIsInRange :
                 )
                 (N (In minDownLimit maxUpperLimitAtLeast {}))
         )
-intIsInRange ( lowerLimit, upperLimit ) =
+intIsIn ( lowerLimit, upperLimit ) =
     \int ->
         if int < (lowerLimit |> toInt) then
             int |> Below |> Err
@@ -696,19 +688,19 @@ intIsAtLeast minimumLimit =
 
 ```
 0
-    |> N.intInRange ( n3, n12 )
+    |> N.intIn ( n3, n12 )
     --: N (In N3 (Add12 a_) {})
     |> N.toInt
 --> 3
 
 99
-    |> N.intInRange n3 n12
+    |> N.intIn n3 n12
     --: N (In N3 (Add12 a_) {})
     |> N.toInt
 --> 12
 
 9
-    |> N.intInRange ( n3, n12 )
+    |> N.intIn ( n3, n12 )
     --: N (In N3 (Add12 a_) {})
 --> 9
 
@@ -717,7 +709,7 @@ toDigit : Char -> Maybe (N (In N0 (Add9 a_) {}))
 toDigit char =
     case
         ((char |> Char.toCode) - ('0' |> Char.toCode))
-            |> N.intIsInRange n0 n9
+            |> N.intIsIn n0 n9
     of
         Ok digit ->
             digit |> N.maxOpen n9 |> Just
@@ -726,10 +718,10 @@ toDigit char =
             Nothing
 ```
 
-If you want to handle the cases `< minimum` & `> maximum` explicitly, use [`intIsInRange`](N#intIsInRange).
+If you want to handle the cases `< minimum` & `> maximum` explicitly, use [`intIsIn`](N#intIsIn).
 
 -}
-intInRange :
+intIn :
     ( N (In lowerLimit upperLimitMin lowerLimitDifference_)
     , N (In upperLimitMin upperLimit upperLimitDifference_)
     )
@@ -737,8 +729,8 @@ intInRange :
         (Int
          -> N (In lowerLimit upperLimit {})
         )
-intInRange ( lowerLimit, upperLimit ) =
-    intIsInRange ( lowerLimit, upperLimit )
+intIn ( lowerLimit, upperLimit ) =
+    intIsIn ( lowerLimit, upperLimit )
         >> valueElseOnError
             (\error ->
                 case error of
@@ -789,7 +781,7 @@ intAtLeast minimumLimit =
         >> Maybe.withDefault (minimumLimit |> noMax)
 
 
-{-| Return the given number if the `N` is less.
+{-| Return the given number if the [`N`](N) is less.
 
     between5And9 |> N.atLeast n10
     --: N (In N10 (Add10 a_) {})
@@ -802,58 +794,53 @@ intAtLeast minimumLimit =
 
 -}
 atLeast :
-    N (In minNewMin max lowerDifference_)
+    N (In minNewMin (Add1 maxMinus1) lowerDifference_)
     ->
-        (N (In min_ max difference_)
-         -> N (In minNewMin max {})
+        (N (In min_ (Add1 maxMinus1) difference_)
+         -> N (In minNewMin (Add1 maxMinus1) {})
         )
 atLeast lowerLimit =
     \n ->
-        if (n |> toInt) < (lowerLimit |> toInt) then
-            lowerLimit |> noDiff
+        n
+            |> isAtLeast lowerLimit
+            |> valueElseOnError
+                (\_ ->
+                    lowerLimit
+                        |> noDiff
+                )
 
-        else
-            n
-                |> toInt
-                |> minWith (lowerLimit |> minimum)
-                |> maxFrom n
 
-
-{-| **Cap** the `N` to at most a number.
+{-| **Cap** the [`N`](N) to at most a number.
 
     between5And15
-        |> N.atMost n10 { bottom = n5 }
+        |> N.atMost n10
     --: N (In N5 (Add10 a_) {})
 
-    atLeast5 |> N.atMost n10 { bottom = n5 }
+    atLeast5 |> N.atMost n10
     --: N (In N5 (Add10 a_) {})
 
-`bottom` can be a number ≤ the minimum.
+(The type doesn't forbid that the upper limit you're comparing against
+is below the current minimum or above the current maximum.
+→ `Err` or `Ok` values don't necessarily follow `min <= max` for `N (In min max ...)`
+Luckily that's not a problem, since the values won't be produced anyway.)
 
 -}
 atMost :
-    N (In minNewMax maxNewMax newMaxDifference_)
-    ->
-        { bottom :
-            N
-                (In
-                    bottom
-                    atLeastLowest_
-                    (Is
-                        (Diff lowestToMin_ To min)
-                        (Diff lowestToMinNewMax_ To minNewMax)
-                    )
-                )
-        }
+    N (In upperLimitMin_ upperLimitMax newMaxDifference_)
     ->
         (N (In min max_ difference_)
-         -> N (In bottom maxNewMax {})
+         -> N (In min upperLimitMax {})
         )
-atMost higherUpperLimit { bottom } =
+atMost upperLimit =
     \n ->
-        Basics.min (n |> toInt) (higherUpperLimit |> toInt)
-            |> minWith (bottom |> minimum)
-            |> maxFrom higherUpperLimit
+        n
+            |> isAtMost upperLimit
+            |> valueElseOnError
+                (\_ ->
+                    upperLimit
+                        |> minMap (\_ -> n |> minimum)
+                        |> noDiff
+                )
 
 
 
@@ -883,7 +870,7 @@ mul multiplicand =
             |> minWith (n |> minimum)
 
 
-{-| Divide (`//`) by a `N` `d ≥ 1`.
+{-| Divide (`//`) by an [`N`](N) `d ≥ 1`.
 
   - `/ 0` is impossible
   - `x / d` is at most x
@@ -1072,7 +1059,7 @@ maxOpen newMaximum =
 -- # compare
 
 
-{-| The error result of comparing an [`N`](#N).
+{-| The error result of comparing [`N`](#N)s.
 
   - `Above`: greater
   - `Below`: less
@@ -1109,12 +1096,10 @@ toFloat =
 -- `In` with maximum
 
 
-{-| Is the `N` equal to, [`BelowOrAbove`](#BelowOrAbove) a given number?
-
-`bottom` can be a number ≤ the minimum.
+{-| Is the [`N`](N) equal to, [`BelowOrAbove`](#BelowOrAbove) a given number?
 
     giveAPresent { age } =
-        case age |> N.is n18 { bottom = n0 } of
+        case age |> N.is n18 of
             Err (N.Below younger) ->
                 toy { age = younger }
 
@@ -1127,138 +1112,117 @@ toFloat =
     toy : { age : N (In min_ N17 difference_) } -> Toy
 
     book :
-        { age : N (In (Add19 minMinus19_) max_ difference_) }
+        { age : N (In (N19 minMinus19_) max_ difference_) }
         -> Book
 
 -}
 is :
-    N
-        (In
-            (Add1 comparedAgainstMinus1)
-            comparedAgainstAtLeast
-            (Is
-                (Diff (Add1 comparedAgainstMinus1) To (Add1 comparedAgainstMinus1AtLeast))
-                (Diff comparedAgainstToMax_ To max)
-            )
-        )
-    ->
-        { bottom :
-            N
-                (In
-                    bottom
-                    atLeastLowest_
-                    (Is
-                        (Diff lowestToMin_ To min)
-                        (Diff minToValue_ To (Add1 comparedAgainstMinus1))
-                    )
-                )
-        }
+    N (In comparedAgainstMin (Add1 comparedAgainstMaxMinus1) comparedAgainstDifference)
     ->
         (N (In min max difference_)
          ->
             Result
                 (BelowOrAbove
-                    (N (In bottom comparedAgainstMinus1AtLeast {}))
-                    (N (In (Add2 comparedAgainstMinus1) max {}))
+                    (N (In min comparedAgainstMaxMinus1 {}))
+                    (N (In (Add1 comparedAgainstMin) max {}))
                 )
-                (N (In (Add1 comparedAgainstMinus1) comparedAgainstAtLeast {}))
+                (N (In comparedAgainstMin (Add1 comparedAgainstMaxMinus1) comparedAgainstDifference))
         )
-is comparedAgainst { bottom } =
+is comparedAgainst =
     \n ->
         case compare (n |> toInt) (comparedAgainst |> toInt) of
             EQ ->
                 comparedAgainst
-                    |> noDiff
                     |> Ok
 
             GT ->
-                (n |> toInt)
-                    |> minWith
-                        ((comparedAgainst |> minimum)
-                            |> addDifference (n1 |> difference0)
+                n
+                    |> minMap
+                        (\_ ->
+                            (comparedAgainst |> minimum)
+                                |> addDifference (n1 |> difference0)
                         )
-                    |> maxFrom n
+                    |> noDiff
                     |> Above
                     |> Err
 
             LT ->
-                (n |> toInt)
-                    |> minWith (bottom |> minimum)
-                    |> maxMap
-                        (\_ ->
-                            (comparedAgainst |> minimum)
-                                |> addDifference (comparedAgainst |> difference0)
-                                |> subDifference (n1 |> difference0)
-                        )
+                n
+                    |> maxFrom comparedAgainst
+                    |> maxMap (subDifference (n1 |> difference0))
+                    |> noDiff
                     |> Below
                     |> Err
 
 
-{-| Compared to a range from a lower to an upper bound, is the `N` in range or [`BelowOrAbove`](#BelowOrAbove)?
+{-| Compared to a range from a lower to an upper bound,
+is the [`N`](#N) in range or [`BelowOrAbove`](#BelowOrAbove)?
 
-`bottom` can be a number ≤ the minimum.
-
-    isBetween3And10 : N (In min_ (Add10 maxMinus10_) d_) -> Maybe (N (In N3 (Add10 a_) {}))
-    isBetween3And10 =
-        N.isInRange ( n3, n10 ) { bottom = n0 }
+    isIn3To10 : N (In min_ (Add10 maxMinus10_) d_) -> Maybe (N (In N3 (Add10 a_) {}))
+    isIn3To10 =
+        N.isIn ( n3, n10 )
             >> Result.toMaybe
 
-    n9 |> isBetween3And10 |> Maybe.map N.toInt
+    n9 |> isIn3To10 |> Maybe.map N.toInt
     --> Just 9
 
-    n12 |> isBetween3And10
+    n12 |> isIn3To10
     --> Nothing
 
+TODO: de-warning
+
+Here's some example-cases:
+
+  - `hi < lo < min < max` → `Below | Above`
+  - `hi < min < lo < max` → `Below | Above`
+  - `hi < min < max < lo` → `Below | Above`
+  - `lo < hi < min < max` → `Above`
+  - `max < hi < min < lo` → `Below`
+  - `min < hi < lo < max` → `Below | Above`
+  - `lo < min < hi < max` → `Ok | Above`
+  - `max < min < hi < lo` → `Below`
+  - `max < lo < hi < min` → `Below | Ok | Above` ← the default case
+  - `lo < min < max < hi` → `Ok`
+  - `min < lo < max < hi` → `Ok | Below`
+  - `min < max < lo < hi` → `Below`
+
+.
+
+  - did we miss something? → issue
+  - feel motivated to add the other cases? → PR
+
 -}
-isInRange :
+isIn :
     ( N
         (In
             lowerLimit
-            (Add1 atLeastLowerLimitMinus1)
-            (Is
-                (Diff lowerLimitToUpperLimit_ To upperLimit)
-                lowerLimitDiff1_
-            )
+            (Add1 lowerLimitMaxMinus1)
+            lowerLimitDifference_
         )
     , N
         (In
-            upperLimit
-            atLeastUpperLimit
-            (Is
-                (Diff upperLimitToMax_ To max)
-                upperLimitDiff1_
-            )
+            upperLimitMin
+            upperLimitMax
+            upperLimitDifference_
         )
     )
-    ->
-        { bottom :
-            N
-                (In
-                    bottom
-                    atLeastLowest_
-                    (Is
-                        (Diff lowestToMin_ To min)
-                        (Diff minToLowerLimit_ To lowerLimit)
-                    )
-                )
-        }
     ->
         (N (In min max difference_)
          ->
             Result
                 (BelowOrAbove
-                    (N (In bottom atLeastLowerLimitMinus1 {}))
-                    (N (In (Add1 upperLimit) max {}))
+                    (N (In min lowerLimitMaxMinus1 {}))
+                    (N (In (Add1 upperLimitMin) max {}))
                 )
-                (N (In lowerLimit atLeastUpperLimit {}))
+                (N (In lowerLimit upperLimitMax {}))
         )
-isInRange ( lowerLimit, upperLimit ) { bottom } =
+isIn ( lowerLimit, upperLimit ) =
     \n ->
         if (n |> toInt) < (lowerLimit |> toInt) then
-            (n |> toInt)
-                |> minWith (bottom |> minimum)
+            n
                 |> maxFrom lowerLimit
                 |> maxMap (subDifference (n1 |> difference0))
+                |> noDiff
                 |> Below
                 |> Err
 
@@ -1283,207 +1247,14 @@ isInRange ( lowerLimit, upperLimit ) { bottom } =
 -- ## compare
 
 
-{-| Is the `N` equal to, [`BelowOrAbove`](#BelowOrAbove) a given number?
-
-`bottom` can be a number ≤ the minimum.
-
-    giveAPresent { age } =
-        case age |> N.minIs n18 { bottom = n0 } of
-            Err (N.Below younger) ->
-                toy { age = younger }
-
-            Err (N.Above older) ->
-                book { age = older }
-
-            Ok _ ->
-                bigPresent
-
-    toy : { age : N (In min_ N17 difference_) } -> Toy
-
-    book :
-        { age : N (In (N19 minMinus19_) max_ difference_) }
-        -> Book
-
--}
-minIs :
-    N
-        (In
-            (Add1 nMinus1)
-            nAtLeast
-            (Is
-                (Diff nMinus1 To nMinus1AtLeast)
-                nDiff1_
-            )
-        )
-    ->
-        { bottom :
-            N
-                (In
-                    bottom
-                    atLeastLowest_
-                    (Is
-                        (Diff lowestToMin_ To min)
-                        (Diff minToValueMinus1_ To nMinus1)
-                    )
-                )
-        }
-    ->
-        (N (In min max_ difference_)
-         ->
-            Result
-                (BelowOrAbove
-                    (N (In bottom nMinus1AtLeast {}))
-                    (N (Min (Add2 nMinus1)))
-                )
-                (N (In (Add1 nMinus1) nAtLeast {}))
-        )
-minIs comparedAgainst { bottom } =
-    \minN ->
-        case compare (minN |> toInt) (comparedAgainst |> toInt) of
-            LT ->
-                (minN |> toInt)
-                    |> minWith (bottom |> minimum)
-                    |> maxMap
-                        (\_ ->
-                            (comparedAgainst |> minimum)
-                                |> subDifference (n1 |> difference0)
-                                |> addDifference (comparedAgainst |> difference0)
-                        )
-                    |> Below
-                    |> Err
-
-            EQ ->
-                comparedAgainst |> noDiff |> Ok
-
-            GT ->
-                (minN |> toInt)
-                    |> minWith
-                        ((comparedAgainst |> minimum)
-                            |> addDifference (n1 |> difference0)
-                        )
-                    |> Above
-                    |> Err
-
-
-{-| Is the `N` less or atLeast a given number?
-
-    factorial : N (In min_ max_ difference_) -> N (Min N1)
-    factorial =
-        factorialBody
-
-    factorialBody : N (In min_ max_ difference_) -> N (Min N1)
-    factorialBody =
-        case x |> N.minIsAtLeast n1 { bottom = n0 } of
-            Err _ ->
-                n1 |> N.noMax
-
-            Ok atLeast1 ->
-                factorial (atLeast1 |> N.minSub n1)
-                    |> N.mul atLeast1
-
--}
-minIsAtLeast :
-    N
-        (In
-            minDownLimit
-            (Add1 maxLowerLimitMinus1)
-            lowerLimitDifference_
-        )
-    ->
-        { bottom :
-            N
-                (In
-                    bottom
-                    atLeastLowest_
-                    (Is
-                        (Diff lowestToMin_ To min)
-                        (Diff lowestToMinLowerLimit_ To minDownLimit)
-                    )
-                )
-        }
-    ->
-        (N (In min max_ difference_)
-         ->
-            Result
-                (N (In bottom maxLowerLimitMinus1 {}))
-                (N (Min minDownLimit))
-        )
-minIsAtLeast lowerLimit { bottom } =
-    \minIn ->
-        if (minIn |> toInt) >= (lowerLimit |> toInt) then
-            (minIn |> toInt)
-                |> minWith (lowerLimit |> minimum)
-                |> Ok
-
-        else
-            (minIn |> toInt)
-                |> minWith (bottom |> minimum)
-                |> maxFrom lowerLimit
-                |> maxMap (subDifference (n1 |> difference0))
-                |> Err
-
-
-{-| Is the `N` atMost or greater than a given number?
-
-    goToBelow18Party : { age : N (In min_ N17 difference_) } -> Snack
-
-    tryToGoToBelow18Party { age } =
-        case age |> N.minIsAtMost n17 { bottom = n0 } of
-            Ok below18 ->
-                Just (goToBelow18Party { age = below18 })
-
-            Err _ ->
-                Nothing
-
--}
-minIsAtMost :
-    N (In minUpperLimit maxUpperLimit upperLimitDifference_)
-    ->
-        { bottom :
-            N
-                (In
-                    bottom
-                    atLeastLowest_
-                    (Is
-                        (Diff lowestToMin_ To min)
-                        (Diff minToAtMostMin_ To minUpperLimit)
-                    )
-                )
-        }
-    ->
-        (N (In min max_ difference_)
-         ->
-            Result
-                (N (Min (Add1 minUpperLimit)))
-                (N (In bottom maxUpperLimit {}))
-        )
-minIsAtMost upperLimit { bottom } =
-    \minIn ->
-        if (minIn |> toInt) <= (upperLimit |> toInt) then
-            (minIn |> toInt)
-                |> minWith (bottom |> minimum)
-                |> maxFrom upperLimit
-                |> Ok
-
-        else
-            (minIn |> toInt)
-                |> minWith
-                    ((upperLimit |> minimum)
-                        |> addDifference (n1 |> difference0)
-                    )
-                |> Err
-
-
-{-| Is the `N` below than or at least as big as a given number?
-
-`bottom` can be a number ≤ the minimum.
+{-| Is the [`N`](N) below than or at least as big as a given number?
 
     vote :
         { age : N (In (Add18 minMinus18_) max_ difference_) }
         -> Vote
 
     tryToVote { age } =
-        case age |> N.isAtLeast n18 { bottom = n0 } of
+        case age |> N.isAtLeast n18 of
             Err _ ->
                 --😓
                 Nothing
@@ -1491,111 +1262,104 @@ minIsAtMost upperLimit { bottom } =
             Ok oldEnough ->
                 vote { age = oldEnough } |> Just
 
+    factorial : N (In min_ max_ difference_) -> N (Min N1)
+    factorial =
+        factorialBody
+
+    factorialBody : N (In min_ max_ difference_) -> N (Min N1)
+    factorialBody x =
+        case x |> N.isAtLeast n1 of
+            Err _ ->
+                n1 |> N.noMax
+
+            Ok atLeast1 ->
+                factorial (atLeast1 |> N.minSub n1)
+                    |> N.mul atLeast1
+
+(The type doesn't forbid that the lower limit you're comparing against
+is below the current minimum or above the current maximum.
+→ `Err` or `Ok` values don't necessarily follow `min <= max` for `N (In min max ...)`
+Luckily that's not a problem, since the values won't be produced anyway.)
+
 -}
 isAtLeast :
     N
         (In
-            lowerLimit
-            (Add1 atLeastLowerLimitMinus1)
-            (Is
-                (Diff atLeastRange_ To max)
-                lowerLimitDiff1_
-            )
+            lowerLimitMin
+            (Add1 lowerLimitMaxMinus1)
+            lowerLimitDifference_
         )
-    ->
-        { bottom :
-            N
-                (In
-                    bottom
-                    atLeastLowest_
-                    (Is
-                        (Diff lowestToMin_ To min)
-                        (Diff (Add1 lowestToLowerLimit_) To lowerLimit)
-                    )
-                )
-        }
     ->
         (N (In min max difference_)
          ->
             Result
-                (N (In bottom atLeastLowerLimitMinus1 {}))
-                (N (In lowerLimit max {}))
+                (N (In min lowerLimitMaxMinus1 {}))
+                (N (In lowerLimitMin max {}))
         )
-isAtLeast lowerLimit { bottom } =
+isAtLeast lowerLimit =
     \n ->
         if (n |> toInt) >= (lowerLimit |> toInt) then
-            (n |> toInt)
-                |> minWith (lowerLimit |> minimum)
-                |> maxFrom n
+            n
+                |> minMap (\_ -> lowerLimit |> minimum)
+                |> noDiff
                 |> Ok
 
         else
-            (n |> toInt)
-                |> minWith (bottom |> minimum)
+            n
                 |> maxFrom lowerLimit
                 |> maxMap (subDifference (n1 |> difference1))
+                |> noDiff
                 |> Err
 
 
-{-| Is the `N` at most or greater than a given number?
-
-`bottom` can be a number ≤ the minimum.
+{-| Is the [`N`](N) at most (`Ok`) or greater than (`Err`) a given number?
 
     goToBelow18Party : { age : N (In min_ N17 difference_) } -> Snack
 
     tryToGoToBelow18Party { age } =
-        case age |> N.isAtMost n17 { bottom = n0 } of
+        case age |> N.isAtMost n17 of
             Ok below18 ->
-                Just (goToBelow18Party { age = below18 })
+                goToBelow18Party { age = below18 } |> Just
 
             Err _ ->
                 Nothing
+
+(The type doesn't forbid that the upper limit you're comparing against
+is below the current minimum or above the current maximum.
+→ `Err` or `Ok` values don't necessarily follow `min <= max` for `N (In min max ...)`
+Luckily that's not a problem, since the values won't be produced anyway.)
 
 -}
 isAtMost :
     N
         (In
-            upperLimit
-            atLeastUpperLimit
-            (Is
-                (Diff (Add1 greaterRange_) To max)
-                upperLimitDiff1_
-            )
+            upperLimitMin
+            upperLimitMax
+            upperLimitDifference_
         )
-    ->
-        { bottom :
-            N
-                (In
-                    bottom
-                    atLeastLowest_
-                    (Is
-                        (Diff lowestToMin_ To min)
-                        (Diff minToUpperLimit_ To upperLimit)
-                    )
-                )
-        }
     ->
         (N (In min max difference_)
          ->
             Result
-                (N (In (Add1 upperLimit) max {}))
-                (N (In bottom atLeastUpperLimit {}))
+                (N (In (Add1 upperLimitMin) max {}))
+                (N (In min upperLimitMax {}))
         )
-isAtMost upperLimit { bottom } =
+isAtMost upperLimit =
     \n ->
         if (n |> toInt) <= (upperLimit |> toInt) then
-            (n |> toInt)
-                |> minWith (bottom |> minimum)
+            n
                 |> maxFrom upperLimit
+                |> noDiff
                 |> Ok
 
         else
-            (n |> toInt)
-                |> minWith
-                    ((upperLimit |> minimum)
-                        |> addDifference (n1 |> difference0)
+            n
+                |> minMap
+                    (\_ ->
+                        (upperLimit |> minimum)
+                            |> addDifference (n1 |> difference0)
                     )
-                |> maxFrom n
+                |> noDiff
                 |> Err
 
 
@@ -1621,7 +1385,7 @@ This is only rarely useful, as you shouldn't
 
     inRangeXAndXPlus10 x =
         -- won't work
-        isInRange ( x, x |> N.diffAdd ( n10, n10 ) )
+        isIn ( x, x |> N.diffAdd ( n10, n10 ) )
 
 Only use it when the `N (In ... (Is ...))` is used once.
 
@@ -1698,21 +1462,21 @@ diffAdd ( toAdd, toAddWithAdditionalInformation ) =
             |> maxMap (addDifference (toAdd |> difference1))
 
 
-{-| Add a `N`. The second argument is the minimum added value.
+{-| Add an [`N`](N). The second argument is the minimum added value.
 Use [`minAdd`](N#minAdd) to add exact numbers.
 
-    atLeast5 |> N.minAddMin n2 atLeast2
+    atLeast5 |> N.addMin n2 atLeast2
     --: N (Min N7)
 
 -}
-minAddMin :
+addMin :
     N (In minAdded atLeastMinAdded_ (Is (Diff min To sumMin) is_))
     -> N (In minAdded maxAdded_ addedDifference_)
     ->
         (N (In min max_ difference_)
          -> N (Min sumMin)
         )
-minAddMin minAdded toAdd =
+addMin minAdded toAdd =
     \n ->
         (n |> toInt)
             + (toAdd |> toInt)
@@ -1722,12 +1486,12 @@ minAddMin minAdded toAdd =
                 )
 
 
-{-| Add an exact `N (N ...)` value.
+{-| Add an exact [`N (In ... (Is ...))`](#Is) value.
 
     atLeast70 |> InDiff.add n7
     --: N (Min N77)
 
-Use [`minAddMin`](#minAddMin) if you want to add a `N` that isn't a `N (N ...)`.
+Use [`addMin`](#addMin) if you want to add an [`N`](#N) that can be in a range.
 
 -}
 minAdd :
@@ -1746,7 +1510,7 @@ minAdd toAdd =
                 )
 
 
-{-| Add a `N` that isn't a `N (N ...)`.
+{-| Add an [`N`](#N) that can be in a range.
 
 The tuple argument should contain
 
@@ -1798,7 +1562,7 @@ This is only rarely useful, as you shouldn't
 
     inRangeXMinus10ToX x =
         -- won't work
-        isInRange (x |> N.diffSub ( n10, n10 )) x
+        isIn (x |> N.diffSub ( n10, n10 )) x
 
 Only use it when the `N (N ...)` is used once.
 
@@ -1878,7 +1642,7 @@ diffSub ( subtrahend, subtrahendWithAdditionalInformation ) =
             |> maxMap (subDifference (subtrahend |> difference1))
 
 
-{-| Subtract a `N` that isn't a `N (N ...)`.
+{-| Subtract an [`N`](#N) that can be in a range.
 
 The tuple argument should contain
 
@@ -1928,7 +1692,8 @@ subIn ( subtractedMin, subtractedMax ) subtrahend =
             |> maxMap (subDifference (subtractedMin |> difference0))
 
 
-{-| Subtract a number that isn't a [`N (In ... (Is ...))`](#Is).
+{-| From an [`N`](#N) without an unknown maximum constraint,
+subtract a number in a range.
 
 The first argument is the maximum of the subtracted number.
 
@@ -1960,7 +1725,7 @@ minSubMax subtractedMax subtrahend =
     atLeast7 |> N.minSub n2
     --: N (Min N5)
 
-Use [`minSubMax`](#minSubMax) if you want to subtract a `N` that isn't a `N (N ...)`.
+Use [`minSubMax`](#minSubMax) if you want to subtract an [`N`](#N) that can be in a range.
 
 -}
 minSub :
