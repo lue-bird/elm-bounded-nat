@@ -13,7 +13,7 @@ module N exposing
     , add, addIn
     , sub, subIn
     , toPower, remainderBy, mul, div
-    , minSub, minAdd, minSubMax, addMin
+    , minSub, minAdd, minSubAtMost, addMin
     , toInt, toFloat
     , minDown, noDiff, noMax, maxOpen, maxUp
     , Is, Diff(..), To
@@ -106,7 +106,7 @@ In the future, [`elm-generate`](https://github.com/lue-bird/generate-elm) will a
 
 ## alter maximum unconstrained
 
-@docs minSub, minAdd, minSubMax, addMin
+@docs minSub, minAdd, minSubAtMost, addMin
 
 
 ## broaden
@@ -1671,11 +1671,11 @@ subtract a number in a range.
 
 The first argument is the maximum of the subtracted number.
 
-    atLeast6 |> N.minSubMax n5 between0And5
+    atLeast6 |> N.minSubAtMost n5 between0And5
     --: N (Min N1)
 
 -}
-minSubMax :
+minSubAtMost :
     N
         (In
             subtractedMax
@@ -1690,7 +1690,7 @@ minSubMax :
         (N (In min max difference_)
          -> N (In differenceMin max {})
         )
-minSubMax subtractedMax subtrahend =
+minSubAtMost subtractedMax subtrahend =
     subIn ( n0, subtractedMax ) (subtrahend |> minDown n0)
 
 
@@ -1700,7 +1700,7 @@ subtract a [specific number](#Is)
     atLeast7 |> N.minSub n2
     --: N (Min N5)
 
-Use [`minSubMax`](#minSubMax) if you want to subtract an [`N`](#N) that can be in a range.
+Use [`minSubAtMost`](#minSubAtMost) if you want to subtract an [`N`](#N) that can be in a range.
 
 -}
 minSub :

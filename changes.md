@@ -84,6 +84,7 @@
       - `intIsAtLeast` change result
         `: Maybe` → `: Result Int`
       - `minAddMin` rename → `addMin`
+      - `minSubMax` rename → `minSubAtMost`
       - `toMin` rename → `noMax`
       - `toIn` rename → `noDiff`
       - `restoreMax` rename → `maxOpen`
