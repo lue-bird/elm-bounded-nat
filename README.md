@@ -33,7 +33,7 @@ Users can prove this by explicitly
 
     ```elm
     toHexChar n2 --→ 'c'
-    red = rgbPercent n100 n0 n0  --👍
+    red = rgbPercent { r = n100, g = n0, b = n0 }  --👍
     ```
 
   - handling the possibility that a number isn't in the expected range
@@ -41,14 +41,14 @@ Users can prove this by explicitly
     ```elm
     toPositive : Int -> Maybe (N (Min N1))
     toPositive =
-        N.intIsAtLeast n1
+        N.intIsAtLeast n1 >> Result.toMaybe
     ```
 
   - clamping
 
     ```elm
     floatPercent float =
-        float * 100 |> round |> N.intIn n0 n100
+        float * 100 |> round |> N.intIn ( n0, n100 )
     ```
 
   - There are more ways, but you get the idea 🙂
@@ -168,7 +168,7 @@ No extra work.
     charFromCode : N (Min min_) -> Char
     ```
 
-    which you should also never do, allow `N (In min_ ...)` with any max & `N (N ...)` to fit in as well:
+    which you should also never do, allow maximum-constrained and specific numbers to fit in as well:
 
     ```elm
     charFromCode : N (In min_ max_ difference_) -> Char

@@ -75,6 +75,8 @@
       - `range a b` replace with
         `up (b - a) |> List.map (add a)`
       - -`InRange` operations rename → -`In`
+      - `intIsAtLeast` change result
+        `: Maybe` → `: Result Int`
       - `minAddMin` rename → `addMin`
       - `toMin` rename → `noMax`
       - `toIn` rename → `noDiff`
