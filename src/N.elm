@@ -399,12 +399,12 @@ type alias NoMax =
 --
 
 
-{-| Add a given specific `N (In ... (Is ...))`.
+{-| Add a given specific [`N (In ... (Is ...))`](#Is).
 
     between70And100 |> N.add n7
     --: N (In N77 (Add107 a_) {})
 
-Use [`addIn`](#addIn) if you want to add an [`N`](#N) that isn't a `N (In ... (Is ...))`.
+Use [`addIn`](#addIn) if you want to add an [`N`](#N) that isn't a [`N (In ... (Is ...))`](#Is).
 
 -}
 add :
@@ -433,12 +433,12 @@ add toAdd =
             |> maxMap (addDifference (toAdd |> difference1))
 
 
-{-| Subtract a given specific `N (In ... (Is ...))`.
+{-| Subtract a given specific [`N (In ... (Is ...))`](#Is).
 
     between7And10 |> N.sub n7
     --: N (In N0 (Add3 a_) {})
 
-Use [`subIn`](#subIn) if you want to subtract an [`N`](#N) that isn't a `N (In ... (Is ...))`.
+Use [`subIn`](#subIn) if you want to subtract an [`N`](#N) that isn't a [`N (In ... (Is ...))`](#Is).
 
 -}
 sub :
@@ -1349,7 +1349,7 @@ isAtMost upperLimit =
                 |> Err
 
 
-{-| The `N (In ... (Is ...))` plus another `N (In ... (Is ...))`. Give the added value twice as a tuple.
+{-| The [`N (In ... (Is ...))`](#Is) plus another [`N (In ... (Is ...))`](#Is). Give the added value twice as a tuple.
 
     n6 |> N.diffAdd ( n5, n5 )
     --→ n11
@@ -1520,7 +1520,7 @@ addIn ( addedAtLeast, addedAtMost ) toAdd =
             |> maxMap (addDifference (addedAtMost |> difference0))
 
 
-{-| The `N (In ... (Is ...)` minus another `N (In ... (Is ...))`. Give the subtracted value twice as a tuple.
+{-| The `N (In ... (Is ...)` minus another [`N (In ... (Is ...))`](#Is). Give the subtracted value twice as a tuple.
 
     n6 |> N.diffSub ( n5, n5 )
     --→ n1
