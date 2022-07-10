@@ -1908,10 +1908,10 @@ n1Difference =
     Difference
         { add = Add1
         , sub =
-            \zeroableNever ->
-                case zeroableNever of
-                    Add1 lower ->
-                        lower
+            \n0Never ->
+                case n0Never of
+                    Add1 predecessor ->
+                        predecessor
 
                     N0 possible ->
                         possible |> never
