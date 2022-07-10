@@ -659,7 +659,7 @@ If you want to handle the cases `< minimum` & `> maximum` explicitly, use [`intI
     --> 3
 
     99
-        |> N.intIn n3 n12
+        |> N.intIn ( n3, n12 )
         --: N (In N3 (Add12 a_) {})
         |> N.toInt
     --> 12
@@ -674,7 +674,7 @@ If you want to handle the cases `< minimum` & `> maximum` explicitly, use [`intI
     toDigit : Char -> Maybe (N (In N0 (Add9 atLeast_) {}))
     toDigit char =
         ((char |> Char.toCode) - ('0' |> Char.toCode))
-            |> N.intIsIn n0 n9
+            |> N.intIsIn ( n0, n9 )
             |> Result.toMaybe
 
 -}
