@@ -18,22 +18,9 @@ suite =
 --
 
 
-diffSubTypeChecks : Expectation
-diffSubTypeChecks =
-    n11
-        |> N.diffSub ( n9, n9 )
-        |> Expect.equal n2
-
-
-diffAddTypeChecks : Expectation
-diffAddTypeChecks =
-    n11
-        |> N.diffAdd ( n3, n3 )
-        |> Expect.equal n14
-
-
-
---
+factorial : N (In min_ max_ difference_) -> N (Min N1)
+factorial =
+    factorialBody
 
 
 maximumUnconstrainedTest : Test
@@ -55,31 +42,15 @@ maximumUnconstrainedTest =
         ]
 
 
+
+--
+
+
 listLength : List a_ -> N (Min N0)
 listLength =
     List.foldl
         (\_ -> N.minAdd n1 >> N.minDown n0)
         (n0 |> N.noMax)
-
-
-factorial : N (In min_ max_ difference_) -> N (Min N1)
-factorial =
-    factorialBody
-
-
-factorialBody : N (In min_ max_ difference_) -> N (Min N1)
-factorialBody x =
-    case x |> N.isAtLeast n1 of
-        Err _ ->
-            n1 |> N.noMax
-
-        Ok atLeast1 ->
-            factorial (atLeast1 |> N.minSub n1)
-                |> N.mul atLeast1
-
-
-
---
 
 
 maximumConstrainedTest : Test
@@ -104,6 +75,50 @@ maximumConstrainedTest =
                 )
             ]
         ]
+
+
+toDigit :
+    Char
+    ->
+        Result
+            (N.BelowOrAbove
+                Int
+                (N (Min N10))
+            )
+            (N (In N0 (Add9 atLeast_) {}))
+toDigit char =
+    ((char |> Char.toCode) - ('0' |> Char.toCode))
+        |> N.intIsIn ( n0, n9 )
+        |> Result.map (N.maxOpen n9)
+
+
+diffSubTypeChecks : Expectation
+diffSubTypeChecks =
+    n11
+        |> N.diffSub ( n9, n9 )
+        |> Expect.equal n2
+
+
+
+--
+
+
+diffAddTypeChecks : Expectation
+diffAddTypeChecks =
+    n11
+        |> N.diffAdd ( n3, n3 )
+        |> Expect.equal n14
+
+
+factorialBody : N (In min_ max_ difference_) -> N (Min N1)
+factorialBody x =
+    case x |> N.isAtLeast n1 of
+        Err _ ->
+            n1 |> N.noMax
+
+        Ok atLeast1 ->
+            factorial (atLeast1 |> N.minSub n1)
+                |> N.mul atLeast1
 
 
 addAtLeastTest : N (Min N4)
@@ -156,18 +171,3 @@ subTest : N (In N7 (Add11 a_) {})
 subTest =
     N.intIn ( n12, n16 ) 1
         |> N.sub n5
-
-
-toDigit :
-    Char
-    ->
-        Result
-            (N.BelowOrAbove
-                Int
-                (N (Min N10))
-            )
-            (N (In N0 (Add9 atLeast_) {}))
-toDigit char =
-    ((char |> Char.toCode) - ('0' |> Char.toCode))
-        |> N.intIsIn ( n0, n9 )
-        |> Result.map (N.maxOpen n9)
