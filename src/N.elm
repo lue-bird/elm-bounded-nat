@@ -197,7 +197,7 @@ what to put in declared types like `Model`
     -- 2 ≤ n ≤ 12
     N (In N2 N12 {})
 
-They are like [result types](#result-types) but without type variables.
+They are like [result types](#result-type) but without type variables.
 
 
 ### specific number
@@ -749,6 +749,9 @@ intAtLeast minimumLimit =
     n5AtLeast |> N.atLeast (n10 |> noMax)
     --: N (Min N10)
 
+(The type doesn't forbid that the lower limit you're comparing against
+is below the current minimum.)
+
 -}
 atLeast :
     N (In minNewMin (Add1 maxMinus1) lowerDifference_)
@@ -777,15 +780,13 @@ atLeast lowerLimit =
     --: N (In N5 (Add10 a_) {})
 
 (The type doesn't forbid that the upper limit you're comparing against
-is below the current minimum or above the current maximum.
-→ `Err` or `Ok` values don't necessarily follow `min <= max` for `N (In min max ...)`
-Luckily that's not a problem, since the values won't be produced anyway.)
+is above the current maximum.)
 
 -}
 atMost :
-    N (In upperLimitMin_ upperLimitMax newMaxDifference_)
+    N (In upperLimitMin upperLimitMax newMaxDifference_)
     ->
-        (N (In min max_ difference_)
+        (N (In min upperLimitMin difference_)
          -> N (In min upperLimitMax {})
         )
 atMost upperLimit =
@@ -1098,6 +1099,11 @@ toFloat =
         { age : N (In (N19 minMinus19_) max_ difference_) }
         -> Book
 
+(The type doesn't forbid that the number you're comparing against
+is below the current minimum or above the current maximum.
+→ `Err` or `Ok` values don't necessarily follow `min <= max` for `N (In min max ...)`
+Luckily that's not a problem, since the values won't be produced anyway.)
+
 -}
 is :
     N (In comparedAgainstMin (Add1 comparedAgainstMaxMinus1) comparedAgainstDifference)
@@ -1152,7 +1158,10 @@ is the [`N`](#N) in range or [`BelowOrAbove`](#BelowOrAbove)?
     n12 |> isIn3To10
     --> Nothing
 
-TODO: de-warning
+(The type doesn't forbid that the limits you're comparing against
+are below the current minimum, above the current maximum or in the wrong order.
+→ `Err` or `Ok` values don't necessarily follow `min <= max` for `N (In min max ...)`
+Luckily that's not a problem, since the values won't be produced anyway.)
 
 Here's some example-cases:
 
