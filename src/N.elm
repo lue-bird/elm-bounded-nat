@@ -498,6 +498,23 @@ abs =
         >> minWith (n0 |> minimum)
 
 
+downBelow :
+    N (In minimum_ (Add1 maxMinus1) difference_)
+    -> List (N (In N0 maxMinus1 {}))
+downBelow length =
+    case length |> isAtLeast n1 of
+        Err _ ->
+            []
+
+        Ok lengthAtLeast1 ->
+            let
+                lengthMinus1 =
+                    lengthAtLeast1 |> sub n1
+            in
+            lengthMinus1
+                :: (lengthMinus1 |> maxUp n1 |> downBelowRecursive)
+
+
 {-| [`N`](#N)s increasing from `0` to `n - 1`.
 In the end, there are `n` numbers.
 
@@ -518,23 +535,6 @@ up :
     -> List (N (In N0 maxMinus1 {}))
 up length =
     downBelow length |> List.reverse
-
-
-downBelow :
-    N (In minimum_ (Add1 maxMinus1) difference_)
-    -> List (N (In N0 maxMinus1 {}))
-downBelow length =
-    case length |> isAtLeast n1 of
-        Err _ ->
-            []
-
-        Ok lengthAtLeast1 ->
-            let
-                lengthMinus1 =
-                    lengthAtLeast1 |> sub n1
-            in
-            lengthMinus1
-                :: (lengthMinus1 |> maxUp n1 |> downBelowRecursive)
 
 
 downBelowRecursive :
@@ -1821,33 +1821,6 @@ differenceSub diffMiddleToHigh =
             }
 
 
-n0Difference : Diff n To n
-n0Difference =
-    Difference
-        { add = identity
-        , sub = identity
-        }
-
-
-n1Difference : Diff n To (Add1 n)
-n1Difference =
-    Difference
-        { add = Add1
-        , sub =
-            \zeroableNever ->
-                case zeroableNever of
-                    Add1 lower ->
-                        lower
-
-                    N0 possible ->
-                        possible |> never
-        }
-
-
-
---
-
-
 {-| The exact natural number `0`
 -}
 n0 : N (In N0 atLeast_ (Is (Diff x0 To x0) (Diff x1 To x1)))
@@ -1907,6 +1880,18 @@ n0 =
         |> differenceTo { diff0 = n0Difference, diff1 = n0Difference }
 
 
+n0Difference : Diff n To n
+n0Difference =
+    Difference
+        { add = identity
+        , sub = identity
+        }
+
+
+
+--
+
+
 {-| The exact natural number `1`
 -}
 n1 : N (In N1 (Add1 atLeast_) (Is (Diff x0 To (Add1 x0)) (Diff x1 To (Add1 x1))))
@@ -1916,6 +1901,21 @@ n1 =
         |> differenceTo { diff0 = n1Difference, diff1 = n1Difference }
         |> maxFrom n0
         |> maxMap Add1
+
+
+n1Difference : Diff n To (Add1 n)
+n1Difference =
+    Difference
+        { add = Add1
+        , sub =
+            \zeroableNever ->
+                case zeroableNever of
+                    Add1 lower ->
+                        lower
+
+                    N0 possible ->
+                        possible |> never
+        }
 
 
 {-| The exact natural number `2`
