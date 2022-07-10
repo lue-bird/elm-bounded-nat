@@ -411,7 +411,7 @@ add :
     N
         (In
             added_
-            atLeastAdded_
+            addedAtLeast_
             (Is
                 (Diff min To sumMin)
                 (Diff max To sumMax)
@@ -1494,8 +1494,8 @@ between3And10 |> N.addIn ( n1, n12 ) between1And12
 
 -}
 addIn :
-    ( N (In minAdded atLeastMinAdded_ (Is (Diff min To sumMin) minAddedIs_))
-    , N (In maxAdded atLeastMaxAdded_ (Is (Diff max To sumMax) maxAddedIs_))
+    ( N (In minAdded minAddedAtLeast_ (Is (Diff min To sumMin) minAddedDiff1_))
+    , N (In maxAdded maxAddedAtLeast_ (Is (Diff max To sumMax) maxAddedDiff1_))
     )
     -> N (In minAdded maxAdded addedDifference_)
     ->
@@ -1627,7 +1627,7 @@ subIn :
     ( N
         (In
             subtractedMin
-            atLeastMinSubtracted_
+            subtractedMinAtLeast_
             (Is
                 (Diff differenceMax To max)
                 subtractedMinDiff1_
@@ -1636,7 +1636,7 @@ subIn :
     , N
         (In
             subtractedMax
-            atLeastMaxSubtracted_
+            subtractedMaxAtLeast_
             (Is
                 (Diff differenceMin To min)
                 subtractedMaxDiff1_
@@ -1701,7 +1701,7 @@ minSub :
     N
         (In
             subtracted_
-            atLeastSubtracted_
+            subtractedAtLeast_
             (Is (Diff differenceMin To min) subtractedDiff1_)
         )
     ->
