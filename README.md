@@ -147,7 +147,7 @@ No extra work.
 
   - keep _argument types as broad as possible_
     
-    Instead of accepting only `n0`, `n1`, ... values in a range
+    Instead of accepting only [`n0`](N#n0), [`n1`](N#n1), ... values in a range
 
     ```elm
     percent :
