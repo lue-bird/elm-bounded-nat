@@ -8,25 +8,24 @@ A natural number ≥ 0 that has extra information about its range _at compile-ti
 toHexChar : Int -> Char
 ```
 
-- the _type_ doesn't tell us that an `Int` between 0 & 15 is wanted
-- _the one implementing_ `toHexChar` has to handle the cases where the argument isn't between 0 & 15
-    - either by introducing `Maybe` which will be carried throughout your program
-    - or by providing silent default error values like `'?'` or even worse `'0'`
-- the `Int` range promise of the argument is lost after the operation
+  - the _type_ doesn't show that an `Int` between 0 & 15 is expected
+  - _the one implementing_ `toHexChar` has to handle the cases where the argument isn't between 0 & 15
+      - either by introducing `Maybe` which will be carried throughout your program
+      - or by providing silent default error values like `'?'` or even worse `'0'`
+  - the `Int` range promise of the argument is lost after the operation
 
 with `bounded-nat`:
 ```elm
 toHexChar : N (In anyMinimum_ N15 difference_) -> Char
 ```
 
-- the _type_ tells us that a number between 0 & 15 is wanted
-- the _user_ proves that the number is actually between 0 & 15
+  - the _type_ tells us that a number between 0 & 15 is wanted
+  - the _user_ proves that the number is actually between 0 & 15
 
 The argument type says: Give me an integer ≥ 0 `N` `In` range
   - `≥ 0`; `anyMinimum_` value allowed
   - `≤` `N15`
-  - which might be a [specific value like `n0`, `n1`, ... which has a `difference_`](N#Is)
-`)`
+  - which might be a [specific value like `n0`, `n1`, ... which has a `difference_`](N#Is) `)`
 
 Users can prove this by explicitly
 
@@ -65,8 +64,8 @@ toDigit : Char -> Maybe Int
 
 You might be able to do anything with this `Int` value, but you lost useful information.
 
-- Can the result even be negative?
-- Can the result even have multiple digits?
+  - can the result even be negative?
+  - can the result even have multiple digits?
 
 ```elm
 toDigit : Char -> Maybe (N (In N0 (Add9 a_) {}))
@@ -98,7 +97,7 @@ intFactorial x =
 
 This forms an infinite loop if we call `intFactorial -1`...
 
-Let's disallow negative numbers here!
+Let's disallow negative numbers here (& more)!
 
 ```elm
 factorial : N (In min_ max_ difference_) -> N (Min N1)
@@ -113,11 +112,11 @@ factorialBody x =
         Err _ ->
             n1 |> N.noMax
 
-        Ok atLeast1 ->
-            -- atLeast1 : N (Min N1)
+        Ok positive ->
+            -- positive : N (Min N1)
             -- so subtracting 1, we're still ≥ 0
-            factorial (atLeast1 |> N.minSub n1)
-                |> N.mul atLeast1
+            factorial (positive |> N.minSub n1)
+                |> N.mul positive
 
 factorial n4 |> N.toInt --→ 24
 ```
