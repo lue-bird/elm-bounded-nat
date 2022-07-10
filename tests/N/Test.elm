@@ -106,11 +106,11 @@ maximumConstrainedTest =
         ]
 
 
-addMinTest : N (Min N4)
-addMinTest =
+addAtLeastTest : N (Min N4)
+addAtLeastTest =
     7
         |> N.intAtLeast n3
-        |> N.addMin n1 (N.intAtLeast n1 9)
+        |> N.addAtLeast n1 (N.intAtLeast n1 9)
 
 
 minAddTest : N (Min N15)

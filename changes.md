@@ -83,7 +83,7 @@
       - -`InRange` operations rename → -`In`
       - `intIsAtLeast` change result
         `: Maybe` → `: Result Int`
-      - `minAddMin` rename → `addMin`
+      - `minAddMin` rename → `addAtLeast`
       - `minSubMax` rename → `minSubAtMost`
       - `toMin` rename → `noMax`
       - `toIn` rename → `noDiff`

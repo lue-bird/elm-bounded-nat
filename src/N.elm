@@ -13,7 +13,7 @@ module N exposing
     , add, addIn
     , sub, subIn
     , toPower, remainderBy, mul, div
-    , minSub, minAdd, minSubAtMost, addMin
+    , minSub, minAdd, minSubAtMost, addAtLeast
     , toInt, toFloat
     , minDown, noDiff, noMax, maxOpen, maxUp
     , Is, Diff(..), To
@@ -106,7 +106,7 @@ In the future, [`elm-generate`](https://github.com/lue-bird/generate-elm) will a
 
 ## alter maximum unconstrained
 
-@docs minSub, minAdd, minSubAtMost, addMin
+@docs minSub, minAdd, minSubAtMost, addAtLeast
 
 
 ## broaden
@@ -1444,20 +1444,20 @@ diffAdd ( toAdd, toAddWithAdditionalInformation ) =
 {-| To the [`N`](#N) without a known maximum-constraint,,
 add an [`N`](#N). The second argument is the minimum added value.
 
-    atLeast5 |> N.addMin n2 atLeast2
+    atLeast5 |> N.addAtLeast n2 atLeast2
     --: N (Min N7)
 
 Use [`minAdd`](#minAdd) to add exact numbers.
 
 -}
-addMin :
+addAtLeast :
     N (In addedMin addedMinAtLeast_ (Is (Diff min To sumMin) addedDiff1_))
     -> N (In addedMin addedMax_ addedDifference_)
     ->
         (N (In min max_ difference_)
          -> N (Min sumMin)
         )
-addMin addedAtLeast toAdd =
+addAtLeast addedAtLeast toAdd =
     \n ->
         (n |> toInt)
             + (toAdd |> toInt)
@@ -1473,7 +1473,7 @@ add a specific [`N (In ... (Is ...))`](#Is) value.
     atLeast70 |> N.add n7
     --: N (Min N77)
 
-Use [`addMin`](#addMin) if you want to add an [`N`](#N) that can be in a range.
+Use [`addAtLeast`](#addAtLeast) if you want to add an [`N`](#N) that can be in a range.
 
 -}
 minAdd :
@@ -1483,7 +1483,7 @@ minAdd :
          -> N (Min sumMin)
         )
 minAdd toAdd =
-    addMin toAdd toAdd
+    addAtLeast toAdd toAdd
 
 
 {-| Add an [`N`](#N) that can be in a range.
