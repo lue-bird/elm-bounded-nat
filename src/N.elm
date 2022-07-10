@@ -157,6 +157,7 @@ Operations used with [`n0`](N#n0), [`n1`](N#n1), ... `: N (In ... (Is ...))`.
 
 -}
 
+import Help exposing (valueElseOnError)
 import N.Internal exposing (differenceTo, maxFrom, maxMap, minWith)
 import Possibly exposing (Possibly(..))
 import Random
@@ -661,6 +662,33 @@ intIsInRange ( lowerLimit, upperLimit ) =
                 |> Ok
 
 
+{-| If the `Int ≥ a minimum`, return `Just` the `N (Min minimum)`, else `Nothing`.
+
+    4 |> N.intIsAtLeast n5
+    --: Maybe (N (Min N5))
+    --> Nothing
+
+    1234 |> N.intIsAtLeast n5 |> Maybe.map N.toInt
+    --> Just 1234
+
+-}
+intIsAtLeast :
+    N (In min max_ minimumLimitDifference_)
+    ->
+        (Int
+         -> Maybe (N (Min min))
+        )
+intIsAtLeast minimumLimit =
+    \int ->
+        if int >= (minimumLimit |> toInt) then
+            int
+                |> minWith (minimumLimit |> minimum)
+                |> Just
+
+        else
+            Nothing
+
+
 {-| Create a `N (In ...)` by **clamping** an `Int` between a minimum & maximum.
 
   - if the `Int < minimum`, `minimum` is returned
@@ -710,45 +738,18 @@ intInRange :
          -> N (In lowerLimit upperLimit {})
         )
 intInRange ( lowerLimit, upperLimit ) =
-    \int ->
-        case intIsInRange ( lowerLimit, upperLimit ) int of
-            Ok inRange ->
-                inRange
+    intIsInRange ( lowerLimit, upperLimit )
+        >> valueElseOnError
+            (\error ->
+                case error of
+                    Below _ ->
+                        (lowerLimit |> toInt)
+                            |> minWith (lowerLimit |> minimum)
+                            |> maxFrom upperLimit
 
-            Err (Below _) ->
-                (lowerLimit |> toInt)
-                    |> minWith (lowerLimit |> minimum)
-                    |> maxFrom upperLimit
-
-            Err (Above _) ->
-                upperLimit |> minDown lowerLimit
-
-
-{-| If the `Int ≥ a minimum`, return `Just` the `N (Min minimum)`, else `Nothing`.
-
-    4 |> N.intIsAtLeast n5
-    --: Maybe (N (Min N5))
-    --> Nothing
-
-    1234 |> N.intIsAtLeast n5 |> Maybe.map N.toInt
-    --> Just 1234
-
--}
-intIsAtLeast :
-    N (In min max_ minimumLimitDifference_)
-    ->
-        (Int
-         -> Maybe (N (Min min))
-        )
-intIsAtLeast minimumLimit =
-    \int ->
-        if int >= (minimumLimit |> toInt) then
-            int
-                |> minWith (minimumLimit |> minimum)
-                |> Just
-
-        else
-            Nothing
+                    Above _ ->
+                        upperLimit |> minDown lowerLimit
+            )
 
 
 {-| A `N (Min ...)` from an `Int`; if the `Int < minimum`, `minimum` is returned.
