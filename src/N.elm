@@ -150,19 +150,25 @@ import Random
 import RecordWithoutConstructorFunction exposing (RecordWithoutConstructorFunction)
 
 
-{-| A **bounded** natural number `>= 0`.
+{-| A **bounded** natural number `>= 0`
 
 
 ### argument type
 
     -- ≥ 0, else any limitations allowed
-    N range
+    N range_
 
     -- ≥ 4
     N (In (Add4 minMinus4_) max_ difference_)
 
     -- 4 ≤ n ≤ 15
     N (In (Add4 minMinus4_) N15 difference_)
+
+`In (Add4 minMinus4_) N15` says:
+
+  - the minimum-constraint can be `4`|`5`|`6`|...
+  - any maximum-constraint greater than `15` is forbidden
+  - specific numbers like [`n0`](#n0), [`n1`](#n1), ... which carry [`difference_`](#Is)s are allowed
 
 
 ### result type
@@ -172,6 +178,13 @@ import RecordWithoutConstructorFunction exposing (RecordWithoutConstructorFuncti
 
     -- 2 ≤ n ≤ 12
     N (In N2 (Add12 a_) {})
+
+`In N2 (Add12 a_) {}` says:
+
+  - the minimum-constraint can be `4`|`5`|`6`|...
+  - any maximum-constraint greater than `15` is forbidden
+  - `{}`: no [differences](#Is) are attached.
+    Only specific numbers like [`n0`](#n0), [`n1`](#n1), ... carry [differences](#Is)s
 
 
 ### storage types
@@ -184,13 +197,16 @@ what to put in declared types like `Model`
     -- 2 ≤ n ≤ 12
     N (In N2 N12 {})
 
+They are like [result types](#result-types) but without type variables.
 
-### exact number
+
+### specific number
 
 Numbers [`n0`](#n0), [`n1`](#n1), ... supplied by this library.
-[`Is ...`](#Is) enables adding, subtracting `N<x>` types.
 
-Consider their type an implementation detail.
+The type [`Is`](#Is) `(`[`Diff x0 To nPlusX0`](#Diff)`) ...`
+enables adding, subtracting `N<x>` types.
+Consider the type an implementation detail.
 You can come back to understand them later.
 
     n3 :
@@ -205,7 +221,7 @@ You can come back to understand them later.
             )
 
     -- a number nTo15 away from 15
-    N (In n atLeastN_ (Is (Diff nTo15 To N15) diff1_))
+    N (In n nAtLeast_ (Is (Diff nTo15 To N15) diff1_))
 
 -}
 type alias N range =
