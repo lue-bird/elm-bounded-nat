@@ -1,53 +1,16 @@
-## 22.0.0 plans
-
-  - rename `Nat` module and type to `N`
-  - remove `Nats` module, moving content to `N`
-      - rename `Nat`<x> types to `N`<x>
-      - rename `Nat`<x>`Plus` types to `Add`<x>
-      - remove `Nat`<x> and `nat`<x> for x >= 17
-      - add `allowable-state` dependency
-      - replace `Z` with `N0`, `S` with `Add1`:
-        ```elm
-        type alias N0 =
-            Zero Possibly Never
-        
-        type alias Add1 more =
-            Zero Never more
-        
-        type Zero possiblyOrNever ifPossible
-            = Add1 ifPossible
-            | Zero possiblyOrNever
-        ```
-      - expose `Zero(..)`
-      - redefine `N` as
-        ```elm
-        type alias N range =
-            Typed
-                Checked
-                NTag
-                Public
-                { int : Int, range : range )
-        
-        type NTag
-            = NTag
-        ```
-      - readd `toInt`
-      - add `range`
-  - add `N.Generator` that auto-generates `N`<x>, `Add`<x> and `n`<x> for x >= 17
-
 ### rejected
 
-  - rename `Nat` to `ℕ` and `N`<x>`Plus` to `ℕ`<x>`𐊛`
+  - `N` name → `ℕ`, `Add<x>` name → `ℕ<x>𐊛`
       - 👎 must be copied
       - 👎 is confusing
       - 👍 is readable
-      - → no
 
 ## 21.1.0 plans
 
-  - add `fuzzIn ( min, max ) : ... -> Fuzzer (N (In ...))`
+  - `fuzzIn ( min, max ) : ... -> Fuzzer (N (In ...))` add
       - currently waiting for `elm-test` major version 2
         to avoid a major version bump as a result
+  - `N.Generator` that auto-generates `N`<x>, `Add`<x> and `n`<x> for x >= 17 add
 
 # changelog
 
@@ -61,6 +24,51 @@
           - in favor of generating locally
       - `Nat<x>Plus` → `Add<x>`
       - `Nat<x>` → `N<x>`
+      - `nat<x>` → `n<x>`
+      - phantom types `Z`, `S`
+        →
+        ```elm
+        type N0able successor possiblyOrNever
+            = N0 possiblyOrNever
+            | Add1 successor
+        
+        type alias N0 =
+            N0able Never Possibly
+        
+        type alias Add1 successor =
+            N0able successor Never
+        ```
+      - expose `N0able(..)`
+      - `Nat` → `N` defined internally as
+        ```elm
+        type N.Internal.N range =
+            NLimitedTo range Int
+        ```
+      - `ArgIn min max diff0 diff1`
+        →
+        ```elm
+        type alias In min max possibleDifferences =
+            RecordWithoutConstructorFunction
+                { min : min
+                , max : () -> max
+                , diff : possibleDifferences
+                }
+        ```
+      - `In min max` remove
+          - in favor of `In min max {}`
+      - `(Is lo0 To hi0) (Is lo1 To hi1)`
+        →
+        ```elm
+        type alias Is diff0 diff1 =
+            RecordWithoutConstructorFunction
+                { diff0 : diff0, diff1 : diff1 }
+        
+        type Diff lo To high =
+            Difference
+                { sub : hi -> lo
+                , add : lo -> hi
+                }
+        ```
       - `MinNat.atLeast lowerLimit` remove
           - in favor of `N.atLeast (lowerLimit |> noMax)`
       - `.serialize`, `.Error`, ... remove
@@ -91,6 +99,9 @@
       - `lowerMin` rename → `minDown`
       - `maxUp` add
       - `type BelowOrAbove l g` add
+      - `toInt` add
+      - `toFloat` add
+      - internals on `Diff`, minimum add
 
 #### 20.0.1
 
