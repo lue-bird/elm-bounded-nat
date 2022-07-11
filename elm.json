@@ -3,7 +3,7 @@
     "name": "lue-bird/elm-bounded-nat",
     "summary": "number in a typed range",
     "license": "MIT",
-    "version": "21.0.0",
+    "version": "21.1.0",
     "exposed-modules": [
         "N"
     ],
