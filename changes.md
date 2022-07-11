@@ -1,3 +1,8 @@
+## 22.0.0 plans
+
+  - `up` remove
+      - in favor of `until`
+
 ### rejected
 
   - `N` name → `ℕ`, `Add<x>` name → `ℕ<x>𐊛`
@@ -5,7 +10,7 @@
       - 👎 is confusing
       - 👍 is readable
 
-## 21.1.0 plans
+## 21.2.0 plans
 
   - `fuzzIn ( min, max ) : ... -> Fuzzer (N (In ...))` add
       - currently waiting for `elm-test` major version 2
@@ -13,6 +18,10 @@
   - `N.Generator` that auto-generates `N<x>`, `Add<x>` and `n<x>` for x >= 17 add
 
 # changelog
+
+### 21.1.0
+
+  - `until` add
 
 ## 21.0.0
 

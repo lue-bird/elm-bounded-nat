@@ -1,7 +1,7 @@
 module N exposing
     ( N
     , In, Min, NoMax, Exactly
-    , abs, random, up
+    , abs, random, until, up
     , N0, N1, N2, N3, N4, N5, N6, N7, N8, N9, N10, N11, N12, N13, N14, N15, N16
     , N0able(..), Add1, Add2, Add3, Add4, Add5, Add6, Add7, Add8, Add9, Add10, Add11, Add12, Add13, Add14, Add15, Add16
     , n0, n1, n2, n3, n4, n5, n6, n7, n8, n9, n10, n11, n12, n13, n14, n15, n16
@@ -37,7 +37,7 @@ module N exposing
 
 # create
 
-@docs abs, random, up
+@docs abs, random, until, up
 
 
 # specific numbers
@@ -143,11 +143,13 @@ must be built as actual values checked by the compiler.
 
 -}
 
+import Emptiable exposing (Emptiable)
 import Help exposing (valueElseOnError)
 import N.Internal exposing (differenceTo, maxFrom, maxMap, minMap, minWith)
 import Possibly exposing (Possibly(..))
 import Random
 import RecordWithoutConstructorFunction exposing (RecordWithoutConstructorFunction)
+import Stack exposing (Stacked)
 
 
 {-| A **bounded** natural number `>= 0`
@@ -507,25 +509,21 @@ downBelow length =
             []
 
         Ok lengthAtLeast1 ->
-            let
-                lengthMinus1 =
-                    lengthAtLeast1 |> sub n1
-            in
-            lengthMinus1
-                :: (lengthMinus1 |> maxUp n1 |> downBelowRecursive)
+            (lengthAtLeast1 |> sub n1)
+                :: (lengthAtLeast1 |> minSub n1 |> downBelowRecursive)
 
 
 {-| [`N`](#N)s increasing from `0` to `n - 1`.
 In the end, there are `n` numbers.
+
+> @deprecated in favor of [`until`](#until)
+> If you'd like to keep this → issue
 
     N.up n7
         |> List.map (N.add n3)
         --: List (N (In N3 (Add9 a_)))
         |> List.map N.toInt
     --> [ 3, 4, 5, 6, 7, 8, 9 ]
-
-    N.up atLeast7 |> List.map (N.add n3)
-    --: List (N (Min N3))
 
 [`typesafe-array`](https://package.elm-lang.org/packages/lue-bird/elm-typesafe-array/latest/Arr#nats) even knows the length! Try it.
 
@@ -542,6 +540,48 @@ downBelowRecursive :
     -> List (N (In N0 maxMinus1 {}))
 downBelowRecursive length =
     downBelow length
+
+
+untilReverse :
+    N (In min_ max difference_)
+    -> Emptiable (Stacked (N (In N0 max {}))) Never
+untilReverse last =
+    case last |> isAtLeast n1 of
+        Err _ ->
+            n0 |> maxOpen last |> noDiff |> Stack.only
+
+        Ok lastAtLeast1 ->
+            (lastAtLeast1 |> minSub n1 |> untilReverseRecursive)
+                |> Stack.onTopLay (last |> minDown n0)
+
+
+{-| [`N`](#N)s increasing from `0` to `n`
+In the end, there are `n` numbers.
+
+    N.until n6
+        |> List.map (N.add n3)
+        --: List (N (In N3 (Add9 a_)))
+        |> List.map N.toInt
+    --> [ 3, 4, 5, 6, 7, 8, 9 ]
+
+    N.up atLeast7 |> List.map (N.add n3)
+    --: List (N (Min N10))
+
+[`typesafe-array`](https://package.elm-lang.org/packages/lue-bird/elm-typesafe-array/latest/Arr#nats) even knows the length! Try it.
+
+-}
+until :
+    N (In min_ max difference_)
+    -> Emptiable (Stacked (N (In N0 max {}))) Never
+until last =
+    untilReverse last |> Stack.reverse
+
+
+untilReverseRecursive :
+    N (In min_ max difference_)
+    -> Emptiable (Stacked (N (In N0 max {}))) Never
+untilReverseRecursive =
+    untilReverse
 
 
 {-| Generate a random [`N`](#N) in a range.
