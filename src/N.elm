@@ -1066,8 +1066,10 @@ When is this useful? Very rarely. This is how [`up`](#up) reverse could be imple
                     :: (lengthMinus1
                             -- → In N0 maxMinus1
                             |> maxUp n1
-                            |> upRecursive
+                            |> downRecursive
                        )
+
+(to be fair: here, you could also use `lengthAtLeast1 |> subMin n1` instead of `lengthMinus1 |> maxUp n1`)
 
 -}
 maxUp :
