@@ -2,6 +2,26 @@
 
   - `up` remove
       - in favor of `until`
+  - `random` remove
+      - in favor of `randomIn`
+  - ```elm
+    ...In ( diffMin, diffMax ) ... :
+        N (In ... (Is <Diff min> ...))
+        -> N (In ... (Is <Diff max> ...))
+    ```
+    →
+    ```elm
+    ...In ( diffMin, diffMax ) ... :
+        N (In ... (Is <Diff min> ...))
+        -> N (In ... (Is ... <Diff max>))
+    ```
+
+### 21.3.0 plans
+
+  - `fuzzIn ( min, max ) : ... -> Fuzzer (N (In ...))` add
+      - currently waiting for `elm-test` major version 2
+        to avoid a major version bump as a result
+  - `N.Generator` that auto-generates `N<x>`, `Add<x>` and `n<x>` for x >= 17 add
 
 ### rejected
 
@@ -10,14 +30,12 @@
       - 👎 is confusing
       - 👍 is readable
 
-## 21.2.0 plans
-
-  - `fuzzIn ( min, max ) : ... -> Fuzzer (N (In ...))` add
-      - currently waiting for `elm-test` major version 2
-        to avoid a major version bump as a result
-  - `N.Generator` that auto-generates `N<x>`, `Add<x>` and `n<x>` for x >= 17 add
-
 # changelog
+
+### 21.2.0
+
+  - `randomIn` add
+  - `differencesSwap` add
 
 ### 21.1.0
 

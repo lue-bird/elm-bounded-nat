@@ -1,7 +1,7 @@
 module N exposing
     ( N
     , In, Min, NoMax, Exactly
-    , abs, random, until, up
+    , abs, randomIn, random, until, up
     , N0, N1, N2, N3, N4, N5, N6, N7, N8, N9, N10, N11, N12, N13, N14, N15, N16
     , N0able(..), Add1, Add2, Add3, Add4, Add5, Add6, Add7, Add8, Add9, Add10, Add11, Add12, Add13, Add14, Add15, Add16
     , n0, n1, n2, n3, n4, n5, n6, n7, n8, n9, n10, n11, n12, n13, n14, n15, n16
@@ -20,7 +20,7 @@ module N exposing
     , diffAdd, diffSub
     , maximumUnknown
     , minimum
-    , difference0, difference1, differences
+    , difference0, difference1, differences, differencesSwap
     , addDifference, subDifference
     , differenceAdd, differenceSub
     )
@@ -37,7 +37,7 @@ module N exposing
 
 # create
 
-@docs abs, random, until, up
+@docs abs, randomIn, random, until, up
 
 
 # specific numbers
@@ -137,7 +137,7 @@ must be built as actual values checked by the compiler.
 @docs maximumUnknown
 
 @docs minimum
-@docs difference0, difference1, differences
+@docs difference0, difference1, differences, differencesSwap
 @docs addDifference, subDifference
 @docs differenceAdd, differenceSub
 
@@ -586,6 +586,8 @@ untilReverseRecursive =
 
 {-| Generate a random [`N`](#N) in a range.
 
+> @deprecated in favor of the name [`randomIn`](#randomIn)
+
     N.random ( n1, n10 )
     --: Random.Generator (N (In N1 (Add10 a_) {}))
 
@@ -603,6 +605,23 @@ random ( lowestPossible, highestPossible ) =
             (minWith (lowestPossible |> minimum)
                 >> maxFrom highestPossible
             )
+
+
+{-| Generate a random [`N`](#N) in a range.
+
+    N.randomIn ( n1, n10 )
+    --: Random.Generator (N (In N1 (Add10 a_) {}))
+
+-}
+randomIn :
+    ( N (In lowerLimitMin upperLimitMin lowerLimitDifference_)
+    , N (In upperLimitMin upperLimitMax upperLimitDifference_)
+    )
+    ->
+        Random.Generator
+            (N (In lowerLimitMin upperLimitMax {}))
+randomIn ( lowestPossible, highestPossible ) =
+    random ( lowestPossible, highestPossible )
 
 
 {-| Compared to a range from a lower to an upper bound, is the `Int` in range, [`BelowOrAbove`](#BelowOrAbove)?
@@ -1793,6 +1812,36 @@ For the individual [difference](#Diff)s: [`difference0`](#difference0), [`differ
 differences : N (In min_ max_ differences) -> differences
 differences =
     N.Internal.differences
+
+
+{-| Switch [`difference0`](#difference0), [`difference1`](#difference1) of the [specific](N#Is) type [`N`](#N).
+
+    addInSwapped :
+        ( N (In addedMin addedMinAtLeast_ (Is (Diff min To sumMin) addedMinDiff1_))
+        , N (In addedMax addedMaxAtLeast_ (Is (Diff max To sumMax) addedMaxDiff1_))
+        )
+        -> N (In addedMin addedMax addedDifference_)
+        ->
+            (N (In min max difference_)
+             -> N (In sumMin sumMax {})
+            )
+    addInSwapped ( addedAtLeast, addedAtMost ) toAdd =
+        N.addIn ( addedAtLeast, addedAtMost |> N.differencesSwap ) toAdd
+
+    add toAdd =
+        addInSwapped ( toAdd, toAdd ) toAdd
+
+-}
+differencesSwap :
+    N (In min max (Is diff0 diff1))
+    -> N (In min max (Is diff1 diff0))
+differencesSwap =
+    \n ->
+        n
+            |> differenceTo
+                { diff0 = n |> difference1
+                , diff1 = n |> difference0
+                }
 
 
 {-| The number representation as a [difference](#Diff) promised by its type [`Is (Diff low To high) ...`](#Is).
