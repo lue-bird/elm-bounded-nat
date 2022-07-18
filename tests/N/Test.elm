@@ -1,7 +1,7 @@
 module N.Test exposing (suite)
 
 import Expect exposing (Expectation)
-import N exposing (Add11, Add16, Add4, Add9, In, Min, N, N0, N0able, N1, N10, N11, N15, N3, N4, N7, n0, n1, n10, n11, n12, n14, n16, n2, n3, n4, n5, n6, n7, n9)
+import N exposing (Add11, Add16, Add4, Add9, In, Min, MinAndMinAsDifferencesAndMax, N, N0, N0able, N1, N10, N11, N15, N3, N4, N7, n0, n1, n10, n11, n12, n14, n16, n2, n3, n4, n5, n6, n7, n9)
 import Possibly exposing (Possibly)
 import Test exposing (Test, describe, test)
 
@@ -18,7 +18,7 @@ suite =
 --
 
 
-factorial : N (In min_ max_ difference_) -> N (Min N1)
+factorial : N (In min_ max_) -> N (Min N1)
 factorial =
     factorialBody
 
@@ -35,7 +35,7 @@ maximumUnconstrainedTest =
         , test "factorial"
             (\() ->
                 factorial n3
-                    -- == n6 |> N.minDown n1 |> N.noMax
+                    -- == n6 |> N.min n1 |> N.maxNo
                     |> N.toInt
                     |> Expect.equal 6
             )
@@ -49,8 +49,8 @@ maximumUnconstrainedTest =
 listLength : List a_ -> N (Min N0)
 listLength =
     List.foldl
-        (\_ -> N.minAdd n1 >> N.minDown n0)
-        (n0 |> N.noMax)
+        (\_ -> N.minAdd n1 >> N.min n0)
+        (n0 |> N.maxNo)
 
 
 maximumConstrainedTest : Test
@@ -85,11 +85,10 @@ toDigit :
                 Int
                 (N (Min N10))
             )
-            (N (In N0 (Add9 atLeast_) {}))
+            (N (In N0 (Add9 atLeast_)))
 toDigit char =
     ((char |> Char.toCode) - ('0' |> Char.toCode))
         |> N.intIsIn ( n0, n9 )
-        |> Result.map (N.maxOpen n9)
 
 
 diffSubTypeChecks : Expectation
@@ -110,11 +109,11 @@ diffAddTypeChecks =
         |> Expect.equal n14
 
 
-factorialBody : N (In min_ max_ difference_) -> N (Min N1)
+factorialBody : N (In min_ max_) -> N (Min N1)
 factorialBody x =
     case x |> N.isAtLeast n1 of
         Err _ ->
-            n1 |> N.noMax
+            n1 |> N.maxNo
 
         Ok atLeast1 ->
             factorial (atLeast1 |> N.minSub n1)
@@ -142,32 +141,32 @@ minSubTest =
         |> N.minSub n9
 
 
-minDownTest : List (N (In N3 (Add4 (N0able a_ Possibly)) {}))
+minDownTest : List (N (In N3 (Add4 (N0able a_ Possibly))))
 minDownTest =
-    [ n3 |> N.noDiff
-    , n4 |> N.minDown n3
+    [ n3 |> N.diffNo
+    , n4 |> N.min n3
     ]
 
 
-addInTest : N (In N4 (Add16 a_) {})
+addInTest : N (In N4 (Add16 a_))
 addInTest =
     N.intIn ( n3, n10 ) 7
-        |> N.addIn ( n1, n6 ) (N.intIn ( n1, n6 ) 5)
+        |> N.addAtMost ( n1, n6 ) (N.intIn ( n1, n6 ) 5)
 
 
-addTest : N (In N11 (Add16 a_) {})
+addTest : N (In N11 (Add16 a_))
 addTest =
     N.intIn ( n2, n7 ) 7
         |> N.add n9
 
 
-subInTest : N (In N1 (Add9 a_) {})
+subInTest : N (In N1 (Add9 a_))
 subInTest =
     N.intIn ( n6, n10 ) 7
-        |> N.subIn ( n1, n5 ) (N.intIn ( n1, n5 ) 4)
+        |> N.subAtMost ( n1, n5 ) (N.intIn ( n1, n5 ) 4)
 
 
-subTest : N (In N7 (Add11 a_) {})
+subTest : N (In N7 (Add11 a_))
 subTest =
     N.intIn ( n12, n16 ) 1
         |> N.sub n5

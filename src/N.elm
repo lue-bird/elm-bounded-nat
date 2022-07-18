@@ -1,7 +1,7 @@
 module N exposing
     ( N
     , In, Min, NoMax, Exactly
-    , abs, randomIn, random, until, up
+    , abs, randomIn, until
     , N0, N1, N2, N3, N4, N5, N6, N7, N8, N9, N10, N11, N12, N13, N14, N15, N16
     , N0able(..), Add1, Add2, Add3, Add4, Add5, Add6, Add7, Add8, Add9, Add10, Add11, Add12, Add13, Add14, Add15, Add16
     , n0, n1, n2, n3, n4, n5, n6, n7, n8, n9, n10, n11, n12, n13, n14, n15, n16
@@ -10,19 +10,20 @@ module N exposing
     , intIsIn, intIsAtLeast
     , atLeast, atMost
     , is, isIn, isAtLeast, isAtMost
-    , add, addIn
-    , sub, subIn
+    , add, addAtMost, minAdd
+    , sub, minSub, minSubAtMost
     , toPower, remainderBy, mul, div
-    , minSub, minAdd, minSubAtMost, addAtLeast
     , toInt, toFloat
-    , minDown, noDiff, noMax, maxOpen, maxUp
-    , Is, Diff(..), To
+    , min, diffNo, maxNo, max, maxUp
+    , MinAndMinAsDifferencesAndMax, Increase(..), To
     , diffAdd, diffSub
-    , maximumUnknown
     , minimum
-    , difference0, difference1, differences, differencesSwap
-    , addDifference, subDifference
-    , differenceAdd, differenceSub
+    , minimumDifference0, minimumDifference1
+    , decreaseByDifference, increaseByDifference
+    , differenceDecrease, differenceIncrease
+    , minimumDifference0Up, minimumDifference1Up
+    , minimumDifference0Down, minimumDifference1Down
+    , differencesSwap, subAtMost
     )
 
 {-| Natural numbers within a typed range.
@@ -37,7 +38,7 @@ module N exposing
 
 # create
 
-@docs abs, randomIn, random, until, up
+@docs abs, randomIn, until
 
 
 # specific numbers
@@ -99,14 +100,9 @@ In the future, [`elm-generate`](https://github.com/lue-bird/generate-elm) will a
 
 # alter
 
-@docs add, addIn
-@docs sub, subIn
+@docs add, addAtMost, minAdd
+@docs sub, subIn, minSub, minSubAtMost
 @docs toPower, remainderBy, mul, div
-
-
-## alter maximum unconstrained
-
-@docs minSub, minAdd, minSubAtMost, addAtLeast
 
 
 ## broaden
@@ -116,7 +112,7 @@ In the future, [`elm-generate`](https://github.com/lue-bird/generate-elm) will a
 
 # type information
 
-@docs minDown, noDiff, noMax, maxOpen, maxUp
+@docs min, diffNo, maxNo, max, maxUp
 
 
 # miss operation x?
@@ -124,28 +120,31 @@ In the future, [`elm-generate`](https://github.com/lue-bird/generate-elm) will a
 Anything that can't be expressed with the available operations? → issue/PR
 
 
-# internals
+# fancy
 
-Useful for fancy things – building structures like [`typesafe-array`](https://dark.elm.dmy.fr/packages/lue-bird/elm-typesafe-array/latest/)
+Useful for extensions to this library
+– building structures like [`typesafe-array`](https://dark.elm.dmy.fr/packages/lue-bird/elm-typesafe-array/latest/)
 
 While the internally stored `Int` isn't directly guaranteed to be in bounds by elm,
-[`minimum`](#minimum), maximum, [`differences`](#differences)
+[`minimum`](#minimum), maximum, [`minimumDifference0`](#minimumDifference0), [`minimumDifference1`](#minimumDifference1)
 must be built as actual values checked by the compiler.
 
-@docs Is, Diff, To
+@docs MinAndMinAsDifferencesAndMax, Increase, To
 @docs diffAdd, diffSub
-@docs maximumUnknown
 
 @docs minimum
-@docs difference0, difference1, differences, differencesSwap
-@docs addDifference, subDifference
-@docs differenceAdd, differenceSub
+@docs minimumDifference0, minimumDifference1
+
+@docs decreaseByDifference, increaseByDifference
+@docs differenceDecrease, differenceIncrease
+@docs minimumDifference0Up, minimumDifference1Up
+@docs minimumDifference0Down, minimumDifference1Down
 
 -}
 
 import Emptiable exposing (Emptiable)
 import Help exposing (valueElseOnError)
-import N.Internal exposing (differenceTo, maxFrom, maxMap, minMap, minWith)
+import N.Internal
 import Possibly exposing (Possibly(..))
 import Random
 import RecordWithoutConstructorFunction exposing (RecordWithoutConstructorFunction)
@@ -170,7 +169,6 @@ import Stack exposing (Stacked)
 
   - the minimum-constraint can be `4`|`5`|`6`|...
   - any maximum-constraint greater than `15` is forbidden
-  - specific numbers like [`n0`](#n0), [`n1`](#n1), ... which carry [`difference_`](#Is)s are allowed
 
 
 ### result type
@@ -179,14 +177,12 @@ import Stack exposing (Stacked)
     N (Min N4)
 
     -- 2 ≤ n ≤ 12
-    N (In N2 (Add12 a_) {})
+    N (In N2 (Add12 a_))
 
-`In N2 (Add12 a_) {}` says:
+`In N2 (Add12 a_)` says:
 
   - the minimum-constraint can be `4`|`5`|`6`|...
   - any maximum-constraint greater than `15` is forbidden
-  - `{}`: no [differences](#Is) are attached.
-    Only specific numbers like [`n0`](#n0), [`n1`](#n1), ... carry [differences](#Is)s
 
 
 ### stored type
@@ -197,7 +193,7 @@ what to put in declared types like `Model`
     N (Min N4)
 
     -- 2 ≤ n ≤ 12
-    N (In N2 N12 {})
+    N (In N2 N12)
 
 They are like [result types](#result-type) but without type variables.
 
@@ -206,24 +202,19 @@ They are like [result types](#result-type) but without type variables.
 
 Numbers [`n0`](#n0), [`n1`](#n1), ... supplied by this library.
 
-The type [`Is`](#Is) `(`[`Diff x0 To nPlusX0`](#Diff)`) ...`
+The type [`MinAndMinAsDifferencesAndMax`](#MinAndMinAsDifferencesAndMax) `(`[`Increase x0 To nPlusX0`](#Increase)`) ...`
 enables adding, subtracting `N<x>` types.
 Consider the type an implementation detail.
-You can come back to [understand them later](#internals).
+You can come back to [understand them later](#fancy).
 
     n3 :
         N
-            (In
+            (MinAndMinAsDifferencesAndMax
                 N3
+                (Increase x0 To (Add3 x0))
+                (Increase x1 To (Add3 x1))
                 (Add3 atLeast_)
-                (Is
-                    (Diff x0 To (Add3 x0))
-                    (Diff x1 To (Add3 x1))
-                )
             )
-
-    -- a number nTo15 away from 15
-    N (In n nAtLeast_ (Is (Diff nTo15 To N15) diff1_))
 
 -}
 type alias N range =
@@ -251,7 +242,7 @@ If you want a number where you just care about the minimum, leave the `max` as a
 
 Any natural number:
 
-    N (In min_ max_ difference_)
+    N (In min_ max_)
 
 A number, at least 5:
 
@@ -259,11 +250,8 @@ A number, at least 5:
 
   - `max_` could be a specific maximum or [no maximum at all](#NoMax)
 
-  - `difference_` could contain extra information if the argument is a [specific](#Is) number
-    like [`n0`](#n0), [`n1`](#n1), ...
 
-
-### `In minimum maximum {}`
+### `In minimum maximum`
 
 A number somewhere within a `minimum` & `maximum`. We don't know it exactly, though
 
@@ -274,22 +262,33 @@ Do **not** use it as an argument type.
 
 A number between 3 and 5
 
-    N (In N3 (Add5 a_) {})
+    N (In N3 (Add5 a_))
 
 -}
-type alias In minimum maximum possibleRepresentationAsDifferences =
-    RecordWithoutConstructorFunction
-        { min : minimum
-        , max : () -> maximum
-        , diff : possibleRepresentationAsDifferences
-        }
+type alias In lowestPossibleValue highestPossibleValue =
+    MinAndMinAsDifferencesAndMax
+        lowestPossibleValue
+        (Increase N0 To lowestPossibleValue)
+        (Increase N0 To lowestPossibleValue)
+        highestPossibleValue
+
+
+{-| [`In`](#In) with actual known [difference](#Increase)s from variables attached.
+
+TODO: idea: minimumAsDifference0 minimumAsDifference1 → minimumAsDifference maximumAsDifference
+
+  - check if somewhere 2 differences from min are needed
+
+-}
+type alias MinAndMinAsDifferencesAndMax minimum minimumAsDifference0 minimumAsDifference1 maximum =
+    N.Internal.MinAndMinAsDifferencesAndMax minimum minimumAsDifference0 minimumAsDifference1 maximum
 
 
 {-| Only **stored / result types should be `Min`**.
 
 Sometimes, you simply cannot compute a maximum.
 
-    abs : Int -> N (In N0 ?? {})
+    abs : Int -> N (In N0 ??)
                     ↓
     abs : Int -> N (Min N0)
 
@@ -301,7 +300,7 @@ Every `Min min` is of type `In min ...`.
 
 -}
 type alias Min lowestPossibleValue =
-    In lowestPossibleValue NoMax {}
+    In lowestPossibleValue NoMax
 
 
 {-| Allow only a specific number.
@@ -322,42 +321,41 @@ not with [`N`](#N)s.
 
 -}
 type alias Exactly n =
-    In n n {}
+    In n n
 
 
-{-| Associated [difference](#Diff)s.
--}
-type alias Is difference0 difference1 =
-    RecordWithoutConstructorFunction
-        { diff0 : difference0
-        , diff1 : difference1
-        }
-
-
-{-| `Diff low To high`: an exact number as the difference `high - low`.
+{-| `Increase low To high`: an exact number as the difference `high - low`.
 
     In
         N5
         (Add5 a_)
         (Is
-            (Diff myAge To sistersAge)
-            (Diff mothersAge To fathersAge)
+            (Increase myAge To sistersAge)
+            (Increase mothersAge To fathersAge)
         )
 
   - `myAge + 5 = sistersAge`
   - `mothersAge + 5 = fathersAge`
 
 -}
-type Diff low toTag high
+type Increase low toTag high
     = Difference
-        { add : low -> high
-        , sub : high -> low
+        { increase : low -> high
+        , decrease : high -> low
         }
 
 
-{-| Just a word in the [type `Diff`](#Diff).
+differenceFrom0To : min -> Increase (N0able successor_ Possibly) toTag min
+differenceFrom0To lowerLimit =
+    Difference
+        { increase = \_ -> lowerLimit
+        , decrease = \_ -> N0 Possible
+        }
 
-    Diff low To high
+
+{-| Just a word in the [type `Increase`](#Increase).
+
+    Increase low To high
 
 → distance `high - low`.
 
@@ -369,7 +367,7 @@ type To
 {-| Flag "The number's maximum limit is unknown".
 
     type alias Min min =
-        In minimum NoMax {}
+        In minimum NoMax
 
 is the definition of [`Min`](#Min).
 
@@ -379,7 +377,7 @@ An example where this is useful using [typesafe-array](https://package.elm-lang.
         = Tree
             element
             (Arr
-                (In N0 childCountMax {})
+                (In N0 childCountMax)
                 (Maybe (Tree childCountMax element))
             )
 
@@ -394,79 +392,60 @@ You can just use a variable `Tree childCountMax_ element` if you don't care abou
 
 -}
 type alias NoMax =
-    N.Internal.NoMax
+    RecordWithoutConstructorFunction
+        { maximumUnknown : () }
 
 
 
 --
 
 
-{-| Add a given specific [`N (In ... (Is ...))`](#Is).
+{-| Add a given [specific](#MinAndMinAsDifferencesAndMax) [`N`](#N).
 
     between70And100 |> N.add n7
-    --: N (In N77 (Add107 a_) {})
+    --: N (In N77 (Add107 a_))
 
-Use [`addIn`](#addIn) if you want to add an [`N`](#N) that isn't a [`N (In ... (Is ...))`](#Is).
+Use [`addAtMost`](#addAtMost)/[`minAdd`](#minAdd) to add an [`N`](#N) in a range.
 
 -}
 add :
     N
-        (In
-            added_
-            addedAtLeast_
-            (Is
-                (Diff min To sumMin)
-                (Diff max To sumMax)
-            )
+        (MinAndMinAsDifferencesAndMax
+            added
+            (Increase min To sumMin)
+            (Increase max To sumMax)
+            added
         )
     ->
-        (N (In min max difference_)
-         -> N (In sumMin sumMax {})
+        (N (In min max)
+         -> N (In sumMin sumMax)
         )
 add toAdd =
-    \n ->
-        (n |> toInt)
-            + (toAdd |> toInt)
-            |> minWith
-                ((n |> minimum)
-                    |> addDifference (toAdd |> difference0)
-                )
-            |> maxFrom n
-            |> maxMap (addDifference (toAdd |> difference1))
+    addAtMost toAdd toAdd
 
 
-{-| Subtract a given specific [`N (In ... (Is ...))`](#Is).
+{-| Subtract a given [specific](#MinAndMinAsDifferencesAndMax) [`N`](#N).
 
     between7And10 |> N.sub n7
-    --: N (In N0 (Add3 a_) {})
+    --: N (In N0 (Add3 a_))
 
-Use [`subIn`](#subIn) if you want to subtract an [`N`](#N) that isn't a [`N (In ... (Is ...))`](#Is).
+Use [`subIn`](#subIn) if you want to subtract an [`N`](#N) in a range.
 
 -}
 sub :
     N
-        (In
-            subtractedMin_
-            subtractedMax_
-            (Is
-                (Diff differenceMin To min)
-                (Diff differenceMax To max)
-            )
+        (MinAndMinAsDifferencesAndMax
+            subtracted
+            (Increase differenceMax To max)
+            (Increase differenceMin To min)
+            subtracted
         )
     ->
-        (N (In min max diff_)
-         -> N (In differenceMin differenceMax {})
+        (N (In min max)
+         -> N (In differenceMin differenceMax)
         )
-sub subtrahend =
-    \n ->
-        (n |> toInt)
-            - (subtrahend |> toInt)
-            |> minWith
-                ((n |> minimum)
-                    |> subDifference (subtrahend |> difference0)
-                )
-            |> maxFrom n
-            |> maxMap (subDifference (subtrahend |> difference1))
+sub toSubtract =
+    subAtMost toSubtract toSubtract
 
 
 {-| The absolute value of an `Int` → `≥ 0`
@@ -484,8 +463,8 @@ Really only use this if you want the absolute value.
 
         mostCorrectLength =
             List.foldl
-                (\_ -> N.minAdd n1 >> N.minDown n0)
-                (n0 |> N.noMax)
+                (\_ -> N.minAdd n1 >> N.min n0)
+                (n0 |> N.maxNo)
 
   - other times, though, like with `Array.length`, which isn't `O(n)`,
     you can escape with for example
@@ -500,9 +479,27 @@ abs =
         >> minWith (n0 |> minimum)
 
 
+minWith :
+    min
+    -> Int
+    ->
+        N
+            (MinAndMinAsDifferencesAndMax
+                min
+                (Increase N0 To min)
+                (Increase N0 To min)
+                NoMax
+            )
+minWith lowerLimit =
+    N.Internal.minWith
+        lowerLimit
+        (differenceFrom0To lowerLimit)
+        (differenceFrom0To lowerLimit)
+
+
 downBelow :
-    N (In minimum_ (Add1 maxMinus1) difference_)
-    -> List (N (In N0 maxMinus1 {}))
+    N (In minimum_ (Add1 maxMinus1))
+    -> List (N (In N0 maxMinus1))
 downBelow length =
     case length |> isAtLeast n1 of
         Err _ ->
@@ -513,124 +510,85 @@ downBelow length =
                 :: (lengthAtLeast1 |> minSub n1 |> downBelowRecursive)
 
 
-{-| [`N`](#N)s increasing from `0` to `n - 1`.
-In the end, there are `n` numbers.
-
-> @deprecated in favor of [`until`](#until)
-> If you'd like to keep this → issue
-
-    N.up n7
-        |> List.map (N.add n3)
-        --: List (N (In N3 (Add9 a_)))
-        |> List.map N.toInt
-    --> [ 3, 4, 5, 6, 7, 8, 9 ]
-
-[`typesafe-array`](https://package.elm-lang.org/packages/lue-bird/elm-typesafe-array/latest/Arr#nats) even knows the length! Try it.
-
--}
-up :
-    N (In min_ (Add1 maxMinus1) difference_)
-    -> List (N (In N0 maxMinus1 {}))
-up length =
-    downBelow length |> List.reverse
-
-
 downBelowRecursive :
-    N (In min_ (Add1 maxMinus1) difference_)
-    -> List (N (In N0 maxMinus1 {}))
+    N (In min_ (Add1 maxMinus1))
+    -> List (N (In N0 maxMinus1))
 downBelowRecursive length =
     downBelow length
 
 
 untilReverse :
-    N (In min_ max difference_)
-    -> Emptiable (Stacked (N (In N0 max {}))) Never
+    N (In min_ max)
+    -> Emptiable (Stacked (N (In N0 max))) Never
 untilReverse last =
     case last |> isAtLeast n1 of
         Err _ ->
-            n0 |> maxOpen last |> noDiff |> Stack.only
+            n0 |> max last |> diffNo |> Stack.only
 
         Ok lastAtLeast1 ->
             (lastAtLeast1 |> minSub n1 |> untilReverseRecursive)
-                |> Stack.onTopLay (last |> minDown n0)
+                |> Stack.onTopLay (last |> min n0)
 
 
 {-| [`N`](#N)s increasing from `0` to `n`
 In the end, there are `n` numbers.
 
-    N.until n6
-        |> List.map (N.add n3)
-        --: List (N (In N3 (Add9 a_)))
-        |> List.map N.toInt
-    --> [ 3, 4, 5, 6, 7, 8, 9 ]
+    import Stack
 
-    N.up atLeast7 |> List.map (N.add n3)
-    --: List (N (Min N10))
+    N.until n6
+        |> Stack.map (\_ -> N.add n3)
+        --: Emptiable (Stacked (N (In N3 (Add9 a_)))) Never
+        |> Stack.map (\_ -> N.toInt)
+    --> Stack.topDown 3 [ 4, 5, 6, 7, 8, 9 ]
+
+    N.until atLeast7 |> Stack.map (\_ -> N.minAdd n3)
+    --: Emptiable (Stacked (N (Min N10))) Never
 
 [`typesafe-array`](https://package.elm-lang.org/packages/lue-bird/elm-typesafe-array/latest/Arr#nats) even knows the length! Try it.
 
 -}
 until :
-    N (In min_ max difference_)
-    -> Emptiable (Stacked (N (In N0 max {}))) Never
+    N (In min_ max)
+    -> Emptiable (Stacked (N (In N0 max))) Never
 until last =
     untilReverse last |> Stack.reverse
 
 
 untilReverseRecursive :
-    N (In min_ max difference_)
-    -> Emptiable (Stacked (N (In N0 max {}))) Never
+    N (In min_ max)
+    -> Emptiable (Stacked (N (In N0 max))) Never
 untilReverseRecursive =
     untilReverse
 
 
 {-| Generate a random [`N`](#N) in a range.
 
-> @deprecated in favor of the name [`randomIn`](#randomIn)
-
-    N.random ( n1, n10 )
-    --: Random.Generator (N (In N1 (Add10 a_) {}))
-
--}
-random :
-    ( N (In lowerLimitMin upperLimitMin lowerLimitDifference_)
-    , N (In upperLimitMin upperLimitMax upperLimitDifference_)
-    )
-    ->
-        Random.Generator
-            (N (In lowerLimitMin upperLimitMax {}))
-random ( lowestPossible, highestPossible ) =
-    Random.int (lowestPossible |> toInt) (highestPossible |> toInt)
-        |> Random.map
-            (minWith (lowestPossible |> minimum)
-                >> maxFrom highestPossible
-            )
-
-
-{-| Generate a random [`N`](#N) in a range.
-
     N.randomIn ( n1, n10 )
-    --: Random.Generator (N (In N1 (Add10 a_) {}))
+    --: Random.Generator (N (In N1 (Add10 a_)))
 
 -}
 randomIn :
-    ( N (In lowerLimitMin upperLimitMin lowerLimitDifference_)
-    , N (In upperLimitMin upperLimitMax upperLimitDifference_)
+    ( N (In lowerLimitMin upperLimitMin)
+    , N (In upperLimitMin upperLimitMax)
     )
     ->
         Random.Generator
-            (N (In lowerLimitMin upperLimitMax {}))
+            (N (In lowerLimitMin upperLimitMax))
 randomIn ( lowestPossible, highestPossible ) =
-    random ( lowestPossible, highestPossible )
+    Random.int (lowestPossible |> toInt) (highestPossible |> toInt)
+        |> Random.map
+            (minWith (lowestPossible |> minimum)
+                >> N.Internal.maxFrom highestPossible
+            )
 
 
 {-| Compared to a range from a lower to an upper bound, is the `Int` in range, [`BelowOrAbove`](#BelowOrAbove)?
 
-    inputIntJudge : Int -> Result String (N (In N1 (Add10 a_) {}))
+    inputIntJudge : Int -> Result String (N (In N1 (Add10 a_)))
     inputIntJudge int =
         case int |> N.intIsIn ( n1, n10 ) of
             Ok inRange ->
-                inRange |> N.maxOpen n10 |> Ok
+                inRange |> N.max n10 |> Ok
             Err (N.Below _) ->
                 Err "must be ≥ 1"
             Err (N.Above _) ->
@@ -641,8 +599,8 @@ randomIn ( lowestPossible, highestPossible ) =
 
 -}
 intIsIn :
-    ( N (In minDownLimit maxUpperLimit lowerLimitDifference_)
-    , N (In maxUpperLimit maxUpperLimitAtLeast upperLimitDifference_)
+    ( N (In minDownLimit maxUpperLimit)
+    , N (In maxUpperLimit maxUpperLimitAtLeast)
     )
     ->
         (Int
@@ -652,7 +610,7 @@ intIsIn :
                     Int
                     (N (Min (Add1 maxUpperLimit)))
                 )
-                (N (In minDownLimit maxUpperLimitAtLeast {}))
+                (N (In minDownLimit maxUpperLimitAtLeast))
         )
 intIsIn ( lowerLimit, upperLimit ) =
     \int ->
@@ -663,7 +621,7 @@ intIsIn ( lowerLimit, upperLimit ) =
             int
                 |> minWith
                     ((upperLimit |> minimum)
-                        |> addDifference (n1 |> difference0)
+                        |> increaseByDifference (n1 |> minimumDifference0)
                     )
                 |> Above
                 |> Err
@@ -671,7 +629,7 @@ intIsIn ( lowerLimit, upperLimit ) =
         else
             int
                 |> minWith (lowerLimit |> minimum)
-                |> maxFrom upperLimit
+                |> N.Internal.maxFrom upperLimit
                 |> Ok
 
 
@@ -688,7 +646,7 @@ else `Err` with the input `Int`.
 
 -}
 intIsAtLeast :
-    N (In min max_ minimumLimitDifference_)
+    N (In min max_)
     ->
         (Int
          -> Result Int (N (Min min))
@@ -713,24 +671,24 @@ If you want to handle the cases `< minimum` & `> maximum` explicitly, use [`intI
 
     0
         |> N.intIn ( n3, n12 )
-        --: N (In N3 (Add12 a_) {})
+        --: N (In N3 (Add12 a_))
         |> N.toInt
     --> 3
 
     99
         |> N.intIn ( n3, n12 )
-        --: N (In N3 (Add12 a_) {})
+        --: N (In N3 (Add12 a_))
         |> N.toInt
     --> 12
 
     9
         |> N.intIn ( n3, n12 )
-        --: N (In N3 (Add12 a_) {})
+        --: N (In N3 (Add12 a_))
         |> N.toInt
     --> 9
 
 
-    toDigit : Char -> Maybe (N (In N0 (Add9 atLeast_) {}))
+    toDigit : Char -> Maybe (N (In N0 (Add9 atLeast_)))
     toDigit char =
         ((char |> Char.toCode) - ('0' |> Char.toCode))
             |> N.intIsIn ( n0, n9 )
@@ -738,12 +696,12 @@ If you want to handle the cases `< minimum` & `> maximum` explicitly, use [`intI
 
 -}
 intIn :
-    ( N (In lowerLimit upperLimitMin lowerLimitDifference_)
-    , N (In upperLimitMin upperLimit upperLimitDifference_)
+    ( N (In lowerLimit upperLimitMin)
+    , N (In upperLimitMin upperLimit)
     )
     ->
         (Int
-         -> N (In lowerLimit upperLimit {})
+         -> N (In lowerLimit upperLimit)
         )
 intIn ( lowerLimit, upperLimit ) =
     intIsIn ( lowerLimit, upperLimit )
@@ -753,10 +711,10 @@ intIn ( lowerLimit, upperLimit ) =
                     Below _ ->
                         (lowerLimit |> toInt)
                             |> minWith (lowerLimit |> minimum)
-                            |> maxFrom upperLimit
+                            |> N.Internal.maxFrom upperLimit
 
                     Above _ ->
-                        upperLimit |> minDown lowerLimit
+                        upperLimit |> min lowerLimit
             )
 
 
@@ -780,32 +738,32 @@ But avoid it if you can do better, like
 
     goodLength =
         List.foldl
-            (\_ -> N.minAdd n1 >> N.minDown n0)
-            (n0 |> N.noMax)
+            (\_ -> N.minAdd n1 >> N.min n0)
+            (n0 |> N.maxNo)
 
 If you want to handle the case `< minimum` yourself → [`intIsAtLeast`](#intIsAtLeast)
 
 -}
 intAtLeast :
-    N (In min max_ lowerDifference_)
+    N (In min max_)
     ->
         (Int
          -> N (Min min)
         )
 intAtLeast minimumLimit =
     intIsAtLeast minimumLimit
-        >> Result.withDefault (minimumLimit |> noMax)
+        >> Result.withDefault (minimumLimit |> maxNo)
 
 
 {-| Return the given number if the [`N`](#N) is less.
 
     between5And9 |> N.atLeast n10
-    --: N (In N10 (Add10 a_) {})
+    --: N (In N10 (Add10 a_))
 
     n15 |> N.atLeast n10 |> N.toInt
     --> 15
 
-    n5AtLeast |> N.atLeast (n10 |> noMax)
+    n5AtLeast |> N.atLeast (n10 |> maxNo)
     --: N (Min N10)
 
 (The type doesn't forbid that the lower limit you're comparing against
@@ -813,40 +771,42 @@ is below the current minimum.)
 
 -}
 atLeast :
-    N (In minNewMin (Add1 maxMinus1) lowerDifference_)
+    N (MinAndMinAsDifferencesAndMax minNewMin newMinDiff0 newMinDiff1 max)
     ->
-        (N (In min_ (Add1 maxMinus1) difference_)
-         -> N (In minNewMin (Add1 maxMinus1) {})
+        (N (In min_ max)
+         -> N (MinAndMinAsDifferencesAndMax minNewMin newMinDiff0 newMinDiff1 max)
         )
 atLeast lowerLimit =
     \n ->
-        n
-            |> isAtLeast lowerLimit
-            |> valueElseOnError
-                (\_ ->
-                    lowerLimit
-                        |> noDiff
-                )
+        if (n |> toInt) >= (lowerLimit |> toInt) then
+            n
+                |> N.Internal.minMap (\_ -> lowerLimit |> minimum)
+                |> N.Internal.differencesTo
+                    (lowerLimit |> minimumDifference0)
+                    (lowerLimit |> minimumDifference1)
+
+        else
+            lowerLimit
 
 
 {-| **Cap** the [`N`](#N) to at most a number.
 
     between5And15
         |> N.atMost n10
-    --: N (In N5 (Add10 a_) {})
+    --: N (In N5 (Add10 a_))
 
     atLeast5 |> N.atMost n10
-    --: N (In N5 (Add10 a_) {})
+    --: N (In N5 (Add10 a_))
 
 (The type doesn't forbid that the upper limit you're comparing against
 is above the current maximum.)
 
 -}
 atMost :
-    N (In min maxCapped capDifference_)
+    N (In min maxCapped)
     ->
-        (N (In min max_ difference_)
-         -> N (In min maxCapped {})
+        (N (In min max_)
+         -> N (In min maxCapped)
         )
 atMost upperLimit =
     \n ->
@@ -855,8 +815,8 @@ atMost upperLimit =
             |> valueElseOnError
                 (\_ ->
                     upperLimit
-                        |> minMap (\_ -> n |> minimum)
-                        |> noDiff
+                        |> N.Internal.minMap (\_ -> n |> minimum)
+                        |> diffNo
                 )
 
 
@@ -871,9 +831,9 @@ we know that if `n ≥ 1`, `x * n ≥ x`.
 
 -}
 mul :
-    N (In (Add1 multiplicandMinMinus1_) multiplicandMax_ multiplicandDifference_)
+    N (In (Add1 multiplicandMinMinus1_) multiplicandMax_)
     ->
-        (N (In min max_ difference_)
+        (N (In min max_)
          -> N (Min min)
         )
 mul multiplicand =
@@ -891,46 +851,46 @@ mul multiplicand =
 ```
 atMost7
     |> N.div n3
-    --: N (In N0 (Add7 a_) {})
+    --: N (In N0 (Add7 a_))
     |> N.toInt
 --> 2
 ```
 
 -}
 div :
-    N (In (Add1 divisorMinMinus1_) divisorMax_ divisorDifference_)
+    N (In (Add1 divisorMinMinus1_) divisorMax_)
     ->
-        (N (In min_ max difference_)
-         -> N (In N0 max {})
+        (N (In min_ max)
+         -> N (In N0 max)
         )
 div divisor =
     \n ->
         (n |> toInt)
             // (divisor |> toInt)
             |> minWith (n0 |> minimum)
-            |> maxFrom n
+            |> N.Internal.maxFrom n
 
 
 {-| The remainder after dividing by a [`N`](#N) `d ≥ 1`.
 We know `x % d ≤ d - 1`
 
     atMost7 |> N.remainderBy n3
-    --: N (In N0 (Add3 a_) {})
+    --: N (In N0 (Add3 a_))
 
 -}
 remainderBy :
-    N (In (Add1 divisorMinMinus1_) (Add1 divisorMaxMinus1) divisorDifference_)
+    N (In (Add1 divisorMinMinus1_) (Add1 divisorMaxMinus1))
     ->
-        (N (In min_ max_ difference_)
-         -> N (In N0 divisorMaxMinus1 {})
+        (N (In min_ max_)
+         -> N (In N0 divisorMaxMinus1)
         )
 remainderBy divisor =
     \n ->
         (n |> toInt)
             |> Basics.remainderBy (divisor |> toInt)
             |> minWith (n0 |> minimum)
-            |> maxFrom divisor
-            |> maxMap (subDifference (n1 |> difference0))
+            |> N.Internal.maxFrom divisor
+            |> N.Internal.maxMap (decreaseByDifference (n1 |> minimumDifference0))
 
 
 {-| [`N`](#N) Raised to a given power `p ≥ 1`
@@ -944,9 +904,9 @@ remainderBy divisor =
 
 -}
 toPower :
-    N (In (Add1 exponentMinMinus1_) (Add1 exponentMax_) exponentDifference_)
+    N (In (Add1 exponentMinMinus1_) (Add1 exponentMax_))
     ->
-        (N (In min max_ difference_)
+        (N (In min max_)
          -> N (Min min)
         )
 toPower exponent =
@@ -965,50 +925,60 @@ Elm complains:
 > But all the previous elements in the list are: `N (Min N3)`
 
     [ atLeast3
-    , atLeast4 |> N.minDown n3
+    , atLeast4 |> N.min n3
     ]
 
 -}
-minDown :
-    N (In newMin min lowerDifference_)
+min :
+    N (MinAndMinAsDifferencesAndMax newMin newMinDiff0 newMinDiff1 min)
     ->
-        (N (In min max difference_)
-         -> N (In newMin max {})
+        (N (In min max)
+         -> N (MinAndMinAsDifferencesAndMax newMin newMinDiff0 newMinDiff1 max)
         )
-minDown newMinimum =
+min newMinimum =
     \n ->
         (n |> toInt)
             |> minWith (newMinimum |> minimum)
-            |> maxFrom n
+            |> N.Internal.maxFrom n
+            |> N.Internal.differencesTo
+                (newMinimum |> minimumDifference0)
+                (newMinimum |> minimumDifference1)
 
 
-{-| Convert it to a `N (In min max {})`.
+{-| Convert an [`N`](#N) with specific minimum differences it to a `N (In min max)`.
 
-    n4 |> N.noDiff
-    --: N (In N4 (Add4 a_) {})
+    take : MinAndMinAsDifferencesAndMax min (Diff ...) (Diff ...) max -> ...
+    take taken =
+        ...
+        taken
+            -- differences are set in stone to specific type variables
+            -- so supplying it to a function that requires `In ...` is impossible
+            |> N.diffNo
+        ...
+    --: N (In N4 (Add4 a_))
 
-Example
+A more common example:
 
     [ in3To10, n3 ]
 
-> all the previous elements in the list are: `N (In N3 N10 {})`
+> all the previous elements in the list are: `N (In N3 N10)`
 
     [ in3To10
-    , n3 |> N.noDiff
+    , n3 |> N.diffNo
     ]
 
 -}
-noDiff : N (In min max difference_) -> N (In min max {})
-noDiff =
+diffNo : N (MinAndMinAsDifferencesAndMax min diff0_ diff1_ max) -> N (In min max)
+diffNo =
     \n ->
         (n |> toInt)
             |> minWith (n |> minimum)
-            |> maxFrom n
+            |> N.Internal.maxFrom n
 
 
 {-| Convert a `N (In min ...)` to a `N (Min min)`.
 
-    between3And10 |> N.noMax
+    between3And10 |> N.maxNo
     --: N (Min N4)
 
 Use it to unify different types of number minimum constraints like
@@ -1020,12 +990,12 @@ Elm complains:
 > But all the previous elements in the list are: `N (Min N1)`
 
     [ atLeast1
-    , between1And10 |> N.noMax
+    , between1And10 |> N.maxNo
     ]
 
 -}
-noMax : N (In min max_ difference_) -> N (Min min)
-noMax =
+maxNo : N (In min max_) -> N (Min min)
+maxNo =
     \n ->
         (n |> toInt) |> minWith (n |> minimum)
 
@@ -1042,35 +1012,32 @@ But once you implement `onlyAtMost18`, you might use the n in `onlyAtMost19`:
 
     onlyAtMost18 n =
         -- onlyAtMost19 n → error
-        onlyAtMost19 (n |> N.maxOpen n18)
+        onlyAtMost19 (n |> N.max n18)
 
 -}
-maxOpen :
-    N (In max maxOpen maxOpenDifference_)
+max :
+    N (In max maxOpen)
     ->
-        (N (In min max difference_)
-         -> N (In min maxOpen {})
+        (N (MinAndMinAsDifferencesAndMax min minDiff0 minDiff1 max)
+         -> N (MinAndMinAsDifferencesAndMax min minDiff0 minDiff1 maxOpen)
         )
-maxOpen maximumNew =
-    \n ->
-        (n |> toInt)
-            |> minWith (n |> minimum)
-            |> maxFrom maximumNew
+max maximumNew =
+    N.Internal.maxFrom maximumNew
 
 
-{-| Have a specific maximum in mind? → [`maxOpen`](#maxOpen)
+{-| Have a specific maximum in mind? → [`max`](#max)
 
 Want to increase the upper bound by a fixed amount? ↓
 
-    maxUp4 : N (In min max difference_) -> N (In min (Add4 max) {})
+    maxUp4 : N (In min max difference_) -> N (In min (Add4 max))
     maxUp4 =
         N.maxUp n4
 
-When is this useful? Very rarely. This is how [`up`](#up) reverse could be implemented
+When is this useful? Very rarely:
 
     down :
         N (In min (Add1 maxMinus1) difference_)
-        -> List (N (In N0 maxMinus1 {}))
+        -> List (N (In N0 maxMinus1))
     down length =
         case length |> isAtLeast n1 of
             Err _ ->
@@ -1088,18 +1055,24 @@ When is this useful? Very rarely. This is how [`up`](#up) reverse could be imple
                             |> downRecursive
                        )
 
-(to be fair: here, you could also use `lengthAtLeast1 |> subMin n1` instead of `lengthMinus1 |> maxUp n1`)
+(to be fair: here, you're better off using `lengthAtLeast1 |> subMin n1` instead of `lengthMinus1 |> maxUp n1`)
 
 -}
 maxUp :
-    N (In increase_ increaseAtLeast_ (Is (Diff max To maxIncreased) diff1_))
+    N
+        (MinAndMinAsDifferencesAndMax
+            increase_
+            (Increase max To maxIncreased)
+            diff1_
+            increaseAtLeast_
+        )
     ->
-        (N (In min max difference_)
-         -> N (In min maxIncreased {})
+        (N (In min max)
+         -> N (In min maxIncreased)
         )
 maxUp maxRelativeIncrease =
-    maxMap (addDifference (maxRelativeIncrease |> difference0))
-        >> noDiff
+    N.Internal.maxMap (increaseByDifference (maxRelativeIncrease |> minimumDifference0))
+        >> diffNo
 
 
 {-| The error result of comparing [`N`](#N)s.
@@ -1165,16 +1138,16 @@ Luckily that's not a problem, since the values won't be produced anyway.)
 
 -}
 is :
-    N (In comparedAgainstMin (Add1 comparedAgainstMaxMinus1) comparedAgainstDifference)
+    N (In comparedAgainstMin (Add1 comparedAgainstMaxMinus1))
     ->
-        (N (In min max difference_)
+        (N (In min max)
          ->
             Result
                 (BelowOrAbove
-                    (N (In min comparedAgainstMaxMinus1 {}))
-                    (N (In (Add1 comparedAgainstMin) max {}))
+                    (N (In min comparedAgainstMaxMinus1))
+                    (N (In (Add1 comparedAgainstMin) max))
                 )
-                (N (In comparedAgainstMin (Add1 comparedAgainstMaxMinus1) comparedAgainstDifference))
+                (N (In comparedAgainstMin (Add1 comparedAgainstMaxMinus1)))
         )
 is comparedAgainst =
     \n ->
@@ -1185,20 +1158,20 @@ is comparedAgainst =
 
             GT ->
                 n
-                    |> minMap
+                    |> N.Internal.minMap
                         (\_ ->
                             (comparedAgainst |> minimum)
-                                |> addDifference (n1 |> difference0)
+                                |> increaseByDifference (n1 |> minimumDifference0)
                         )
-                    |> noDiff
+                    |> diffNo
                     |> Above
                     |> Err
 
             LT ->
                 n
-                    |> maxFrom comparedAgainst
-                    |> maxMap (subDifference (n1 |> difference0))
-                    |> noDiff
+                    |> N.Internal.maxFrom comparedAgainst
+                    |> N.Internal.maxMap (decreaseByDifference (n1 |> minimumDifference0))
+                    |> diffNo
                     |> Below
                     |> Err
 
@@ -1206,7 +1179,7 @@ is comparedAgainst =
 {-| Compared to a range from a lower to an upper bound,
 is the [`N`](#N) in range or [`BelowOrAbove`](#BelowOrAbove)?
 
-    isIn3To10 : N (In min_ (Add10 maxMinus10_) d_) -> Maybe (N (In N3 (Add10 a_) {}))
+    isIn3To10 : N (In min_ (Add10 maxMinus10_)) -> Maybe (N (In N3 (Add10 a_)))
     isIn3To10 =
         N.isIn ( n3, n10 )
             >> Result.toMaybe
@@ -1248,32 +1221,26 @@ isIn :
         (In
             lowerLimit
             (Add1 lowerLimitMaxMinus1)
-            lowerLimitDifference_
         )
-    , N
-        (In
-            upperLimitMin
-            upperLimitMax
-            upperLimitDifference_
-        )
+    , N (In upperLimitMin upperLimitMax)
     )
     ->
-        (N (In min max difference_)
+        (N (In min max)
          ->
             Result
                 (BelowOrAbove
-                    (N (In min lowerLimitMaxMinus1 {}))
-                    (N (In (Add1 upperLimitMin) max {}))
+                    (N (In min lowerLimitMaxMinus1))
+                    (N (In (Add1 upperLimitMin) max))
                 )
-                (N (In lowerLimit upperLimitMax {}))
+                (N (In lowerLimit upperLimitMax))
         )
 isIn ( lowerLimit, upperLimit ) =
     \n ->
         if (n |> toInt) < (lowerLimit |> toInt) then
             n
-                |> maxFrom lowerLimit
-                |> maxMap (subDifference (n1 |> difference0))
-                |> noDiff
+                |> N.Internal.maxFrom lowerLimit
+                |> N.Internal.maxMap (decreaseByDifference (n1 |> minimumDifference0))
+                |> diffNo
                 |> Below
                 |> Err
 
@@ -1281,16 +1248,16 @@ isIn ( lowerLimit, upperLimit ) =
             (n |> toInt)
                 |> minWith
                     ((upperLimit |> minimum)
-                        |> addDifference (n1 |> difference0)
+                        |> increaseByDifference (n1 |> minimumDifference0)
                     )
-                |> maxFrom n
+                |> N.Internal.maxFrom n
                 |> Above
                 |> Err
 
         else
             (n |> toInt)
                 |> minWith (lowerLimit |> minimum)
-                |> maxFrom upperLimit
+                |> N.Internal.maxFrom upperLimit
                 |> Ok
 
 
@@ -1317,7 +1284,7 @@ isIn ( lowerLimit, upperLimit ) =
     factorialBody x =
         case x |> N.isAtLeast n1 of
             Err _ ->
-                n1 |> N.noMax
+                n1 |> N.maxNo
 
             Ok atLeast1 ->
                 factorial (atLeast1 |> N.minSub n1)
@@ -1334,28 +1301,27 @@ isAtLeast :
         (In
             lowerLimitMin
             (Add1 lowerLimitMaxMinus1)
-            lowerLimitDifference_
         )
     ->
-        (N (In min max difference_)
+        (N (In min max)
          ->
             Result
-                (N (In min lowerLimitMaxMinus1 {}))
-                (N (In lowerLimitMin max {}))
+                (N (In min lowerLimitMaxMinus1))
+                (N (In lowerLimitMin max))
         )
 isAtLeast lowerLimit =
     \n ->
         if (n |> toInt) >= (lowerLimit |> toInt) then
             n
-                |> minMap (\_ -> lowerLimit |> minimum)
-                |> noDiff
+                |> N.Internal.minMap (\_ -> lowerLimit |> minimum)
+                |> diffNo
                 |> Ok
 
         else
             n
-                |> maxFrom lowerLimit
-                |> maxMap (subDifference (n1 |> difference1))
-                |> noDiff
+                |> N.Internal.maxFrom lowerLimit
+                |> N.Internal.maxMap (decreaseByDifference (n1 |> minimumDifference1))
+                |> diffNo
                 |> Err
 
 
@@ -1378,50 +1344,44 @@ Luckily that's not a problem, since the values won't be produced anyway.)
 
 -}
 isAtMost :
-    N
-        (In
-            upperLimitMin
-            upperLimitMax
-            upperLimitDifference_
-        )
+    N (In upperLimitMin upperLimitMax)
     ->
-        (N (In min max difference_)
+        (N (In min max)
          ->
             Result
-                (N (In (Add1 upperLimitMin) max {}))
-                (N (In min upperLimitMax {}))
+                (N (In (Add1 upperLimitMin) max))
+                (N (In min upperLimitMax))
         )
 isAtMost upperLimit =
     \n ->
         if (n |> toInt) <= (upperLimit |> toInt) then
             n
-                |> maxFrom upperLimit
-                |> noDiff
+                |> N.Internal.maxFrom upperLimit
+                |> diffNo
                 |> Ok
 
         else
             n
-                |> minMap
+                |> N.Internal.minMap
                     (\_ ->
                         (upperLimit |> minimum)
-                            |> addDifference (n1 |> difference0)
+                            |> increaseByDifference (n1 |> minimumDifference0)
                     )
-                |> noDiff
+                |> diffNo
                 |> Err
 
 
-{-| The [`N (In ... (Is ...))`](#Is) plus another [`N (In ... (Is ...))`](#Is). Give the added value twice as a tuple.
+{-| The [specific](#MinAndMinAsDifferencesAndMax) [`N`](#N) plus another [specific](#MinAndMinAsDifferencesAndMax) [`N`](#N).
+Give the added number twice as a tuple.
 
     n6 |> N.diffAdd ( n5, n5 )
     --→ n11
     --: N
-    --:     (In
+    --:     (MinAndMinAsDifferencesAndMax
     --:         N11
+    --:         (Increase x0 To (Add11 x0))
+    --:         (Increase x1 To (Add11 x1))
     --:         (Add11 a_)
-    --:         (Is
-    --:             (Diff x0 To (Add11 x0))
-    --:             (Diff x1 To (Add11 x1))
-    --:         )
     --:     )
 
 This is only rarely useful, as for example
@@ -1437,40 +1397,35 @@ would force x to be of type N (In ... (Is ...)). Instead,
 -}
 diffAdd :
     ( N
-        (In
+        (MinAndMinAsDifferencesAndMax
             added
-            added0AtLeast_
-            (Is (Diff n To sum) (Diff nAtLeast To sumAtLeast))
+            (Increase n To sum)
+            (Increase nAtLeast To sumAtLeast)
+            added
         )
     , N
-        (In
+        (MinAndMinAsDifferencesAndMax
             added
-            added1AtLeast_
-            (Is
-                (Diff x0PlusN To aPlusSum)
-                (Diff x1PlusN To bPlusSum)
-            )
+            (Increase x0PlusN To aPlusSum)
+            (Increase x1PlusN To bPlusSum)
+            added
         )
     )
     ->
         (N
-            (In
+            (MinAndMinAsDifferencesAndMax
                 n
+                (Increase x0 To x0PlusN)
+                (Increase x1 To x1PlusN)
                 nAtLeast
-                (Is
-                    (Diff x0 To x0PlusN)
-                    (Diff x1 To x1PlusN)
-                )
             )
          ->
             N
-                (In
+                (MinAndMinAsDifferencesAndMax
                     sum
+                    (Increase x0 To aPlusSum)
+                    (Increase x1 To bPlusSum)
                     sumAtLeast
-                    (Is
-                        (Diff x0 To aPlusSum)
-                        (Diff x1 To bPlusSum)
-                    )
                 )
         )
 diffAdd ( toAdd, toAddWithAdditionalInformation ) =
@@ -1479,120 +1434,114 @@ diffAdd ( toAdd, toAddWithAdditionalInformation ) =
             sum : sum
             sum =
                 (n |> minimum)
-                    |> addDifference (toAdd |> difference0)
-
-            sumDifference :
-                Is
-                    (Diff x0 To aPlusSum)
-                    (Diff x1 To bPlusSum)
-            sumDifference =
-                { diff0 =
-                    (n |> difference0)
-                        |> differenceAdd (toAddWithAdditionalInformation |> difference0)
-                , diff1 =
-                    (n |> difference1)
-                        |> differenceAdd (toAddWithAdditionalInformation |> difference1)
-                }
+                    |> increaseByDifference (toAdd |> minimumDifference0)
         in
         (n |> toInt)
             + (toAdd |> toInt)
             |> minWith sum
-            |> differenceTo sumDifference
-            |> maxFrom n
-            |> maxMap (addDifference (toAdd |> difference1))
-
-
-{-| To the [`N`](#N) without a known maximum-constraint,,
-add an [`N`](#N). The second argument is the minimum added value.
-
-    atLeast5 |> N.addAtLeast n2 atLeast2
-    --: N (Min N7)
-
-Use [`minAdd`](#minAdd) to add exact numbers.
-
--}
-addAtLeast :
-    N (In addedMin addedMinAtLeast_ (Is (Diff min To sumMin) addedDiff1_))
-    -> N (In addedMin addedMax_ addedDifference_)
-    ->
-        (N (In min max_ difference_)
-         -> N (Min sumMin)
-        )
-addAtLeast addedAtLeast toAdd =
-    \n ->
-        (n |> toInt)
-            + (toAdd |> toInt)
-            |> minWith
-                ((n |> minimum)
-                    |> addDifference (addedAtLeast |> difference0)
+            |> N.Internal.differencesTo
+                ((n |> minimumDifference0)
+                    |> differenceIncrease (toAddWithAdditionalInformation |> minimumDifference0)
                 )
+                ((n |> minimumDifference1)
+                    |> differenceIncrease (toAddWithAdditionalInformation |> minimumDifference1)
+                )
+            |> N.Internal.maxFrom n
+            |> N.Internal.maxMap (increaseByDifference (toAdd |> minimumDifference1))
 
 
 {-| To the [`N`](#N) without a known maximum-constraint,
-add a specific [`N (In ... (Is ...))`](#Is) value.
+add a number that has [information on how to add](#Diff) the minima.
 
-    atLeast70 |> N.add n7
+    atLeast70 |> N.minAdd n7
     --: N (Min N77)
 
-Use [`addAtLeast`](#addAtLeast) if you want to add an [`N`](#N) that can be in a range.
+Use [`addAtLeast`](#addAtLeast) if you want to add an [`N`](#N) in a range.
+
+If the added value is in a range, supply the [`min`](#min) manually!
+
+    atLeast5 |> N.minAdd (min n2 atLeast2)
+    --: N (Min N7)
 
 -}
 minAdd :
-    N (In added_ addedAtLeast_ (Is (Diff min To sumMin) addedDiff1_))
+    N
+        (MinAndMinAsDifferencesAndMax
+            added_
+            (Increase min To sumMin)
+            (Increase x0_ To x0PlusAdded_)
+            addedAtLeast_
+        )
     ->
-        (N (In min max_ difference_)
+        (N (In min max)
          -> N (Min sumMin)
         )
 minAdd toAdd =
-    addAtLeast toAdd toAdd
+    \n ->
+        let
+            sumMin =
+                (n |> minimum)
+                    |> increaseByDifference (toAdd |> minimumDifference0)
+        in
+        ((n |> toInt) + (toAdd |> toInt))
+            |> N.Internal.minWith sumMin
+                (differenceFrom0To sumMin)
+                (differenceFrom0To sumMin)
 
 
-{-| Add an [`N`](#N) that can be in a range.
+{-| Add an [`N`](#N) in a range.
 
-The tuple argument should contain
+The argument is the maximum added value
 
-1.  the minimum added value
-2.  the maximum added value
+    between3And10 |> N.addAtMost n12 (min n1 between1And12)
+    --: N (In N4 (N22Plus a_))
 
-```
-between3And10 |> N.addIn ( n1, n12 ) between1And12
---: N (In N4 (N22Plus a_) {})
-```
+[`min`](#min) re-enables adding both minimum types.
 
 -}
-addIn :
-    ( N (In addedMin addedMinAtLeast_ (Is (Diff min To sumMin) addedMinDiff1_))
-    , N (In addedMax addedMaxAtLeast_ (Is (Diff max To sumMax) addedMaxDiff1_))
-    )
-    -> N (In addedMin addedMax addedDifference_)
-    ->
-        (N (In min max difference_)
-         -> N (In sumMin sumMax {})
+addAtMost :
+    N
+        (MinAndMinAsDifferencesAndMax
+            addedMax
+            addedMaxDiff0_
+            (Increase max To sumMax)
+            addedMax
         )
-addIn ( addedAtLeast, addedAtMost ) toAdd =
+    ->
+        N
+            (MinAndMinAsDifferencesAndMax
+                addedMin
+                (Increase min To sumMin)
+                addedMinDiff1_
+                addedMax
+            )
+    ->
+        (N (In min max)
+         -> N (In sumMin sumMax)
+        )
+addAtMost addedAtMost toAdd =
     \n ->
         (n |> toInt)
             + (toAdd |> toInt)
             |> minWith
                 ((n |> minimum)
-                    |> addDifference (addedAtLeast |> difference0)
+                    |> increaseByDifference (toAdd |> minimumDifference0)
                 )
-            |> maxFrom n
-            |> maxMap (addDifference (addedAtMost |> difference0))
+            |> N.Internal.maxFrom n
+            |> N.Internal.maxMap (increaseByDifference (addedAtMost |> minimumDifference1))
 
 
-{-| The `N (In ... (Is ...)` minus another [`N (In ... (Is ...))`](#Is). Give the subtracted value twice as a tuple.
+{-| The [specific](#MinAndMinAsDifferencesAndMax) [`N`](#N) minus another [specific](#MinAndMinAsDifferencesAndMax) [`N`](#N).
+Give the subtracted value twice as a tuple.
 
     n6 |> N.diffSub ( n5, n5 )
     --→ n1
     --: N
-    --:     (In
+    --:     (MinAndMinAsDifferencesAndMax
     --:         N1
+    --:         (Increase x0 To (Add1 x0))
+    --:         (Increase x1 To (Add1 x1))
     --:         (Add1 a_)
-    --:         (Is
-    --:             (Diff x0 To (Add1 x0))
-    --:             (Diff x1 To (Add1 x1))
-    --:         )
     --:     )
 
 This is only rarely useful, as for example
@@ -1600,7 +1549,7 @@ This is only rarely useful, as for example
     isInXMinus10ToX x =
         isIn ( x |> N.diffSub ( n10, n10 ), x )
 
-would force `x` to be of type [`N (In ... (Is ...))`](#Is).
+would force `x` to be a specific [`MinAndMinAsDifferencesAndMax`](#MinAndMinAsDifferencesAndMax).
 Instead,
 
     isInXMinus10ToX x =
@@ -1609,43 +1558,35 @@ Instead,
 -}
 diffSub :
     ( N
-        (In
+        (MinAndMinAsDifferencesAndMax
             subtracted
-            subtracted0AtLeast_
-            (Is
-                (Diff difference To n)
-                (Diff differenceAtLeast To nAtLeast)
-            )
+            (Increase difference To n)
+            (Increase differenceAtLeast To nAtLeast)
+            subtracted
         )
     , N
-        (In
+        (MinAndMinAsDifferencesAndMax
             subtracted
-            subtracted1AtLeast_
-            (Is
-                (Diff x0PlusDifference To x0PlusN)
-                (Diff x1PlusDifference To x1PlusN)
-            )
+            (Increase x0PlusDifference To x0PlusN)
+            (Increase x1PlusDifference To x1PlusN)
+            subtracted
         )
     )
     ->
         (N
-            (In
+            (MinAndMinAsDifferencesAndMax
                 n
+                (Increase x0 To x0PlusN)
+                (Increase x1 To x1PlusN)
                 nAtLeast
-                (Is
-                    (Diff x0 To x0PlusN)
-                    (Diff x1 To x1PlusN)
-                )
             )
          ->
             N
-                (In
+                (MinAndMinAsDifferencesAndMax
                     difference
+                    (Increase x0 To x0PlusDifference)
+                    (Increase x1 To x1PlusDifference)
                     differenceAtLeast
-                    (Is
-                        (Diff x0 To x0PlusDifference)
-                        (Diff x1 To x1PlusDifference)
-                    )
                 )
         )
 diffSub ( subtrahend, subtrahendWithAdditionalInformation ) =
@@ -1654,77 +1595,61 @@ diffSub ( subtrahend, subtrahendWithAdditionalInformation ) =
             difference : difference
             difference =
                 (n |> minimum)
-                    |> subDifference (subtrahend |> difference0)
-
-            differenceDifference :
-                Is
-                    (Diff x0 To x0PlusDifference)
-                    (Diff x1 To x1PlusDifference)
-            differenceDifference =
-                { diff0 =
-                    (n |> difference0)
-                        |> differenceSub (subtrahendWithAdditionalInformation |> difference0)
-                , diff1 =
-                    (n |> difference1)
-                        |> differenceSub (subtrahendWithAdditionalInformation |> difference1)
-                }
+                    |> decreaseByDifference (subtrahend |> minimumDifference0)
         in
         (n |> toInt)
             - (subtrahend |> toInt)
             |> minWith difference
-            |> differenceTo differenceDifference
-            |> maxFrom n
-            |> maxMap (subDifference (subtrahend |> difference1))
+            |> N.Internal.differencesTo
+                ((n |> minimumDifference0)
+                    |> differenceDecrease (subtrahendWithAdditionalInformation |> minimumDifference0)
+                )
+                ((n |> minimumDifference1)
+                    |> differenceDecrease (subtrahendWithAdditionalInformation |> minimumDifference1)
+                )
+            |> N.Internal.maxFrom n
+            |> N.Internal.maxMap (decreaseByDifference (subtrahend |> minimumDifference1))
 
 
-{-| Subtract an [`N`](#N) that can be in a range.
+{-| Subtract an [`N`](#N) in a range.
 
-The tuple argument should contain
+The argument is the maximum subtracted value
 
-1.  the minimum subtracted value
-2.  the maximum subtracted value
-
-```
-between6And12 |> N.subIn ( n1, n5 ) between1And5
---: N (In N1 (Add5 a_) {})
-```
+    between6And12 |> N.subAtMost n5 (min n1 between1And5)
+    --: N (In N1 (Add5 a_))
 
 -}
-subIn :
-    ( N
-        (In
-            subtractedMin
-            subtractedMinAtLeast_
-            (Is
-                (Diff differenceMax To max)
-                subtractedMinDiff1_
-            )
-        )
-    , N
-        (In
+subAtMost :
+    N
+        (MinAndMinAsDifferencesAndMax
             subtractedMax
-            subtractedMaxAtLeast_
-            (Is
-                (Diff differenceMin To min)
-                subtractedMaxDiff1_
-            )
+            subtractedMaxDiff0_
+            (Increase differenceMin To min)
+            subtractedMax
         )
-    )
-    -> N (In subtractedMin subtractedMax subtractedDifference_)
     ->
-        (N (In min max difference_)
-         -> N (In differenceMin differenceMax {})
+        N
+            (MinAndMinAsDifferencesAndMax
+                subtractedMin
+                (Increase differenceMax To max)
+                subtractedMinDiff1_
+                subtractedMax
+            )
+    ->
+        (N (In min max)
+         -> N (In differenceMin differenceMax)
         )
-subIn ( subtractedMin, subtractedMax ) subtrahend =
+subAtMost subtractedMax subtrahend =
     \n ->
         (n |> toInt)
             - (subtrahend |> toInt)
             |> minWith
                 ((n |> minimum)
-                    |> subDifference (subtractedMax |> difference0)
+                    |> decreaseByDifference (subtractedMax |> minimumDifference1)
                 )
-            |> maxFrom n
-            |> maxMap (subDifference (subtractedMin |> difference0))
+            |> N.Internal.maxFrom n
+            |> N.Internal.maxMap
+                (decreaseByDifference (subtrahend |> minimumDifference0))
 
 
 {-| From an [`N`](#N) without an unknown maximum constraint,
@@ -1738,42 +1663,41 @@ The first argument is the maximum of the subtracted number.
 -}
 minSubAtMost :
     N
-        (In
+        (MinAndMinAsDifferencesAndMax
             subtractedMax
-            subtractedMaxAtLeast_
-            (Is
-                (Diff differenceMin To min)
-                subtractedMaxDiff1_
-            )
+            subtractedMaxDiff0_
+            (Increase differenceMin To min)
+            subtractedMax
         )
-    -> N (In (N0able subtractedMinPlus1_ Possibly) subtractedMax subtractedDifference_)
+    -> N (In subtractedMin_ subtractedMax)
     ->
-        (N (In min max difference_)
-         -> N (In differenceMin max {})
+        (N (In min max)
+         -> N (In differenceMin max)
         )
 minSubAtMost subtractedMax subtrahend =
-    subIn ( n0, subtractedMax ) (subtrahend |> minDown n0)
+    subAtMost subtractedMax (subtrahend |> min n0)
 
 
 {-| From an [`N`](#N) with an unknown maximum constraint,
-subtract a [specific number](#Is)
+subtract a [specific number](#MinAndMinAsDifferencesAndMax)
 
     atLeast7 |> N.minSub n2
     --: N (Min N5)
 
-Use [`minSubAtMost`](#minSubAtMost) if you want to subtract an [`N`](#N) that can be in a range.
+Use [`minSubAtMost`](#minSubAtMost) if you want to subtract an [`N`](#N) in a range.
 
 -}
 minSub :
     N
-        (In
-            subtracted_
-            subtractedAtLeast_
-            (Is (Diff differenceMin To min) subtractedDiff1_)
+        (MinAndMinAsDifferencesAndMax
+            subtracted
+            (Increase differenceMin To min)
+            subtractedDiff1_
+            subtracted
         )
     ->
-        (N (In min max difference_)
-         -> N (In differenceMin max {})
+        (N (In min max)
+         -> N (In differenceMin max)
         )
 minSub subtrahend =
     \n ->
@@ -1781,224 +1705,103 @@ minSub subtrahend =
             - (subtrahend |> toInt)
             |> minWith
                 ((n |> minimum)
-                    |> subDifference (subtrahend |> difference0)
+                    |> decreaseByDifference (subtrahend |> minimumDifference0)
                 )
-            |> maxFrom n
+            |> N.Internal.maxFrom n
 
 
 
 -- # internals
 
 
-{-| Constructor for [`NoMax`](#NoMax)
--}
-maximumUnknown : NoMax
-maximumUnknown =
-    N.Internal.MaximumUnknown
-
-
 {-| The smallest allowed number promised by the [range type](#In).
 -}
-minimum : N (In minimum maximum_ difference_) -> minimum
+minimum :
+    N (MinAndMinAsDifferencesAndMax minimum minDiff0_ minDiff1_ maximum_)
+    -> minimum
 minimum =
     N.Internal.minimum
 
 
-{-| The number representation as all [difference](#Diff)s promised by its type [`Is (Diff low0 To high0) (Diff low1 To high1)`](#Is).
-
-For the individual [difference](#Diff)s: [`difference0`](#difference0), [`difference1`](#difference1)
-
+{-| The minimum number representation as a [difference](#Increase) promised by its type
 -}
-differences : N (In min_ max_ differences) -> differences
-differences =
-    N.Internal.differences
+minimumDifference0 :
+    N (MinAndMinAsDifferencesAndMax min_ minimumDifference0 difference1_ max_)
+    -> minimumDifference0
+minimumDifference0 =
+    N.Internal.minDifference0
 
 
-{-| Switch [`difference0`](#difference0), [`difference1`](#difference1) of the [specific](N#Is) type [`N`](#N).
-
-    addInSwapped :
-        ( N (In addedMin addedMinAtLeast_ (Is (Diff min To sumMin) addedMinDiff1_))
-        , N (In addedMax addedMaxAtLeast_ (Is (Diff max To sumMax) addedMaxDiff1_))
-        )
-        -> N (In addedMin addedMax addedDifference_)
-        ->
-            (N (In min max difference_)
-             -> N (In sumMin sumMax {})
-            )
-    addInSwapped ( addedAtLeast, addedAtMost ) toAdd =
-        N.addIn ( addedAtLeast, addedAtMost |> N.differencesSwap ) toAdd
-
-    add toAdd =
-        addInSwapped ( toAdd, toAdd ) toAdd
-
+{-| The minimum number representation as a [difference](#Increase) promised by its type
 -}
-differencesSwap :
-    N (In min max (Is diff0 diff1))
-    -> N (In min max (Is diff1 diff0))
-differencesSwap =
-    \n ->
-        n
-            |> differenceTo
-                { diff0 = n |> difference1
-                , diff1 = n |> difference0
-                }
+minimumDifference1 :
+    N (MinAndMinAsDifferencesAndMax min_ difference0_ minimumDifference1 max_)
+    -> minimumDifference1
+minimumDifference1 =
+    N.Internal.minDifference1
 
 
-{-| The number representation as a [difference](#Diff) promised by its type [`Is (Diff low To high) ...`](#Is).
+{-| To the number, add a specific other one by supplying a [difference](#Increase).
 -}
-difference0 :
-    N (In min_ max_ { differences_ | diff0 : difference0 })
-    -> difference0
-difference0 =
-    differences >> .diff0
+increaseByDifference : Increase low To high -> (low -> high)
+increaseByDifference =
+    \(Difference differenceOperation) -> differenceOperation.increase
 
 
-{-| The number representation as a [difference](#Diff) promised by its type [`Is ... (Diff low To high)`](#Is).
+{-| To the number, subtract a specific other one by supplying a [difference](#Increase).
 -}
-difference1 :
-    N (In min_ max_ { differences_ | diff1 : difference1 })
-    -> difference1
-difference1 =
-    differences >> .diff1
+decreaseByDifference : Increase low To high -> (high -> low)
+decreaseByDifference =
+    \(Difference differenceOperation) -> differenceOperation.decrease
 
 
-{-| To the number, add a specific other one by supplying one of its [difference](#Diff)s
-promised by its type [`Is (Diff low0 To high0) (Diff low1 To high1)`](#Is)
+{-| Chain the [difference](#Increase) further to a higher number.
 -}
-addDifference : Diff low To high -> (low -> high)
-addDifference =
-    \(Difference differenceOperation) -> differenceOperation.add
-
-
-{-| To the number, subtract a specific other one by supplying one of its [difference](#Diff)s
-promised by its type [`Is (Diff low0 To high0) (Diff low1 To high1)`](#Is)
--}
-subDifference : Diff low To high -> (high -> low)
-subDifference =
-    \(Difference differenceOperation) -> differenceOperation.sub
-
-
-{-| Chain the [difference](#Diff) further to a higher number.
--}
-differenceAdd :
-    Diff middle To high
-    -> (Diff low To middle -> Diff low To high)
-differenceAdd diffMiddleToHigh =
+differenceIncrease :
+    Increase middle To high
+    -> (Increase low To middle -> Increase low To high)
+differenceIncrease diffMiddleToHigh =
     \diffLowToMiddle ->
         Difference
-            { add =
-                addDifference diffLowToMiddle
-                    >> addDifference diffMiddleToHigh
-            , sub =
-                subDifference diffMiddleToHigh
-                    >> subDifference diffLowToMiddle
+            { increase =
+                increaseByDifference diffLowToMiddle
+                    >> increaseByDifference diffMiddleToHigh
+            , decrease =
+                decreaseByDifference diffMiddleToHigh
+                    >> decreaseByDifference diffLowToMiddle
             }
 
 
-{-| Chain the [difference](#Diff) back to a lower number.
+{-| Chain the [difference](#Increase) back to a lower number.
 -}
-differenceSub :
-    Diff middle To high
-    -> (Diff low To high -> Diff low To middle)
-differenceSub diffMiddleToHigh =
+differenceDecrease :
+    Increase middle To high
+    -> (Increase low To high -> Increase low To middle)
+differenceDecrease diffMiddleToHigh =
     \diffLowToHigh ->
         Difference
-            { add =
-                addDifference diffLowToHigh
-                    >> subDifference diffMiddleToHigh
-            , sub =
-                addDifference diffMiddleToHigh
-                    >> subDifference diffLowToHigh
+            { increase =
+                increaseByDifference diffLowToHigh
+                    >> decreaseByDifference diffMiddleToHigh
+            , decrease =
+                increaseByDifference diffMiddleToHigh
+                    >> decreaseByDifference diffLowToHigh
             }
 
 
-{-| The exact natural number `0`
--}
-n0 : N (In N0 atLeast_ (Is (Diff x0 To x0) (Diff x1 To x1)))
-n0 =
-    0
-        |> minWith (N0 Possible)
-        |> maxMap
-            (\_ ->
-                let
-                    {- The [mutual recursion prevents TCO](https://jfmengels.net/tail-call-optimization/#so-what-are-these-conditions),
-                       forcing a stack overflow runtime exception.
-
-                       The arguments help identify the cause on inspection when debugging.
-
-                    -}
-                    failLoudlyWithStackOverflow : List String -> valueThatWillNeverBeCreatedDueToRuntimeError_
-                    failLoudlyWithStackOverflow details =
-                        let
-                            failLoudlyWithStackOverflowMutuallyRecursive : List String -> valueThatWillNeverBeCreatedDueToRuntimeError_
-                            failLoudlyWithStackOverflowMutuallyRecursive messageAndCulpritRecursive =
-                                failLoudlyWithStackOverflow messageAndCulpritRecursive
-                        in
-                        failLoudlyWithStackOverflowMutuallyRecursive details
-                in
-                {- Currently, by design, no `N0able` unifies with higher `N<x>`s
-
-                       N0 Possible
-
-                   is impossible as a maximum for `n0` for example because
-
-                       N0able atLeast Possibly
-
-                   correctly doesn't unify with any `N< x≥1 >`
-
-                   ideas:
-
-                   - 👎 define
-                       n<x> : N (In (Add<x> atLeast\_) N<x> ...)
-                       N<x> = Add<x> Never -- to forbid > max
-                       N0able s = [ N0 | Add1 s ]
-                   - requirements for minimum can't be expressed
-                   - `Diff` `sub` becomes impossible to implement
-                   - 👎 adding an escape hatch
-                       N0able s possiblyOrNever = [ N0AtLeast | N0 possiblyOrNever | Add1 s ]
-                   - `Diff` `sub` becomes impossible to implement
-
-                   Happen to have more ideas
-                   on how to avoid the current hack (which also makes elm crash on `==`)?
-                   → please PR
-
-                -}
-                failLoudlyWithStackOverflow
-                    [ "internal minimum evaluated or leaked somewhere from `N`'s API."
-                    , "💙 Please report under https://github.com/lue-bird/elm-bounded-nat/issues"
-                    ]
-            )
-        |> differenceTo { diff0 = n0Difference, diff1 = n0Difference }
-
-
-n0Difference : Diff n To n
+n0Difference : Increase x To x
 n0Difference =
     Difference
-        { add = identity
-        , sub = identity
+        { increase = identity
+        , decrease = identity
         }
 
 
-
---
-
-
-{-| The exact natural number `1`
--}
-n1 : N (In N1 (Add1 atLeast_) (Is (Diff x0 To (Add1 x0)) (Diff x1 To (Add1 x1))))
-n1 =
-    1
-        |> minWith (n0 |> minimum |> Add1)
-        |> differenceTo { diff0 = n1Difference, diff1 = n1Difference }
-        |> maxFrom n0
-        |> maxMap Add1
-
-
-n1Difference : Diff n To (Add1 n)
+n1Difference : Increase x To (Add1 x)
 n1Difference =
     Difference
-        { add = Add1
-        , sub =
+        { increase = Add1
+        , decrease =
             \n0Never ->
                 case n0Never of
                     Add1 predecessor ->
@@ -2009,107 +1812,333 @@ n1Difference =
         }
 
 
+{-| Increase its [`minimumDifference0`](#minimumDifference0) by a specific given number.
+-}
+minimumDifference0Up :
+    N
+        (MinAndMinAsDifferencesAndMax
+            min
+            (Increase middle To high)
+            minDifference1
+            max
+        )
+    ->
+        (N
+            (MinAndMinAsDifferencesAndMax
+                min
+                (Increase low To middle)
+                minDifference1
+                max
+            )
+         ->
+            N
+                (MinAndMinAsDifferencesAndMax
+                    min
+                    (Increase low To high)
+                    minDifference1
+                    max
+                )
+        )
+minimumDifference0Up minimumDifference0Change =
+    \n ->
+        n
+            |> N.Internal.differencesTo
+                ((n |> minimumDifference0)
+                    |> differenceIncrease
+                        (minimumDifference0Change |> minimumDifference0)
+                )
+                (n |> minimumDifference1)
+
+
+{-| Increase its [`minimumDifference1`](#minimumDifference1) by a specific given number.
+-}
+minimumDifference1Up :
+    N
+        (MinAndMinAsDifferencesAndMax
+            min
+            minDifference0
+            (Increase middle To high)
+            max
+        )
+    ->
+        (N
+            (MinAndMinAsDifferencesAndMax
+                min
+                minDifference0
+                (Increase low To middle)
+                max
+            )
+         ->
+            N
+                (MinAndMinAsDifferencesAndMax
+                    min
+                    minDifference0
+                    (Increase low To high)
+                    max
+                )
+        )
+minimumDifference1Up minimumDifference1Change =
+    \n ->
+        n
+            |> N.Internal.differencesTo
+                (n |> minimumDifference0)
+                ((n |> minimumDifference1)
+                    |> differenceIncrease
+                        (minimumDifference1Change |> minimumDifference1)
+                )
+
+
+{-| Decrease its [`minimumDifference0`](#minimumDifference0) by a specific given number.
+-}
+minimumDifference0Down :
+    N
+        (MinAndMinAsDifferencesAndMax
+            min
+            (Increase middle To high)
+            minDifference0
+            max
+        )
+    ->
+        (N
+            (MinAndMinAsDifferencesAndMax
+                min
+                (Increase low To high)
+                minDifference0
+                max
+            )
+         ->
+            N
+                (MinAndMinAsDifferencesAndMax
+                    min
+                    (Increase low To middle)
+                    minDifference0
+                    max
+                )
+        )
+minimumDifference0Down minimumDifference0Change =
+    \n ->
+        n
+            |> N.Internal.differencesTo
+                ((n |> minimumDifference0)
+                    |> differenceDecrease
+                        (minimumDifference0Change |> minimumDifference0)
+                )
+                (n |> minimumDifference1)
+
+
+{-| Decrease its [`minimumDifference1`](#minimumDifference1) by a specific given number.
+-}
+minimumDifference1Down :
+    N
+        (MinAndMinAsDifferencesAndMax
+            min
+            minDifference0
+            (Increase middle To high)
+            max
+        )
+    ->
+        (N
+            (MinAndMinAsDifferencesAndMax
+                min
+                minDifference0
+                (Increase low To high)
+                max
+            )
+         ->
+            N
+                (MinAndMinAsDifferencesAndMax
+                    min
+                    minDifference0
+                    (Increase low To middle)
+                    max
+                )
+        )
+minimumDifference1Down minimumDifference1Change =
+    \n ->
+        n
+            |> N.Internal.differencesTo
+                (n |> minimumDifference0)
+                ((n |> minimumDifference1)
+                    |> differenceDecrease
+                        (minimumDifference1Change |> minimumDifference1)
+                )
+
+
+{-| Switch [`minimumDifference0`](#minimumDifference0), [`minimumDifference1`](#minimumDifference1)
+in the type.
+
+    addAtMostSwapped :
+        N
+            (MinAndMinAsDifferencesAndMax
+                addedMax
+                (Increase max To sumMax)
+                addedMaxDiff0_
+                addedMax
+            )
+        ->
+            N
+                (MinAndMinAsDifferencesAndMax
+                    addedMin
+                    addedMinDiff1_
+                    (Increase min To sumMin)
+                    addedMax
+                )
+        ->
+            (N (In min max)
+             -> N (In sumMin sumMax)
+            )
+    addAtMostSwapped addedAtMost toAdd =
+        N.addAtMost
+            (addedAtMost |> N.differencesSwap)
+            (toAdd |> N.differencesSwap)
+
+The example is pretty arbitrary,
+but there really might be some cases where you want to use
+for example the second [`Diff`](#Diff)
+but the function requires it in first position.
+
+-}
+differencesSwap :
+    N (MinAndMinAsDifferencesAndMax min diff0 diff1 max)
+    -> N (MinAndMinAsDifferencesAndMax min diff1 diff0 max)
+differencesSwap =
+    \n ->
+        n
+            |> N.Internal.differencesTo
+                (n |> minimumDifference1)
+                (n |> minimumDifference0)
+
+
+
+--
+
+
+{-| The exact natural number `0`
+-}
+n0 : N (MinAndMinAsDifferencesAndMax N0 (Increase x0 To x0) (Increase x1 To x1) atLeast_)
+n0 =
+    N.Internal.n0 (N0 Possible) n0Difference n0Difference
+
+
+{-| The exact natural number `1`
+-}
+n1 :
+    N
+        (MinAndMinAsDifferencesAndMax
+            N1
+            (Increase x0 To (Add1 x0))
+            (Increase x1 To (Add1 x1))
+            (Add1 atLeast_)
+        )
+n1 =
+    1
+        |> minWith (n0 |> minimum |> Add1)
+        |> N.Internal.differencesTo n1Difference n1Difference
+        |> N.Internal.maxFrom n0
+        |> N.Internal.maxMap Add1
+
+
 {-| The exact natural number `2`
 -}
-n2 : N (In N2 (Add2 atLeast_) (Is (Diff x0 To (Add2 x0)) (Diff x1 To (Add2 x1))))
+n2 : N (MinAndMinAsDifferencesAndMax N2 (Increase x0 To (Add2 x0)) (Increase x1 To (Add2 x1)) (Add2 atLeast_))
 n2 =
     n1 |> diffAdd ( n1, n1 )
 
 
 {-| The exact natural number `3`
 -}
-n3 : N (In N3 (Add3 atLeast_) (Is (Diff x0 To (Add3 x0)) (Diff x1 To (Add3 x1))))
+n3 : N (MinAndMinAsDifferencesAndMax N3 (Increase x0 To (Add3 x0)) (Increase x1 To (Add3 x1)) (Add3 atLeast_))
 n3 =
     n2 |> diffAdd ( n1, n1 )
 
 
 {-| The exact natural number `4`
 -}
-n4 : N (In N4 (Add4 atLeast_) (Is (Diff x0 To (Add4 x0)) (Diff x1 To (Add4 x1))))
+n4 : N (MinAndMinAsDifferencesAndMax N4 (Increase x0 To (Add4 x0)) (Increase x1 To (Add4 x1)) (Add4 atLeast_))
 n4 =
     n3 |> diffAdd ( n1, n1 )
 
 
 {-| The exact natural number `5`
 -}
-n5 : N (In N5 (Add5 atLeast_) (Is (Diff x0 To (Add5 x0)) (Diff x1 To (Add5 x1))))
+n5 : N (MinAndMinAsDifferencesAndMax N5 (Increase x0 To (Add5 x0)) (Increase x1 To (Add5 x1)) (Add5 atLeast_))
 n5 =
     n4 |> diffAdd ( n1, n1 )
 
 
 {-| The exact natural number `6`
 -}
-n6 : N (In N6 (Add6 atLeast_) (Is (Diff x0 To (Add6 x0)) (Diff x1 To (Add6 x1))))
+n6 : N (MinAndMinAsDifferencesAndMax N6 (Increase x0 To (Add6 x0)) (Increase x1 To (Add6 x1)) (Add6 atLeast_))
 n6 =
     n5 |> diffAdd ( n1, n1 )
 
 
 {-| The exact natural number `7`
 -}
-n7 : N (In N7 (Add7 atLeast_) (Is (Diff x0 To (Add7 x0)) (Diff x1 To (Add7 x1))))
+n7 : N (MinAndMinAsDifferencesAndMax N7 (Increase x0 To (Add7 x0)) (Increase x1 To (Add7 x1)) (Add7 atLeast_))
 n7 =
     n6 |> diffAdd ( n1, n1 )
 
 
 {-| The exact natural number `8`
 -}
-n8 : N (In N8 (Add8 atLeast_) (Is (Diff x0 To (Add8 x0)) (Diff x1 To (Add8 x1))))
+n8 : N (MinAndMinAsDifferencesAndMax N8 (Increase x0 To (Add8 x0)) (Increase x1 To (Add8 x1)) (Add8 atLeast_))
 n8 =
     n7 |> diffAdd ( n1, n1 )
 
 
 {-| The exact natural number `9`
 -}
-n9 : N (In N9 (Add9 atLeast_) (Is (Diff x0 To (Add9 x0)) (Diff x1 To (Add9 x1))))
+n9 : N (MinAndMinAsDifferencesAndMax N9 (Increase x0 To (Add9 x0)) (Increase x1 To (Add9 x1)) (Add9 atLeast_))
 n9 =
     n8 |> diffAdd ( n1, n1 )
 
 
 {-| The exact natural number `10`
 -}
-n10 : N (In N10 (Add10 atLeast_) (Is (Diff x0 To (Add10 x0)) (Diff x1 To (Add10 x1))))
+n10 : N (MinAndMinAsDifferencesAndMax N10 (Increase x0 To (Add10 x0)) (Increase x1 To (Add10 x1)) (Add10 atLeast_))
 n10 =
     n9 |> diffAdd ( n1, n1 )
 
 
 {-| The exact natural number `11`
 -}
-n11 : N (In N11 (Add11 atLeast_) (Is (Diff x0 To (Add11 x0)) (Diff x1 To (Add11 x1))))
+n11 : N (MinAndMinAsDifferencesAndMax N11 (Increase x0 To (Add11 x0)) (Increase x1 To (Add11 x1)) (Add11 atLeast_))
 n11 =
     n10 |> diffAdd ( n1, n1 )
 
 
 {-| The exact natural number `12`
 -}
-n12 : N (In N12 (Add12 atLeast_) (Is (Diff x0 To (Add12 x0)) (Diff x1 To (Add12 x1))))
+n12 : N (MinAndMinAsDifferencesAndMax N12 (Increase x0 To (Add12 x0)) (Increase x1 To (Add12 x1)) (Add12 atLeast_))
 n12 =
     n11 |> diffAdd ( n1, n1 )
 
 
 {-| The exact natural number `13`
 -}
-n13 : N (In N13 (Add13 atLeast_) (Is (Diff x0 To (Add13 x0)) (Diff x1 To (Add13 x1))))
+n13 : N (MinAndMinAsDifferencesAndMax N13 (Increase x0 To (Add13 x0)) (Increase x1 To (Add13 x1)) (Add13 atLeast_))
 n13 =
     n12 |> diffAdd ( n1, n1 )
 
 
 {-| The exact natural number `14`
 -}
-n14 : N (In N14 (Add14 atLeast_) (Is (Diff x0 To (Add14 x0)) (Diff x1 To (Add14 x1))))
+n14 : N (MinAndMinAsDifferencesAndMax N14 (Increase x0 To (Add14 x0)) (Increase x1 To (Add14 x1)) (Add14 atLeast_))
 n14 =
     n13 |> diffAdd ( n1, n1 )
 
 
 {-| The exact natural number `15`
 -}
-n15 : N (In N15 (Add15 atLeast_) (Is (Diff x0 To (Add15 x0)) (Diff x1 To (Add15 x1))))
+n15 : N (MinAndMinAsDifferencesAndMax N15 (Increase x0 To (Add15 x0)) (Increase x1 To (Add15 x1)) (Add15 atLeast_))
 n15 =
     n14 |> diffAdd ( n1, n1 )
 
 
 {-| The exact natural number `16`
 -}
-n16 : N (In N16 (Add16 atLeast_) (Is (Diff x0 To (Add16 x0)) (Diff x1 To (Add16 x1))))
+n16 : N (MinAndMinAsDifferencesAndMax N16 (Increase x0 To (Add16 x0)) (Increase x1 To (Add16 x1)) (Add16 atLeast_))
 n16 =
     n15 |> diffAdd ( n1, n1 )
 

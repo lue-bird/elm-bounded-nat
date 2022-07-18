@@ -169,27 +169,19 @@ nType n =
     typed "N" [ n ]
 
 
-inDiffType : Int -> Generation.TypeAnnotation
-inDiffType n =
-    typed "In"
+minAsDifferenceAndMaxType : Int -> Generation.TypeAnnotation
+minAsDifferenceAndMaxType n =
+    typed "MinAndMinAsDifferencesAndMax"
         [ nXType n
-        , addXType n
-            (n0ableType (typeVar "atLeast_") possiblyType)
-        , isType n
-        ]
-
-
-isType : Int -> Generation.TypeAnnotation
-isType n =
-    typed "Is"
-        [ diffType n "x0"
+        , diffType n "x0"
         , diffType n "x1"
+        , addXType n (typeVar "atLeast_")
         ]
 
 
 diffType : Int -> String -> Generation.TypeAnnotation
 diffType n var =
-    typed "Diff"
+    typed "Increase"
         [ typeVar var
         , toType
         , addXType n (typeVar var)
@@ -302,7 +294,7 @@ n0To16Module =
                                 |> String.concat
                             )
                         ]
-                        (nType (inDiffType x))
+                        (nType (minAsDifferenceAndMaxType x))
                         (nX x)
                         []
                         (applyBinOp
@@ -367,7 +359,7 @@ nBinaryModule n =
         [ importStmt [ "N" ]
             noAlias
             (exposingExplicit
-                (aliasExpose [ "N", "Is", "To", "In", "N0", "Add1", "Add2", "Add4", "Add8", "Add16" ]
+                (aliasExpose [ "N", "MinAndMinAsDifferencesAndMax", "To", "Increase", "N0", "Add1", "Add2", "Add4", "Add8", "Add16" ]
                     ++ funExpose [ "n1", "n2", "n4", "n8", "n16", "diffAdd" ]
                 )
             )
@@ -379,7 +371,7 @@ nBinaryModule n =
                     |> String.concat
                 )
             ]
-            (nType (inDiffType n))
+            (nType (minAsDifferenceAndMaxType n))
             (nX n)
             []
             (case
@@ -484,7 +476,7 @@ nLinearModule n =
         [ importStmt [ "N" ]
             noAlias
             (exposingExplicit
-                (aliasExpose [ "N", "Is", "To", "In", "N0able" ]
+                (aliasExpose [ "N", "MinAndMinAsDifferencesAndMax", "To", "Increase", "N0able" ]
                     ++ funExpose [ "n1", "n2", "n4", "n8", "n16", "diffAdd" ]
                 )
             )
@@ -532,7 +524,7 @@ nLinearModule n =
                     |> String.concat
                 )
             ]
-            (nType (inDiffType n))
+            (nType (minAsDifferenceAndMaxType n))
             (nX n)
             []
             (case

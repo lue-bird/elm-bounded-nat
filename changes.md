@@ -1,4 +1,20 @@
-## 22.0.0 plans
+### 22.1.0 plans
+
+  - `fuzzIn ( min, max ) : ... -> Fuzzer (N (In ...))` add
+      - currently waiting for `elm-test` major version 2
+        to avoid a major version bump as a result
+  - `N.Generator` that auto-generates `N<x>`, `Add<x>` and `n<x>` for x >= 17 add
+
+### rejected
+
+  - `N` name → `ℕ`, `Add<x>` name → `ℕ<x>𐊛`
+      - 👎 must be copied
+      - 👎 is confusing
+      - 👍 is readable
+
+# changelog
+
+## 22.0.0
 
   - `up` remove
       - in favor of `until`
@@ -15,22 +31,27 @@
         N (In ... (Is <Diff min> ...))
         -> N (In ... (Is ... <Diff max>))
     ```
-
-### 21.3.0 plans
-
-  - `fuzzIn ( min, max ) : ... -> Fuzzer (N (In ...))` add
-      - currently waiting for `elm-test` major version 2
-        to avoid a major version bump as a result
-  - `N.Generator` that auto-generates `N<x>`, `Add<x>` and `n<x>` for x >= 17 add
-
-### rejected
-
-  - `N` name → `ℕ`, `Add<x>` name → `ℕ<x>𐊛`
-      - 👎 must be copied
-      - 👎 is confusing
-      - 👍 is readable
-
-# changelog
+  - `differences` remove
+      - in favor of `minimumDifference0`, `minimumDifference1`
+  - `diff0`, `diff1` name → `minimumDifference0`, `minimumDifference1`
+  - `minSubAtMost` subtrahend type correct
+  - `addIn ( lo, hi ) toAdd` change
+    →
+    `addAtMost hi toAddWithLo`
+      - if `toAddWithLo` is in a range, use `min`
+  - `addAtLeast lo toAdd` change
+    →
+    `addAtLeast toAddWithLo`
+      - if `toAddWithLo` is in a range, use `min`
+  - `subIn ( lo, hi ) toSub` change
+    →
+    `subAtMost hi toSubWithLo`
+      - if `toSubWithLo` is in a range, use `min`
+  - `minDown` name → `min`
+  - `maxOpen` name → `max`
+      - make clear its absolute, not relative
+  - `noMax` name → `maxNo`
+  - `noDiff` name → `diffNo`
 
 ### 21.2.0
 

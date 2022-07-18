@@ -16,7 +16,7 @@ toHexChar : Int -> Char
 
 with `bounded-nat`:
 ```elm
-toHexChar : N (In anyMinimum_ N15 difference_) -> Char
+toHexChar : N (In anyMinimum_ N15) -> Char
 ```
 
   - the _type_ tells us that a number between 0 & 15 is wanted
@@ -25,7 +25,6 @@ toHexChar : N (In anyMinimum_ N15 difference_) -> Char
 The argument type says: Give me an integer ≥ 0 [`N`](N#N) [`In`](N#In) range
   - `≥ 0`; `anyMinimum_` value allowed
   - `≤` [`N15`](N#N15)
-  - which might be a [specific value like `n0`, `n1`, ... which has a `difference_`](N#Is) `)`
 
 Users can prove this by explicitly
 
@@ -68,15 +67,13 @@ You might be able to do anything with this `Int` value, but you lost useful info
   - can the result even have multiple digits?
 
 ```elm
-toDigit : Char -> Maybe (N (In N0 (Add9 a_) {}))
+toDigit : Char -> Maybe (N (In N0 (Add9 a_)))
 ```
 
 The type of an [`N`](N#N) value will reflect how much you and the compiler know
 
   - at least a minimum value? [`Min`](N#Min)
   - between a minimum & maximum value? [`In`](N#In)
-  - a specific value? [`N (In ... (Is ...))`](N#Is)
-    - allows precise adding, subtracting, ...
 
 
 &emsp;
@@ -100,17 +97,17 @@ This forms an infinite loop if we call `intFactorial -1`...
 Let's disallow negative numbers here (& more)!
 
 ```elm
-factorial : N (In min_ max_ difference_) -> N (Min N1)
+factorial : N (In min_ max_) -> N (Min N1)
 factorial =
     factorialBody
 ```
 Says: For every `n ≥ 0`, `n! ≥ 1`.
 ```elm
-factorialBody : N (In min_ max_ difference_) -> N (Min N1)
+factorialBody : N (In min_ max_) -> N (Min N1)
 factorialBody x =
     case x |> N.isAtLeast n1 of
         Err _ ->
-            n1 |> N.noMax
+            n1 |> N.maxNo
 
         Ok n1AtLeast ->
             -- n1AtLeast : N (Min N1)
@@ -131,7 +128,7 @@ But we can do even better!
 `!19` is already `>` the maximum safe `Int` `2^53 - 1`.
 
 ```elm
-safeFactorial : N (In min_ N18 difference_) -> N (Min N1)
+safeFactorial : N (In min_ N18) -> N (Min N1)
 safeFactorial =
     factorial
 ```
@@ -147,31 +144,13 @@ No extra work.
 
   - keep _argument types as broad as possible_
     
-    Instead of accepting only [`n0`](N#n0), [`n1`](N#n1), ... values in a range
-
-    ```elm
-    percent :
-        N (In p_ atLeast_ (Is (Diff to100_ To N100) diff1_))
-        -> Length
-    ```
-    accept values that are somewhere in a range.
-
-    ```elm
-    percent : N (In min_ N100 difference_) -> Length
-    ```
-
-    `difference_` says that it _can_ be exact anyway.
-    
-    Or instead of
-
+    like instead of
     ```elm
     charFromCode : N (Min min_) -> Char
     ```
-
-    which you should also never do, allow maximum-constrained and specific numbers to fit in as well:
-
+    which you should never do, allow maximum-constrained and specific numbers to fit in as well:
     ```elm
-    charFromCode : N (In min_ max_ difference_) -> Char
+    charFromCode : N (In min_ max_) -> Char
     ```
 
 ## ready? go!
