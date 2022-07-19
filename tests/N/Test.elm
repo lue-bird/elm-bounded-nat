@@ -1,7 +1,7 @@
 module N.Test exposing (suite)
 
 import Expect exposing (Expectation)
-import N exposing (Add11, Add16, Add4, Add9, In, Min, MinAndMinAsDifferencesAndMax, N, N0, N0able, N1, N10, N11, N15, N3, N4, N7, n0, n1, n10, n11, n12, n14, n16, n2, n3, n4, n5, n6, n7, n9)
+import N exposing (Add11, Add16, Add4, Add9, In, Min, N, N0, N0able, N1, N10, N11, N15, N3, N4, N7, n0, n1, n10, n11, n12, n14, n16, n2, n3, n4, n5, n6, n7, n9)
 import Possibly exposing (Possibly)
 import Test exposing (Test, describe, test)
 
@@ -94,19 +94,12 @@ toDigit char =
 diffSubTypeChecks : Expectation
 diffSubTypeChecks =
     n11
-        |> N.diffSub ( n9, n9 )
+        |> N.subIn ( n9, n9 )
         |> Expect.equal n2
 
 
 
 --
-
-
-diffAddTypeChecks : Expectation
-diffAddTypeChecks =
-    n11
-        |> N.diffAdd ( n3, n3 )
-        |> Expect.equal n14
 
 
 factorialBody : N (In min_ max_) -> N (Min N1)
@@ -118,55 +111,3 @@ factorialBody x =
         Ok atLeast1 ->
             factorial (atLeast1 |> N.minSub n1)
                 |> N.mul atLeast1
-
-
-addAtLeastTest : N (Min N4)
-addAtLeastTest =
-    7
-        |> N.intAtLeast n3
-        |> N.addAtLeast n1 (N.intAtLeast n1 9)
-
-
-minAddTest : N (Min N15)
-minAddTest =
-    7
-        |> N.intAtLeast n6
-        |> N.minAdd n9
-
-
-minSubTest : N (Min N7)
-minSubTest =
-    17
-        |> N.intAtLeast n16
-        |> N.minSub n9
-
-
-minDownTest : List (N (In N3 (Add4 (N0able a_ Possibly))))
-minDownTest =
-    [ n3 |> N.diffNo
-    , n4 |> N.min n3
-    ]
-
-
-addInTest : N (In N4 (Add16 a_))
-addInTest =
-    N.intIn ( n3, n10 ) 7
-        |> N.addAtMost ( n1, n6 ) (N.intIn ( n1, n6 ) 5)
-
-
-addTest : N (In N11 (Add16 a_))
-addTest =
-    N.intIn ( n2, n7 ) 7
-        |> N.add n9
-
-
-subInTest : N (In N1 (Add9 a_))
-subInTest =
-    N.intIn ( n6, n10 ) 7
-        |> N.subAtMost ( n1, n5 ) (N.intIn ( n1, n5 ) 4)
-
-
-subTest : N (In N7 (Add11 a_))
-subTest =
-    N.intIn ( n12, n16 ) 1
-        |> N.sub n5

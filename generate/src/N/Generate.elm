@@ -171,12 +171,22 @@ nType n =
 
 minAsDifferenceAndMaxType : Int -> Generation.TypeAnnotation
 minAsDifferenceAndMaxType n =
-    typed "MinAndMinAsDifferencesAndMax"
-        [ nXType n
-        , diffType n "x0"
-        , diffType n "x1"
-        , addXType n (typeVar "atLeast_")
+    typed "In"
+        [ limitType
+            (nXType n)
+            (diffType n "minX")
+        , limitType
+            (nXType n)
+            (diffType n "maxX")
         ]
+
+
+limitType :
+    Generation.TypeAnnotation
+    -> Generation.TypeAnnotation
+    -> Generation.TypeAnnotation
+limitType fixed increase =
+    typed "Limit" [ fixed, increase ]
 
 
 diffType : Int -> String -> Generation.TypeAnnotation
@@ -220,8 +230,10 @@ addXType x more =
 
 diffAdd : Int -> Generation.Expression
 diffAdd powerInInt =
-    construct "diffAdd"
-        [ tuple (List.repeat 2 (val (nX powerInInt))) ]
+    construct "addIn"
+        [ tuple (List.repeat 2 (val (nX powerInInt)))
+        , val (nX powerInInt)
+        ]
 
 
 n0ableType :
@@ -290,7 +302,7 @@ n0To16Module =
                 (\x ->
                     packageExposedFunDecl NDiffValue
                         [ markdown
-                            ([ "The exact natural number `", x |> String.fromInt, "`" ]
+                            ([ "The specific natural number `", x |> String.fromInt, "`" ]
                                 |> String.concat
                             )
                         ]

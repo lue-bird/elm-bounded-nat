@@ -50,8 +50,9 @@
   - `minDown` name → `min`
   - `maxOpen` name → `max`
       - make clear its absolute, not relative
+  - `NoMax` name → `MaxNo`
   - `noMax` name → `maxNo`
-  - `noDiff` name → `diffNo`
+  - `noDiff` name → `fixed`
 
 ### 21.2.0
 

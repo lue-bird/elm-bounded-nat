@@ -6022,7 +6022,7 @@ var $the_sett$elm_syntax_dsl$Elm$CodeGen$val = function (name) {
 var $author$project$N$Generate$diffAdd = function (powerInInt) {
 	return A2(
 		$the_sett$elm_syntax_dsl$Elm$CodeGen$construct,
-		'diffAdd',
+		'addIn',
 		_List_fromArray(
 			[
 				$the_sett$elm_syntax_dsl$Elm$CodeGen$tuple(
@@ -6030,9 +6030,30 @@ var $author$project$N$Generate$diffAdd = function (powerInInt) {
 					$elm$core$List$repeat,
 					2,
 					$the_sett$elm_syntax_dsl$Elm$CodeGen$val(
-						$author$project$N$Generate$nX(powerInInt))))
+						$author$project$N$Generate$nX(powerInInt)))),
+				$the_sett$elm_syntax_dsl$Elm$CodeGen$val(
+				$author$project$N$Generate$nX(powerInInt))
 			]));
 };
+var $the_sett$elm_syntax_dsl$Elm$Comments$Markdown = function (a) {
+	return {$: 'Markdown', a: a};
+};
+var $the_sett$elm_syntax_dsl$Elm$Comments$Comment = function (a) {
+	return {$: 'Comment', a: a};
+};
+var $the_sett$elm_syntax_dsl$Elm$Comments$addPart = F2(
+	function (_v0, part) {
+		var parts = _v0.a;
+		return $the_sett$elm_syntax_dsl$Elm$Comments$Comment(
+			A2($elm$core$List$cons, part, parts));
+	});
+var $the_sett$elm_syntax_dsl$Elm$CodeGen$markdown = F2(
+	function (mdown, comment) {
+		return A2(
+			$the_sett$elm_syntax_dsl$Elm$Comments$addPart,
+			comment,
+			$the_sett$elm_syntax_dsl$Elm$Comments$Markdown(mdown));
+	});
 var $stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$Typed = F2(
 	function (a, b) {
 		return {$: 'Typed', a: a, b: b};
@@ -6081,7 +6102,7 @@ var $author$project$N$Generate$diffType = F2(
 	function (n, _var) {
 		return A2(
 			$the_sett$elm_syntax_dsl$Elm$CodeGen$typed,
-			'Diff',
+			'Increase',
 			_List_fromArray(
 				[
 					$the_sett$elm_syntax_dsl$Elm$CodeGen$typeVar(_var),
@@ -6092,16 +6113,14 @@ var $author$project$N$Generate$diffType = F2(
 					$the_sett$elm_syntax_dsl$Elm$CodeGen$typeVar(_var))
 				]));
 	});
-var $author$project$N$Generate$isType = function (n) {
-	return A2(
-		$the_sett$elm_syntax_dsl$Elm$CodeGen$typed,
-		'Is',
-		_List_fromArray(
-			[
-				A2($author$project$N$Generate$diffType, n, 'x0'),
-				A2($author$project$N$Generate$diffType, n, 'x1')
-			]));
-};
+var $author$project$N$Generate$limitType = F2(
+	function (fixed, increase) {
+		return A2(
+			$the_sett$elm_syntax_dsl$Elm$CodeGen$typed,
+			'Limit',
+			_List_fromArray(
+				[fixed, increase]));
+	});
 var $author$project$N$Generate$nXType = function (x) {
 	return A2(
 		$the_sett$elm_syntax_dsl$Elm$CodeGen$typed,
@@ -6113,42 +6132,22 @@ var $author$project$N$Generate$nXType = function (x) {
 				])),
 		_List_Nil);
 };
-var $author$project$N$Generate$inDiffType = function (n) {
+var $author$project$N$Generate$minAsDifferenceAndMaxType = function (n) {
 	return A2(
 		$the_sett$elm_syntax_dsl$Elm$CodeGen$typed,
 		'In',
 		_List_fromArray(
 			[
+				A2(
+				$author$project$N$Generate$limitType,
 				$author$project$N$Generate$nXType(n),
+				A2($author$project$N$Generate$diffType, n, 'minX')),
 				A2(
-				$author$project$N$Generate$addXType,
-				n,
-				A2(
-					$author$project$N$Generate$n0ableType,
-					$the_sett$elm_syntax_dsl$Elm$CodeGen$typeVar('atLeast_'),
-					$author$project$N$Generate$possiblyType)),
-				$author$project$N$Generate$isType(n)
+				$author$project$N$Generate$limitType,
+				$author$project$N$Generate$nXType(n),
+				A2($author$project$N$Generate$diffType, n, 'maxX'))
 			]));
 };
-var $the_sett$elm_syntax_dsl$Elm$Comments$Markdown = function (a) {
-	return {$: 'Markdown', a: a};
-};
-var $the_sett$elm_syntax_dsl$Elm$Comments$Comment = function (a) {
-	return {$: 'Comment', a: a};
-};
-var $the_sett$elm_syntax_dsl$Elm$Comments$addPart = F2(
-	function (_v0, part) {
-		var parts = _v0.a;
-		return $the_sett$elm_syntax_dsl$Elm$Comments$Comment(
-			A2($elm$core$List$cons, part, parts));
-	});
-var $the_sett$elm_syntax_dsl$Elm$CodeGen$markdown = F2(
-	function (mdown, comment) {
-		return A2(
-			$the_sett$elm_syntax_dsl$Elm$Comments$addPart,
-			comment,
-			$the_sett$elm_syntax_dsl$Elm$Comments$Markdown(mdown));
-	});
 var $author$project$N$Generate$nType = function (n) {
 	return A2(
 		$the_sett$elm_syntax_dsl$Elm$CodeGen$typed,
@@ -6397,13 +6396,13 @@ var $author$project$N$Generate$n0To16Module = function () {
 										$elm$core$String$concat(
 											_List_fromArray(
 												[
-													'The exact natural number `',
+													'The specific natural number `',
 													$elm$core$String$fromInt(x),
 													'`'
 												])))
 									]),
 								$author$project$N$Generate$nType(
-									$author$project$N$Generate$inDiffType(x)),
+									$author$project$N$Generate$minAsDifferenceAndMaxType(x)),
 								$author$project$N$Generate$nX(x),
 								_List_Nil,
 								A3(
@@ -19516,7 +19515,7 @@ var $author$project$N$Generate$nBinaryModule = function (n) {
 								])))
 					]),
 				$author$project$N$Generate$nType(
-					$author$project$N$Generate$inDiffType(n)),
+					$author$project$N$Generate$minAsDifferenceAndMaxType(n)),
 				$author$project$N$Generate$nX(n),
 				_List_Nil,
 				function () {
@@ -19528,7 +19527,7 @@ var $author$project$N$Generate$nBinaryModule = function (n) {
 							},
 							A2($author$project$N$Generate$intToPowersOf, 2, n)));
 					if (!_v0.b) {
-						return $the_sett$elm_syntax_dsl$Elm$CodeGen$string('the number to generate for must be >= 1');
+						return $the_sett$elm_syntax_dsl$Elm$CodeGen$string('the number to generate for must be ≥ 1');
 					} else {
 						var greatestPower = _v0.a;
 						var smallerPowers = _v0.b;
@@ -19649,7 +19648,7 @@ var $author$project$N$Generate$nBinaryModule = function (n) {
 					_Utils_ap(
 						$author$project$Elm$CodeGen$Extra$aliasExpose(
 							_List_fromArray(
-								['N', 'Is', 'To', 'In', 'N0', 'Add1', 'Add2', 'Add4', 'Add8', 'Add16'])),
+								['N', 'MinAndMinAsDifferencesAndMax', 'To', 'Increase', 'N0', 'Add1', 'Add2', 'Add4', 'Add8', 'Add16'])),
 						$author$project$Elm$CodeGen$Extra$funExpose(
 							_List_fromArray(
 								['n1', 'n2', 'n4', 'n8', 'n16', 'diffAdd'])))))
@@ -19740,7 +19739,7 @@ var $author$project$N$Generate$nLinearModule = function (n) {
 								])))
 					]),
 				$author$project$N$Generate$nType(
-					$author$project$N$Generate$inDiffType(n)),
+					$author$project$N$Generate$minAsDifferenceAndMaxType(n)),
 				$author$project$N$Generate$nX(n),
 				_List_Nil,
 				function () {
@@ -19752,7 +19751,7 @@ var $author$project$N$Generate$nLinearModule = function (n) {
 							},
 							A2($author$project$N$Generate$intToPowersOf, 2, n)));
 					if (!_v2.b) {
-						return $the_sett$elm_syntax_dsl$Elm$CodeGen$string('the number to generate for must be >= 1');
+						return $the_sett$elm_syntax_dsl$Elm$CodeGen$string('the number to generate for must be ≥ 1');
 					} else {
 						var greatestPower = _v2.a;
 						var smallerPowers = _v2.b;
@@ -19804,7 +19803,7 @@ var $author$project$N$Generate$nLinearModule = function (n) {
 					_Utils_ap(
 						$author$project$Elm$CodeGen$Extra$aliasExpose(
 							_List_fromArray(
-								['N', 'Is', 'To', 'In', 'N0able'])),
+								['N', 'MinAndMinAsDifferencesAndMax', 'To', 'Increase', 'N0able'])),
 						$author$project$Elm$CodeGen$Extra$funExpose(
 							_List_fromArray(
 								['n1', 'n2', 'n4', 'n8', 'n16', 'diffAdd'])))))
