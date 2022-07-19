@@ -683,8 +683,15 @@ untilReverseRecursive =
 
 -}
 randomIn :
-    ( N (In lowerLimitMin upperLimitMin)
-    , N (In upperLimitMin upperLimitMax)
+    ( N
+        (In
+            lowerLimitMin
+            (Limit
+                lowerLimitMax
+                (Increase lowerLimitMaxToUpperLimitMin To upperLimitMin)
+            )
+        )
+    , N (In (Fixed upperLimitMin) upperLimitMax)
     )
     ->
         Random.Generator
