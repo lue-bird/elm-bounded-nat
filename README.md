@@ -24,7 +24,7 @@ toHexChar : N (In min_ (Up maxTo15_ To N15)) -> Char
 
 The argument type says: Give me an integer ≥ 0 [`N`](N#N) [`In`](N#In) range
   - `≥ 0`; `anyMinimum_` value allowed
-  - `≤ 15`; if we [increase](N#Up) some number by the argument's maximum, we get [`N15`](#N15)
+  - `≤ 15`; if we [increase](N#Up) some number by the argument's maximum, we get [`N15`](N#N15)
 
 Users can prove this by _explicitly_
 
