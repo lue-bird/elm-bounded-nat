@@ -1,8 +1,7 @@
 module N.Test exposing (suite)
 
-import Expect exposing (Expectation)
-import N exposing (Add11, Add16, Add4, Add9, In, Min, N, N0, N0able, N1, N10, N11, N15, N3, N4, N7, n0, n1, n10, n11, n12, n14, n16, n2, n3, n4, n5, n6, n7, n9)
-import Possibly exposing (Possibly)
+import Expect
+import N exposing (Add1, Add10, Add9, In, Min, N, To, Up, n0, n1, n3, n9)
 import Test exposing (Test, describe, test)
 
 
@@ -18,7 +17,7 @@ suite =
 --
 
 
-factorial : N (In min_ max_) -> N (Min N1)
+factorial : N (In min_ max_) -> N (Min (Up x To (Add1 x)))
 factorial =
     factorialBody
 
@@ -46,10 +45,10 @@ maximumUnconstrainedTest =
 --
 
 
-listLength : List a_ -> N (Min N0)
+listLength : List a_ -> N (Min (Up x To x))
 listLength =
     List.foldl
-        (\_ -> N.minAdd n1 >> N.min n0)
+        (\_ -> N.minAdd n1 >> N.minDown n1)
         (n0 |> N.maxNo)
 
 
@@ -83,26 +82,19 @@ toDigit :
         Result
             (N.BelowOrAbove
                 Int
-                (N (Min N10))
+                (N (Min (Up maxX To (Add10 maxX))))
             )
-            (N (In N0 (Add9 atLeast_)))
+            (N (In (Up minX To minX) (Up maxX To (Add9 maxX))))
 toDigit char =
     ((char |> Char.toCode) - ('0' |> Char.toCode))
         |> N.intIsIn ( n0, n9 )
-
-
-diffSubTypeChecks : Expectation
-diffSubTypeChecks =
-    n11
-        |> N.subIn ( n9, n9 )
-        |> Expect.equal n2
 
 
 
 --
 
 
-factorialBody : N (In min_ max_) -> N (Min N1)
+factorialBody : N (In min_ max_) -> N (Min (Up x To (N.Add1 x)))
 factorialBody x =
     case x |> N.isAtLeast n1 of
         Err _ ->

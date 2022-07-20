@@ -20,39 +20,29 @@
       - in favor of `until`
   - `random` remove
       - in favor of `randomIn`
-  - ```elm
-    ...In ( diffMin, diffMax ) ... :
-        N (In ... (Is <Diff min> ...))
-        -> N (In ... (Is <Diff max> ...))
-    ```
-    →
+  - range types redefine
     ```elm
-    ...In ( diffMin, diffMax ) ... :
-        N (In ... (Is <Diff min> ...))
-        -> N (In ... (Is ... <Diff max>))
+    In minimumAsDifference maximumAsDifference
     ```
   - `differences` remove
       - in favor of `minimumDifference0`, `minimumDifference1`
-  - `diff0`, `diff1` name → `minimumDifference0`, `minimumDifference1`
+  - `diff0`, `diff1` remove
+      - now `minimumDifference`, `maximumDifference`
   - `minSubAtMost` subtrahend type correct
-  - `addIn ( lo, hi ) toAdd` change
-    →
-    `addAtMost hi toAddWithLo`
-      - if `toAddWithLo` is in a range, use `min`
-  - `addAtLeast lo toAdd` change
-    →
-    `addAtLeast toAddWithLo`
-      - if `toAddWithLo` is in a range, use `min`
-  - `subIn ( lo, hi ) toSub` change
-    →
-    `subAtMost hi toSubWithLo`
-      - if `toSubWithLo` is in a range, use `min`
   - `minDown` name → `min`
+      - make clear its absolute, not relative
   - `maxOpen` name → `max`
       - make clear its absolute, not relative
+  - add, sub versions
+    replace with just a normal and a `min`- version
+  - `differencesSwap` remove
   - `NoMax` name → `MaxNo`
   - `noMax` name → `maxNo`
   - `noDiff` name → `fixed`
+  - `minUp`, `minDown` add
+  - `maxUp`, `maxDown` add
+  - `type alias Fixed n = Up N0 To n` add
+  - `type alias Down high to low = Up low to high` add
 
 ### 21.2.0
 

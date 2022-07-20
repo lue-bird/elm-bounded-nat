@@ -16,7 +16,7 @@ toHexChar : Int -> Char
 
 with `bounded-nat`:
 ```elm
-toHexChar : N (In anyMinimum_ N15) -> Char
+toHexChar : N (In min_ (Up maxTo15_ To N15)) -> Char
 ```
 
   - the _type_ tells us that a number between 0 & 15 is wanted
@@ -24,11 +24,11 @@ toHexChar : N (In anyMinimum_ N15) -> Char
 
 The argument type says: Give me an integer ≥ 0 [`N`](N#N) [`In`](N#In) range
   - `≥ 0`; `anyMinimum_` value allowed
-  - `≤` [`N15`](N#N15)
+  - `≤ 15`; if we [increase](N#Up) some number by the argument's maximum, we get [`N15`](#N15)
 
-Users can prove this by explicitly
+Users can prove this by _explicitly_
 
-  - using exact values
+  - using specific values
 
     ```elm
     toHexChar n2 --→ 'c'
@@ -38,7 +38,7 @@ Users can prove this by explicitly
   - handling the possibility that a number isn't in the expected range
 
     ```elm
-    toPositive : Int -> Maybe (N (Min N1))
+    toPositive : Int -> Maybe (N (Min (Up x To (Add1 x))))
     toPositive =
         N.intIsAtLeast n1 >> Result.toMaybe
     ```
@@ -50,7 +50,7 @@ Users can prove this by explicitly
         float * 100 |> round |> N.intIn ( n0, n100 )
     ```
 
-  - There are more ways, but you get the idea 🙂
+  - there are more ways, but you get the idea 🙂
 
 &emsp;
 
@@ -67,7 +67,15 @@ You might be able to do anything with this `Int` value, but you lost useful info
   - can the result even have multiple digits?
 
 ```elm
-toDigit : Char -> Maybe (N (In N0 (Add9 a_)))
+toDigit :
+  Char
+  -> Maybe
+      (N
+          (In
+              (Up minX To minX)
+              (Up maxX To (Add9 maxX))
+          )
+      )
 ```
 
 The type of an [`N`](N#N) value will reflect how much you and the compiler know
@@ -97,20 +105,20 @@ This forms an infinite loop if we call `intFactorial -1`...
 Let's disallow negative numbers here (& more)!
 
 ```elm
-factorial : N (In min_ max_) -> N (Min N1)
+factorial : N (In min_ max_) -> N (Min (Up x To (Add1 x)))
 factorial =
     factorialBody
 ```
 Says: For every `n ≥ 0`, `n! ≥ 1`.
 ```elm
-factorialBody : N (In min_ max_) -> N (Min N1)
+factorialBody : N (In min_ max_) -> N (Min (Up x To (Add1 x)))
 factorialBody x =
     case x |> N.isAtLeast n1 of
         Err _ ->
             n1 |> N.maxNo
 
         Ok n1AtLeast ->
-            -- n1AtLeast : N (Min N1)
+            -- n1AtLeast : N (Min ..1..)
             -- so subtracting 1, we're still ≥ 0
             factorial (n1AtLeast |> N.minSub n1)
                 |> N.mul n1AtLeast
@@ -128,7 +136,7 @@ But we can do even better!
 `!19` is already `>` the maximum safe `Int` `2^53 - 1`.
 
 ```elm
-safeFactorial : N (In min_ N18) -> N (Min N1)
+safeFactorial : N (In min_ (Up maxTo18_ To N18)) -> N (Min (Up x To (Add1 x)))
 safeFactorial =
     factorial
 ```
@@ -148,7 +156,7 @@ No extra work.
     ```elm
     charFromCode : N (Min min_) -> Char
     ```
-    which you should never do, allow maximum-constrained and specific numbers to fit in as well:
+    which you should never do, allow maximum-constrained numbers to fit as well:
     ```elm
     charFromCode : N (In min_ max_) -> Char
     ```

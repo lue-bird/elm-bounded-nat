@@ -5798,20 +5798,14 @@ var $author$project$Elm$CodeGen$Extra$PackageExposedModule = function (a) {
 };
 var $author$project$N$Generate$TypeAdd = {$: 'TypeAdd'};
 var $author$project$N$Generate$TypeExact = {$: 'TypeExact'};
-var $elm$core$String$concat = function (strings) {
-	return A2($elm$core$String$join, '', strings);
+var $stil4m$elm_syntax$Elm$Syntax$Expression$Application = function (a) {
+	return {$: 'Application', a: a};
 };
-var $author$project$N$Generate$addX = function (x) {
-	return $elm$core$String$concat(
-		_List_fromArray(
-			[
-				'Add',
-				$elm$core$String$fromInt(x)
-			]));
-};
-var $stil4m$elm_syntax$Elm$Syntax$Expression$OperatorApplication = F4(
-	function (a, b, c, d) {
-		return {$: 'OperatorApplication', a: a, b: b, c: c, d: d};
+var $stil4m$elm_syntax$Elm$Syntax$Infix$Left = {$: 'Left'};
+var $elm$core$Basics$composeR = F3(
+	function (f, g, x) {
+		return g(
+			f(x));
 	});
 var $stil4m$elm_syntax$Elm$Syntax$Node$Node = F2(
 	function (a, b) {
@@ -5910,40 +5904,6 @@ var $the_sett$elm_syntax_dsl$Util$parentify = F3(
 				return expr;
 		}
 	});
-var $the_sett$elm_syntax_dsl$Elm$CodeGen$applyBinOp = F3(
-	function (exprl, _v0, exprr) {
-		var symbol = _v0.a;
-		var dir = _v0.b;
-		var precedence = _v0.c;
-		return A4(
-			$stil4m$elm_syntax$Elm$Syntax$Expression$OperatorApplication,
-			symbol,
-			dir,
-			$the_sett$elm_syntax_dsl$Util$nodify(
-				A3($the_sett$elm_syntax_dsl$Util$parentify, precedence, dir, exprl)),
-			$the_sett$elm_syntax_dsl$Util$nodify(
-				A3($the_sett$elm_syntax_dsl$Util$parentify, precedence, dir, exprr)));
-	});
-var $elm$core$List$append = F2(
-	function (xs, ys) {
-		if (!ys.b) {
-			return xs;
-		} else {
-			return A3($elm$core$List$foldr, $elm$core$List$cons, ys, xs);
-		}
-	});
-var $elm$core$List$concat = function (lists) {
-	return A3($elm$core$List$foldr, $elm$core$List$append, _List_Nil, lists);
-};
-var $stil4m$elm_syntax$Elm$Syntax$Expression$Application = function (a) {
-	return {$: 'Application', a: a};
-};
-var $stil4m$elm_syntax$Elm$Syntax$Infix$Left = {$: 'Left'};
-var $elm$core$Basics$composeR = F3(
-	function (f, g, x) {
-		return g(
-			f(x));
-	});
 var $the_sett$elm_syntax_dsl$Util$nodifyAndParentifyAll = F2(
 	function (precedence, associativity) {
 		return $elm$core$List$map(
@@ -5975,6 +5935,9 @@ var $the_sett$elm_syntax_dsl$Elm$CodeGen$construct = F2(
 				$the_sett$elm_syntax_dsl$Elm$CodeGen$fun(name),
 				args));
 	});
+var $elm$core$String$concat = function (strings) {
+	return A2($elm$core$String$join, '', strings);
+};
 var $author$project$N$Generate$nX = function (x) {
 	return $elm$core$String$concat(
 		_List_fromArray(
@@ -5983,35 +5946,6 @@ var $author$project$N$Generate$nX = function (x) {
 				$elm$core$String$fromInt(x)
 			]));
 };
-var $elm$core$List$repeatHelp = F3(
-	function (result, n, value) {
-		repeatHelp:
-		while (true) {
-			if (n <= 0) {
-				return result;
-			} else {
-				var $temp$result = A2($elm$core$List$cons, value, result),
-					$temp$n = n - 1,
-					$temp$value = value;
-				result = $temp$result;
-				n = $temp$n;
-				value = $temp$value;
-				continue repeatHelp;
-			}
-		}
-	});
-var $elm$core$List$repeat = F2(
-	function (n, value) {
-		return A3($elm$core$List$repeatHelp, _List_Nil, n, value);
-	});
-var $stil4m$elm_syntax$Elm$Syntax$Expression$TupledExpression = function (a) {
-	return {$: 'TupledExpression', a: a};
-};
-var $the_sett$elm_syntax_dsl$Util$nodifyAll = $elm$core$List$map($the_sett$elm_syntax_dsl$Util$nodify);
-var $the_sett$elm_syntax_dsl$Elm$CodeGen$tuple = function (exprs) {
-	return $stil4m$elm_syntax$Elm$Syntax$Expression$TupledExpression(
-		$the_sett$elm_syntax_dsl$Util$nodifyAll(exprs));
-};
 var $the_sett$elm_syntax_dsl$Elm$CodeGen$fqVal = F2(
 	function (moduleName, name) {
 		return A2($stil4m$elm_syntax$Elm$Syntax$Expression$FunctionOrValue, moduleName, name);
@@ -6019,21 +5953,52 @@ var $the_sett$elm_syntax_dsl$Elm$CodeGen$fqVal = F2(
 var $the_sett$elm_syntax_dsl$Elm$CodeGen$val = function (name) {
 	return A2($the_sett$elm_syntax_dsl$Elm$CodeGen$fqVal, _List_Nil, name);
 };
-var $author$project$N$Generate$diffAdd = function (powerInInt) {
+var $author$project$N$Generate$add = function (powerInInt) {
 	return A2(
 		$the_sett$elm_syntax_dsl$Elm$CodeGen$construct,
-		'addIn',
+		'add',
 		_List_fromArray(
 			[
-				$the_sett$elm_syntax_dsl$Elm$CodeGen$tuple(
-				A2(
-					$elm$core$List$repeat,
-					2,
-					$the_sett$elm_syntax_dsl$Elm$CodeGen$val(
-						$author$project$N$Generate$nX(powerInInt)))),
 				$the_sett$elm_syntax_dsl$Elm$CodeGen$val(
 				$author$project$N$Generate$nX(powerInInt))
 			]));
+};
+var $author$project$N$Generate$addX = function (x) {
+	return $elm$core$String$concat(
+		_List_fromArray(
+			[
+				'Add',
+				$elm$core$String$fromInt(x)
+			]));
+};
+var $stil4m$elm_syntax$Elm$Syntax$Expression$OperatorApplication = F4(
+	function (a, b, c, d) {
+		return {$: 'OperatorApplication', a: a, b: b, c: c, d: d};
+	});
+var $the_sett$elm_syntax_dsl$Elm$CodeGen$applyBinOp = F3(
+	function (exprl, _v0, exprr) {
+		var symbol = _v0.a;
+		var dir = _v0.b;
+		var precedence = _v0.c;
+		return A4(
+			$stil4m$elm_syntax$Elm$Syntax$Expression$OperatorApplication,
+			symbol,
+			dir,
+			$the_sett$elm_syntax_dsl$Util$nodify(
+				A3($the_sett$elm_syntax_dsl$Util$parentify, precedence, dir, exprl)),
+			$the_sett$elm_syntax_dsl$Util$nodify(
+				A3($the_sett$elm_syntax_dsl$Util$parentify, precedence, dir, exprr)));
+	});
+var $elm$core$List$append = F2(
+	function (xs, ys) {
+		if (!ys.b) {
+			return xs;
+		} else {
+			return A3($elm$core$List$foldr, $elm$core$List$cons, ys, xs);
+		}
+	});
+var $elm$core$List$concat = function (lists) {
+	return A3($elm$core$List$foldr, $elm$core$List$append, _List_Nil, lists);
 };
 var $the_sett$elm_syntax_dsl$Elm$Comments$Markdown = function (a) {
 	return {$: 'Markdown', a: a};
@@ -6058,6 +6023,7 @@ var $stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$Typed = F2(
 	function (a, b) {
 		return {$: 'Typed', a: a, b: b};
 	});
+var $the_sett$elm_syntax_dsl$Util$nodifyAll = $elm$core$List$map($the_sett$elm_syntax_dsl$Util$nodify);
 var $the_sett$elm_syntax_dsl$Elm$CodeGen$typed = F2(
 	function (name, args) {
 		return A2(
@@ -6098,11 +6064,11 @@ var $stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$GenericType = function (a) {
 var $the_sett$elm_syntax_dsl$Elm$CodeGen$typeVar = function (name) {
 	return $stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$GenericType(name);
 };
-var $author$project$N$Generate$diffType = F2(
+var $author$project$N$Generate$increaseType = F2(
 	function (n, _var) {
 		return A2(
 			$the_sett$elm_syntax_dsl$Elm$CodeGen$typed,
-			'Increase',
+			'Up',
 			_List_fromArray(
 				[
 					$the_sett$elm_syntax_dsl$Elm$CodeGen$typeVar(_var),
@@ -6113,39 +6079,14 @@ var $author$project$N$Generate$diffType = F2(
 					$the_sett$elm_syntax_dsl$Elm$CodeGen$typeVar(_var))
 				]));
 	});
-var $author$project$N$Generate$limitType = F2(
-	function (fixed, increase) {
-		return A2(
-			$the_sett$elm_syntax_dsl$Elm$CodeGen$typed,
-			'Limit',
-			_List_fromArray(
-				[fixed, increase]));
-	});
-var $author$project$N$Generate$nXType = function (x) {
-	return A2(
-		$the_sett$elm_syntax_dsl$Elm$CodeGen$typed,
-		$elm$core$String$concat(
-			_List_fromArray(
-				[
-					'N',
-					$elm$core$String$fromInt(x)
-				])),
-		_List_Nil);
-};
 var $author$project$N$Generate$minAsDifferenceAndMaxType = function (n) {
 	return A2(
 		$the_sett$elm_syntax_dsl$Elm$CodeGen$typed,
 		'In',
 		_List_fromArray(
 			[
-				A2(
-				$author$project$N$Generate$limitType,
-				$author$project$N$Generate$nXType(n),
-				A2($author$project$N$Generate$diffType, n, 'minX')),
-				A2(
-				$author$project$N$Generate$limitType,
-				$author$project$N$Generate$nXType(n),
-				A2($author$project$N$Generate$diffType, n, 'maxX'))
+				A2($author$project$N$Generate$increaseType, n, 'minX'),
+				A2($author$project$N$Generate$increaseType, n, 'maxX')
 			]));
 };
 var $author$project$N$Generate$nType = function (n) {
@@ -6364,6 +6305,27 @@ var $the_sett$elm_syntax_dsl$Elm$CodeGen$BinOp = F3(
 	});
 var $the_sett$elm_syntax_dsl$Elm$CodeGen$infixLeft = $stil4m$elm_syntax$Elm$Syntax$Infix$Left;
 var $the_sett$elm_syntax_dsl$Elm$CodeGen$piper = A3($the_sett$elm_syntax_dsl$Elm$CodeGen$BinOp, '|>', $the_sett$elm_syntax_dsl$Elm$CodeGen$infixLeft, 0);
+var $elm$core$List$repeatHelp = F3(
+	function (result, n, value) {
+		repeatHelp:
+		while (true) {
+			if (n <= 0) {
+				return result;
+			} else {
+				var $temp$result = A2($elm$core$List$cons, value, result),
+					$temp$n = n - 1,
+					$temp$value = value;
+				result = $temp$result;
+				n = $temp$n;
+				value = $temp$value;
+				continue repeatHelp;
+			}
+		}
+	});
+var $elm$core$List$repeat = F2(
+	function (n, value) {
+		return A3($elm$core$List$repeatHelp, _List_Nil, n, value);
+	});
 var $author$project$N$Generate$n0To16Module = function () {
 	var lastN = 16;
 	return {
@@ -6410,7 +6372,7 @@ var $author$project$N$Generate$n0To16Module = function () {
 									$the_sett$elm_syntax_dsl$Elm$CodeGen$val(
 										$author$project$N$Generate$nX(x - 1)),
 									$the_sett$elm_syntax_dsl$Elm$CodeGen$piper,
-									$author$project$N$Generate$diffAdd(1)));
+									$author$project$N$Generate$add(1)));
 						},
 						A2($elm$core$List$range, 2, lastN)),
 						A2(
@@ -19554,7 +19516,7 @@ var $author$project$N$Generate$nBinaryModule = function (n) {
 										$the_sett$elm_syntax_dsl$Elm$CodeGen$applyBinOp,
 										soFar,
 										$the_sett$elm_syntax_dsl$Elm$CodeGen$piper,
-										$author$project$N$Generate$diffAdd(n10ToPower));
+										$author$project$N$Generate$add(n10ToPower));
 								}),
 							$the_sett$elm_syntax_dsl$Elm$CodeGen$val(
 								$author$project$N$Generate$nX(
@@ -19648,10 +19610,10 @@ var $author$project$N$Generate$nBinaryModule = function (n) {
 					_Utils_ap(
 						$author$project$Elm$CodeGen$Extra$aliasExpose(
 							_List_fromArray(
-								['N', 'MinAndMinAsDifferencesAndMax', 'To', 'Increase', 'N0', 'Add1', 'Add2', 'Add4', 'Add8', 'Add16'])),
+								['N', 'In', 'To', 'Up', 'N0', 'Add1', 'Add2', 'Add4', 'Add8', 'Add16'])),
 						$author$project$Elm$CodeGen$Extra$funExpose(
 							_List_fromArray(
-								['n1', 'n2', 'n4', 'n8', 'n16', 'diffAdd'])))))
+								['n1', 'n2', 'n4', 'n8', 'n16', 'add'])))))
 			]),
 		name: _List_fromArray(
 			['N', 'Binary']),
@@ -19778,7 +19740,7 @@ var $author$project$N$Generate$nLinearModule = function (n) {
 										$the_sett$elm_syntax_dsl$Elm$CodeGen$applyBinOp,
 										soFar,
 										$the_sett$elm_syntax_dsl$Elm$CodeGen$piper,
-										$author$project$N$Generate$diffAdd(n10ToPower));
+										$author$project$N$Generate$add(n10ToPower));
 								}),
 							$the_sett$elm_syntax_dsl$Elm$CodeGen$val(
 								$author$project$N$Generate$nX(
@@ -19803,7 +19765,7 @@ var $author$project$N$Generate$nLinearModule = function (n) {
 					_Utils_ap(
 						$author$project$Elm$CodeGen$Extra$aliasExpose(
 							_List_fromArray(
-								['N', 'MinAndMinAsDifferencesAndMax', 'To', 'Increase', 'N0able'])),
+								['N', 'In', 'To', 'Up', 'N0able'])),
 						$author$project$Elm$CodeGen$Extra$funExpose(
 							_List_fromArray(
 								['n1', 'n2', 'n4', 'n8', 'n16', 'diffAdd'])))))

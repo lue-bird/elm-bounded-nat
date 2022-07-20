@@ -172,12 +172,8 @@ nType n =
 minAsDifferenceAndMaxType : Int -> Generation.TypeAnnotation
 minAsDifferenceAndMaxType n =
     typed "In"
-        [ limitType
-            (nXType n)
-            (diffType n "minX")
-        , limitType
-            (nXType n)
-            (diffType n "maxX")
+        [ increaseType n "minX"
+        , increaseType n "maxX"
         ]
 
 
@@ -189,9 +185,9 @@ limitType fixed increase =
     typed "Limit" [ fixed, increase ]
 
 
-diffType : Int -> String -> Generation.TypeAnnotation
-diffType n var =
-    typed "Increase"
+increaseType : Int -> String -> Generation.TypeAnnotation
+increaseType n var =
+    typed "Up"
         [ typeVar var
         , toType
         , addXType n (typeVar var)
@@ -228,12 +224,9 @@ addXType x more =
             typed (addX n2AtLeast) [ more ]
 
 
-diffAdd : Int -> Generation.Expression
-diffAdd powerInInt =
-    construct "addIn"
-        [ tuple (List.repeat 2 (val (nX powerInInt)))
-        , val (nX powerInInt)
-        ]
+add : Int -> Generation.Expression
+add powerInInt =
+    construct "add" [ val (nX powerInInt) ]
 
 
 n0ableType :
@@ -312,7 +305,7 @@ n0To16Module =
                         (applyBinOp
                             (val (nX (x - 1)))
                             piper
-                            (diffAdd 1)
+                            (add 1)
                         )
                 )
         , List.range 1 lastN
@@ -371,8 +364,8 @@ nBinaryModule n =
         [ importStmt [ "N" ]
             noAlias
             (exposingExplicit
-                (aliasExpose [ "N", "MinAndMinAsDifferencesAndMax", "To", "Increase", "N0", "Add1", "Add2", "Add4", "Add8", "Add16" ]
-                    ++ funExpose [ "n1", "n2", "n4", "n8", "n16", "diffAdd" ]
+                (aliasExpose [ "N", "In", "To", "Up", "N0", "Add1", "Add2", "Add4", "Add8", "Add16" ]
+                    ++ funExpose [ "n1", "n2", "n4", "n8", "n16", "add" ]
                 )
             )
         ]
@@ -419,7 +412,7 @@ nBinaryModule n =
                                 applyBinOp
                                     soFar
                                     piper
-                                    (diffAdd n10ToPower)
+                                    (add n10ToPower)
                             )
                             (val (nX (2 ^ folding.initial)))
             )
@@ -488,8 +481,8 @@ nLinearModule n =
         [ importStmt [ "N" ]
             noAlias
             (exposingExplicit
-                (aliasExpose [ "N", "MinAndMinAsDifferencesAndMax", "To", "Increase", "N0able" ]
-                    ++ funExpose [ "n1", "n2", "n4", "n8", "n16", "diffAdd" ]
+                (aliasExpose [ "N", "In", "To", "Up", "N0able" ]
+                    ++ funExpose [ "n1", "n2", "n4", "n8", "n16", "add" ]
                 )
             )
         ]
@@ -572,7 +565,7 @@ nLinearModule n =
                                 applyBinOp
                                     soFar
                                     piper
-                                    (diffAdd n10ToPower)
+                                    (add n10ToPower)
                             )
                             (val (nX (2 ^ folding.initial)))
             )
