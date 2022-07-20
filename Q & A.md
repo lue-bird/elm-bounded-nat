@@ -1,6 +1,6 @@
 ## Why this, why that
 
-#### These `something_` type variables
+### why these `something_` type variables?
 
 The "_" at the end shows that this type variable is used only in this place.
 
@@ -10,3 +10,16 @@ If you see a -_ you know not to focus on these.
 See the rule [`single-use-type-vars-end-with-underscore`](https://package.elm-lang.org/packages/lue-bird/elm-review-single-use-type-vars-end-with-underscore/latest/).
 
 If you have questions, don't hesitate to ask (e.g. in slack (@lue lue.the.bird@gmail.com) or by starting a discussion in github)!
+
+### why all the `min`- versions?
+
+Can't we define `MaxNo` so that it unifies with the other `Up low To (Add<x> low)` types?
+
+    type alias Infinity =
+        Add1 Infinity
+    
+    type alias MaxNo =
+        Fixed Infinity
+
+but: elm doesn't like recursive aliases and rightfully so here
+because such a value is `Never` constructable.
