@@ -14,6 +14,10 @@
 
 # changelog
 
+### 23.1.0
+
+  - `range` add
+
 ## 23.0.0
 
   - `atLeast` name → `minAtLeast`

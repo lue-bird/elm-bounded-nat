@@ -4,7 +4,7 @@ module N exposing
     , Up(..), Down, To, Fixed
     , abs, randomIn, until
     , N0, N1, N2, N3, N4, N5, N6, N7, N8, N9, N10, N11, N12, N13, N14, N15, N16
-    , N0able(..), Add1, Add2, Add3, Add4, Add5, Add6, Add7, Add8, Add9, Add10, Add11, Add12, Add13, Add14, Add15, Add16
+    , Add1, Add2, Add3, Add4, Add5, Add6, Add7, Add8, Add9, Add10, Add11, Add12, Add13, Add14, Add15, Add16
     , n0, n1, n2, n3, n4, n5, n6, n7, n8, n9, n10, n11, n12, n13, n14, n15, n16
     , intAtLeast, intIn
     , intIsAtLeast, intIsIn, BelowOrAbove(..)
@@ -16,7 +16,8 @@ module N exposing
     , toInt, toFloat
     , min, minDown
     , maxNo, max, maxUp
-    , minimumAsDifference, maximumAsDifference
+    , range, minimumAsDifference, maximumAsDifference
+    , N0able(..)
     , fixed
     , differenceUp, differenceDown
     , upDifference, downDifference
@@ -60,7 +61,7 @@ In the future, [`elm-generate`](https://github.com/lue-bird/generate-elm) will a
 
 [⏭ skip to last](#Add16)
 
-@docs N0able, Add1, Add2, Add3, Add4, Add5, Add6, Add7, Add8, Add9, Add10, Add11, Add12, Add13, Add14, Add15, Add16
+@docs Add1, Add2, Add3, Add4, Add5, Add6, Add7, Add8, Add9, Add10, Add11, Add12, Add13, Add14, Add15, Add16
 
 
 ## exact
@@ -126,8 +127,9 @@ While the internally stored `Int` can't directly be guaranteed to be in bounds b
 must be built as actual values checked by the compiler.
 No shenanigans like runtime errors for impossible cases.
 
-@docs minimumAsDifference, maximumAsDifference
+@docs range, minimumAsDifference, maximumAsDifference
 
+@docs N0able
 @docs fixed
 @docs differenceUp, differenceDown
 @docs upDifference, downDifference
@@ -1673,13 +1675,25 @@ minSub subtrahend =
                 }
 
 
+
+-- # internals
+
+
+{-| Its limits.
+Both its [`minimumAsDifference`](#minimumAsDifference)
+and its [`maximumAsDifference`](#maximumAsDifference)
+-}
+range : N range -> range
+range =
+    \(LimitedIn rangeLimits _) -> rangeLimits
+
+
 {-| The smallest allowed number promised by the range type
 as its representation as a [difference](#Up)
 -}
 minimumAsDifference : N (In minimumAsDifference maximum_) -> minimumAsDifference
 minimumAsDifference =
-    \(LimitedIn rangeLimits _) ->
-        rangeLimits.minimumAsDifference
+    range >> .minimumAsDifference
 
 
 {-| The greatest allowed number promised by the range type
@@ -1687,15 +1701,11 @@ as its representation as a [difference](#Up)
 -}
 maximumAsDifference : N (In min_ maximumAsDifference) -> maximumAsDifference
 maximumAsDifference =
-    \(LimitedIn rangeLimits _) ->
-        rangeLimits.maximumAsDifference
+    range >> .maximumAsDifference
 
 
-
--- # internals
-
-
-{-| To the number, add a specific other one by supplying a [difference](#Up).
+{-| To the [number](#N0able),
+add another [number](#N0able) like shown in a given [difference](#Up)
 -}
 upDifference : Up low To high -> (low -> high)
 upDifference =
@@ -1703,7 +1713,8 @@ upDifference =
         differenceOperation.up
 
 
-{-| To the number, subtract a specific other one by supplying a [difference](#Up).
+{-| From the [number](#N0able),
+subtract another [number](#N0able) like shown in a given [difference](#Down)
 -}
 downDifference : Down high To low -> (high -> low)
 downDifference =
@@ -1711,7 +1722,7 @@ downDifference =
         differenceOperation.down
 
 
-{-| Chain the [difference](#Up) [`Up`](#Up) to a higher number.
+{-| Chain the [difference](#Up) [`Up`](#Up) to a higher [number](#N0able)
 -}
 differenceUp :
     Up middle To high
@@ -1731,7 +1742,7 @@ differenceUp differenceMiddleToHigh =
             }
 
 
-{-| Chain the [difference](#Up) [`Down`](#Down) to a lower number.
+{-| Chain the [difference](#Up) [`Down`](#Down) to a lower [number](#N0able)
 -}
 differenceDown :
     Down high To middle
@@ -1932,199 +1943,199 @@ type N0able successor possiblyOrNever
     | Add1 successor
 
 
-{-| Type for the natural number `1 +` some natural number `n`
+{-| The [natural number](#N0able) `1 +` another given [natural number](#N0able) `n`
 -}
 type alias Add1 n =
     N0able n Never
 
 
-{-| Type for the natural number `2 +` some natural number `n`
+{-| The [natural number](#N0able) `2 +` another given [natural number](#N0able) `n`
 -}
 type alias Add2 n =
     N0able (N0able n Never) Never
 
 
-{-| Type for the natural number `3 +` some natural number `n`
+{-| The [natural number](#N0able) `3 +` another given [natural number](#N0able) `n`
 -}
 type alias Add3 n =
     N0able (N0able (N0able n Never) Never) Never
 
 
-{-| Type for the natural number `4 +` some natural number `n`
+{-| The [natural number](#N0able) `4 +` another given [natural number](#N0able) `n`
 -}
 type alias Add4 n =
     N0able (N0able (N0able (N0able n Never) Never) Never) Never
 
 
-{-| Type for the natural number `5 +` some natural number `n`
+{-| The [natural number](#N0able) `5 +` another given [natural number](#N0able) `n`
 -}
 type alias Add5 n =
     N0able (N0able (N0able (N0able (N0able n Never) Never) Never) Never) Never
 
 
-{-| Type for the natural number `6 +` some natural number `n`
+{-| The [natural number](#N0able) `6 +` another given [natural number](#N0able) `n`
 -}
 type alias Add6 n =
     N0able (N0able (N0able (N0able (N0able (N0able n Never) Never) Never) Never) Never) Never
 
 
-{-| Type for the natural number `7 +` some natural number `n`
+{-| The [natural number](#N0able) `7 +` another given [natural number](#N0able) `n`
 -}
 type alias Add7 n =
     N0able (N0able (N0able (N0able (N0able (N0able (N0able n Never) Never) Never) Never) Never) Never) Never
 
 
-{-| Type for the natural number `8 +` some natural number `n`
+{-| The [natural number](#N0able) `8 +` another given [natural number](#N0able) `n`
 -}
 type alias Add8 n =
     N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able n Never) Never) Never) Never) Never) Never) Never) Never
 
 
-{-| Type for the natural number `9 +` some natural number `n`
+{-| The [natural number](#N0able) `9 +` another given [natural number](#N0able) `n`
 -}
 type alias Add9 n =
     N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able n Never) Never) Never) Never) Never) Never) Never) Never) Never
 
 
-{-| Type for the natural number `10 +` some natural number `n`
+{-| The [natural number](#N0able) `10 +` another given [natural number](#N0able) `n`
 -}
 type alias Add10 n =
     N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able n Never) Never) Never) Never) Never) Never) Never) Never) Never) Never
 
 
-{-| Type for the natural number `11 +` some natural number `n`
+{-| The [natural number](#N0able) `11 +` another given [natural number](#N0able) `n`
 -}
 type alias Add11 n =
     N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able n Never) Never) Never) Never) Never) Never) Never) Never) Never) Never) Never
 
 
-{-| Type for the natural number `12 +` some natural number `n`
+{-| The [natural number](#N0able) `12 +` another given [natural number](#N0able) `n`
 -}
 type alias Add12 n =
     N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able n Never) Never) Never) Never) Never) Never) Never) Never) Never) Never) Never) Never
 
 
-{-| Type for the natural number `13 +` some natural number `n`
+{-| The [natural number](#N0able) `13 +` another given [natural number](#N0able) `n`
 -}
 type alias Add13 n =
     N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able n Never) Never) Never) Never) Never) Never) Never) Never) Never) Never) Never) Never) Never
 
 
-{-| Type for the natural number `14 +` some natural number `n`
+{-| The [natural number](#N0able) `14 +` another given [natural number](#N0able) `n`
 -}
 type alias Add14 n =
     N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able n Never) Never) Never) Never) Never) Never) Never) Never) Never) Never) Never) Never) Never) Never
 
 
-{-| Type for the natural number `15 +` some natural number `n`
+{-| The [natural number](#N0able) `15 +` another given [natural number](#N0able) `n`
 -}
 type alias Add15 n =
     N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able n Never) Never) Never) Never) Never) Never) Never) Never) Never) Never) Never) Never) Never) Never) Never
 
 
-{-| Type for the natural number `16 +` some natural number `n`
+{-| The [natural number](#N0able) `16 +` another given [natural number](#N0able) `n`
 -}
 type alias Add16 n =
     N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able n Never) Never) Never) Never) Never) Never) Never) Never) Never) Never) Never) Never) Never) Never) Never) Never
 
 
-{-| Type for the exact natural number `0`
+{-| Type for the [exact natural number](#N0able) `0`
 -}
 type alias N0 =
     N0able Never Possibly
 
 
-{-| Type for the exact natural number `1`
+{-| Type for the [exact natural number](#N0able) `1`
 -}
 type alias N1 =
     N0able (N0able Never Possibly) Never
 
 
-{-| Type for the exact natural number `2`
+{-| Type for the [exact natural number](#N0able) `2`
 -}
 type alias N2 =
     N0able (N0able (N0able Never Possibly) Never) Never
 
 
-{-| Type for the exact natural number `3`
+{-| Type for the [exact natural number](#N0able) `3`
 -}
 type alias N3 =
     N0able (N0able (N0able (N0able Never Possibly) Never) Never) Never
 
 
-{-| Type for the exact natural number `4`
+{-| Type for the [exact natural number](#N0able) `4`
 -}
 type alias N4 =
     N0able (N0able (N0able (N0able (N0able Never Possibly) Never) Never) Never) Never
 
 
-{-| Type for the exact natural number `5`
+{-| Type for the [exact natural number](#N0able) `5`
 -}
 type alias N5 =
     N0able (N0able (N0able (N0able (N0able (N0able Never Possibly) Never) Never) Never) Never) Never
 
 
-{-| Type for the exact natural number `6`
+{-| Type for the [exact natural number](#N0able) `6`
 -}
 type alias N6 =
     N0able (N0able (N0able (N0able (N0able (N0able (N0able Never Possibly) Never) Never) Never) Never) Never) Never
 
 
-{-| Type for the exact natural number `7`
+{-| Type for the [exact natural number](#N0able) `7`
 -}
 type alias N7 =
     N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able Never Possibly) Never) Never) Never) Never) Never) Never) Never
 
 
-{-| Type for the exact natural number `8`
+{-| Type for the [exact natural number](#N0able) `8`
 -}
 type alias N8 =
     N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able Never Possibly) Never) Never) Never) Never) Never) Never) Never) Never
 
 
-{-| Type for the exact natural number `9`
+{-| Type for the [exact natural number](#N0able) `9`
 -}
 type alias N9 =
     N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able Never Possibly) Never) Never) Never) Never) Never) Never) Never) Never) Never
 
 
-{-| Type for the exact natural number `10`
+{-| Type for the [exact natural number](#N0able) `10`
 -}
 type alias N10 =
     N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able Never Possibly) Never) Never) Never) Never) Never) Never) Never) Never) Never) Never
 
 
-{-| Type for the exact natural number `11`
+{-| Type for the [exact natural number](#N0able) `11`
 -}
 type alias N11 =
     N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able Never Possibly) Never) Never) Never) Never) Never) Never) Never) Never) Never) Never) Never
 
 
-{-| Type for the exact natural number `12`
+{-| Type for the [exact natural number](#N0able) `12`
 -}
 type alias N12 =
     N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able Never Possibly) Never) Never) Never) Never) Never) Never) Never) Never) Never) Never) Never) Never
 
 
-{-| Type for the exact natural number `13`
+{-| Type for the [exact natural number](#N0able) `13`
 -}
 type alias N13 =
     N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able Never Possibly) Never) Never) Never) Never) Never) Never) Never) Never) Never) Never) Never) Never) Never
 
 
-{-| Type for the exact natural number `14`
+{-| Type for the [exact natural number](#N0able) `14`
 -}
 type alias N14 =
     N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able Never Possibly) Never) Never) Never) Never) Never) Never) Never) Never) Never) Never) Never) Never) Never) Never
 
 
-{-| Type for the exact natural number `15`
+{-| Type for the [exact natural number](#N0able) `15`
 -}
 type alias N15 =
     N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able Never Possibly) Never) Never) Never) Never) Never) Never) Never) Never) Never) Never) Never) Never) Never) Never) Never
 
 
-{-| Type for the exact natural number `16`
+{-| Type for the [exact natural number](#N0able) `16`
 -}
 type alias N16 =
     N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able (N0able Never Possibly) Never) Never) Never) Never) Never) Never) Never) Never) Never) Never) Never) Never) Never) Never) Never) Never
