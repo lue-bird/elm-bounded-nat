@@ -14,6 +14,12 @@
 
 # changelog
 
+## 23.0.0
+
+  - `atLeast` name → `minAtLeast`
+  - `atLeast` with maximum `Fixed` add
+  - `atMost` add
+
 ## 22.0.0
 
   - `up` remove

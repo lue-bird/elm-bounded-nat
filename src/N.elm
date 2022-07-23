@@ -8,7 +8,7 @@ module N exposing
     , n0, n1, n2, n3, n4, n5, n6, n7, n8, n9, n10, n11, n12, n13, n14, n15, n16
     , intAtLeast, intIn
     , intIsAtLeast, intIsIn, BelowOrAbove(..)
-    , atLeast, in_
+    , atLeast, minAtLeast, atMost, in_
     , is, isIn, isAtLeast, isAtMost
     , add, minAdd
     , sub, minSub
@@ -85,7 +85,7 @@ In the future, [`elm-generate`](https://github.com/lue-bird/generate-elm) will a
 
 ## clamp
 
-@docs atLeast, in_
+@docs atLeast, minAtLeast, atMost, in_
 
 
 ## compare maximum constrained
@@ -824,7 +824,9 @@ intAtLeast minimumLimit =
     atLeast5 |> N.in_ ( n5, n10 )
     --: N (In (Up minX To (Add5 minX)) (Up maxX To (Add10 maxX)))
 
-There shouldn't be an upper limit? → [`atLeast`](#atLeast)
+  - There shouldn't be an upper limit? → [`minAtLeast`](#minAtLeast)
+  - To keep the current maximum? → [`atLeast`](#atLeast)
+  - To keep the current minimum? → [`atMost`](#atMost)
 
 (The type doesn't forbid that the limits you're comparing against
 are beyond the current limits.)
@@ -854,28 +856,101 @@ in_ ( lowerLimit, upperLimit ) =
                     }
 
 
-{-| **Cap** the [`N`](#N) to >= a given new lower limit.
+{-| **Cap** the [`N`](#N) to `>=` a given new lower limit.
 
-    n15 |> N.atLeast n10 |> N.toInt
-    --> 15
-
-    n5AtLeast |> N.atLeast (n10 |> maxNo)
+    n5AtLeast |> N.minAtLeast n10
     --: N (Min (Up x To (Add10 x)))
 
-(The type doesn't forbid that the lower limit you're comparing against
-is below the current lower limit.)
+The type doesn't forbid that the lower limit you're comparing against
+is below the current lower limit
+
+    n15AtLeast |> N.minAtLeast n10 |> N.toInt
+    --: N (Min (Up x To (Add10 x)))
+
+Know both maxima? → [`atLeast`](#atLeast)
 
 -}
-atLeast :
-    N (In minNew max)
+minAtLeast :
+    N (In minNew maxNew_)
     ->
-        (N (In min_ max)
+        (N (In min_ max_)
          -> N (Min minNew)
         )
-atLeast minimumLimit =
+minAtLeast minimumLimit =
     toInt
         >> intIsAtLeast minimumLimit
         >> Result.withDefault (minimumLimit |> maxNo)
+
+
+{-| **Cap** the [`N`](#N) to `<=` a given new upper limit.
+
+    between3And10
+        |> N.atMost between2And5
+    --: N (In (Fixed 2) (Up x To (Add5 x)))
+
+To replace the [`Fixed`](#Fixed) minimum with a [difference](#Up)
+(for results etc.) → [`min`](#min)
+
+To enforce a new minimum, too? → [`in_`](#in_)
+
+-}
+atMost :
+    N (In (Fixed takenMin) takenMax)
+    ->
+        (N (In (Up minToTakenMin_ To takenMin) max_)
+         -> N (In (Fixed takenMin) takenMax)
+        )
+atMost maximumLimit =
+    \n ->
+        if (n |> toInt) <= (maximumLimit |> toInt) then
+            (n |> toInt)
+                |> LimitedIn
+                    { minimumAsDifference = maximumLimit |> minimumAsDifference
+                    , maximumAsDifference = maximumLimit |> maximumAsDifference
+                    }
+
+        else
+            maximumLimit
+
+
+{-| **Cap** the [`N`](#N) to `>=` a given new lower limit.
+
+    between5And12 |> N.atLeast n10
+    --: N (In (Up x To (Add10 x)) (Fixed N12))
+
+The type doesn't forbid that the lower limit you're comparing against
+is below the current lower limit
+
+    n15
+        |> N.atLeast n10
+        --: N (In (Up x To (Add10 x)) (Fixed N15))
+        |> N.toInt
+    --> 15
+
+Don't know both maxima? → [`minAtLeast`](#minAtLeast)
+
+-}
+atLeast :
+    N (In minNew (Up minNewMaxToMax_ To max))
+    ->
+        (N (In min_ (Fixed max))
+         -> N (In minNew (Fixed max))
+        )
+atLeast minimumLimit =
+    \n ->
+        if (n |> toInt) >= (minimumLimit |> toInt) then
+            (n |> toInt)
+                |> LimitedIn
+                    { minimumAsDifference = minimumLimit |> minimumAsDifference
+                    , maximumAsDifference = n |> maximumAsDifference
+                    }
+
+        else
+            (minimumLimit |> toInt)
+                |> LimitedIn
+                    { minimumAsDifference = minimumLimit |> minimumAsDifference
+                    , maximumAsDifference = n |> maximumAsDifference
+                    }
 
 
 {-| Multiply by a given [`n`](#N) `≥ 1`.
