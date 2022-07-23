@@ -282,7 +282,7 @@ n0To16Module =
             exactDoc : Int -> Doc kind_
             exactDoc n =
                 [ markdown
-                    ([ "Type for the exact natural number `"
+                    ([ "Type for the [exact natural number](#N0able) `"
                      , String.fromInt n
                      , "`"
                      ]
@@ -313,9 +313,9 @@ n0To16Module =
                 (\n ->
                     packageExposedAliasDecl TypeAdd
                         [ markdown
-                            ([ "Type for the natural number `"
+                            ([ "The [natural number](#N0able) `"
                              , n |> String.fromInt
-                             , " +` some natural number `n`"
+                             , " +` another given [natural number](#N0able) `n`"
                              ]
                                 |> String.concat
                             )
@@ -372,7 +372,7 @@ nBinaryModule n =
     , declarations =
         [ packageExposedFunDecl NDiffValue
             [ markdown
-                ([ "The exact natural number `", n |> String.fromInt, "`" ]
+                ([ "The specific natural number `", n |> String.fromInt, "`" ]
                     |> String.concat
                 )
             ]
@@ -507,7 +507,7 @@ nLinearModule n =
             )
         , packageExposedAliasDecl TypeExact
             [ markdown
-                ([ "Type for the exact natural number `"
+                ([ "Type for the [exact natural number](#N0able) `"
                  , String.fromInt n
                  , "`"
                  ]
@@ -525,7 +525,7 @@ nLinearModule n =
             )
         , packageExposedFunDecl NDiffValue
             [ markdown
-                ([ "The exact natural number `", n |> String.fromInt, "`" ]
+                ([ "The specific natural number `", n |> String.fromInt, "`" ]
                     |> String.concat
                 )
             ]
