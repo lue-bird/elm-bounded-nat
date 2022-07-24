@@ -1596,11 +1596,7 @@ minAdd toAdd =
 
     n6 |> N.sub n5
     --→ n1
-    --: N
-    --:     (In
-    --:         (Up x0 To (Add1 x0))
-    --:         (Up x1 To (Add1 x1))
-    --:     )
+    --: N (In (Fixed N1) (Fixed N1))
 
 One of the terms has no maximum constraint? → [`minSub`](#minSub)
 
@@ -1609,18 +1605,14 @@ sub :
     N
         (In
             (Down maxPlusX To differenceMaxPlusX)
-            (Down minPlusX To differenceMinPlusX)
+            (Down min To differenceMin)
         )
     ->
-        (N
-            (In
-                (Up minX To minPlusX)
-                (Up maxX To maxPlusX)
-            )
+        (N (In (Fixed min) (Up maxX To maxPlusX))
          ->
             N
                 (In
-                    (Up minX To differenceMinPlusX)
+                    (Fixed differenceMin)
                     (Up maxX To differenceMaxPlusX)
                 )
         )
@@ -1642,13 +1634,13 @@ sub toSubtract =
 subtract a [specific number](#In)
 
     atLeast7 |> N.minSub n2
-    --: N (Min (Up x To (Add5 x)))
+    --: N (Min (Fixed N5))
 
     atLeast6 |> N.minSub between0And5
-    --: N (Min (Up x To (Add1 x)))
+    --: N (Min (Fixed N1))
 
     between6And12 |> N.minSub between1And5
-    --: N (In (Up minX To (Add1 minX)) (Up maxX To (Add12 maxX)))
+    --: N (In (Fixed min) (Up maxX To (Add12 maxX)))
 
 Use [`sub`](#sub) if you want to subtract an [`N`](#N) in a range.
 
@@ -1657,11 +1649,11 @@ minSub :
     N
         (In
             subtractedDifference0_
-            (Down minPlusX To differenceMinPlusX)
+            (Down min To differenceMin)
         )
     ->
-        (N (In (Up minX To minPlusX) max)
-         -> N (In (Up minX To differenceMinPlusX) max)
+        (N (In (Fixed min) max)
+         -> N (In (Fixed differenceMin) max)
         )
 minSub subtrahend =
     \n ->
@@ -1670,7 +1662,8 @@ minSub subtrahend =
             |> LimitedIn
                 { minimumAsDifference =
                     (n |> minimumAsDifference)
-                        |> differenceDown (subtrahend |> maximumAsDifference)
+                        |> differenceDown
+                            (subtrahend |> maximumAsDifference)
                 , maximumAsDifference = n |> maximumAsDifference
                 }
 

@@ -1,4 +1,4 @@
-### 22.1.0 plans
+### 24.1.0 plans
 
   - `fuzzIn ( min, max ) : ... -> Fuzzer (N (In ...))` add
       - currently waiting for `elm-test` major version 2
@@ -13,6 +13,10 @@
       - 👍 is readable
 
 # changelog
+
+## 24.0.0
+
+  - `sub`, `minSub` minimum subtraction `Fixed`
 
 ### 23.1.0
 
