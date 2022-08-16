@@ -11,7 +11,7 @@
   - add operations that might be useful
 
 notes:
-  - `N`s `0` → `16` are [generated using elm](generate/src/N.Generate.elm)
+  - `Z`s `0` → `16` are [generated using elm](generate/src/Z.Generate.elm)
   - run `elm-review`, `elm-test`, `elm-verify-examples` before creating a PR
 
 If you have questions, don't hesitate to ask (@lue on slack or start a discussion in github)!

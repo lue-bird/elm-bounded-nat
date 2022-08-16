@@ -1,42 +1,43 @@
-module N exposing
-    ( N
-    , In, Min, MaxNo, Exactly
-    , Up(..), Down, To, Fixed
-    , abs, randomIn, until
+module Z exposing
+    ( Z
+    , In, Min, Max, Unlimited, UpExactly
+    , Up(..), Down, To, UpExact, DownExact
+    , int, randomIn, until
     , N0, N1, N2, N3, N4, N5, N6, N7, N8, N9, N10, N11, N12, N13, N14, N15, N16
     , Add1, Add2, Add3, Add4, Add5, Add6, Add7, Add8, Add9, Add10, Add11, Add12, Add13, Add14, Add15, Add16
     , n0, n1, n2, n3, n4, n5, n6, n7, n8, n9, n10, n11, n12, n13, n14, n15, n16
-    , intAtLeast, intIn
-    , intIsAtLeast, intIsIn, BelowOrAbove(..)
+    , BelowOrAbove(..)
     , atLeast, minAtLeast, atMost, in_
     , is, isIn, isAtLeast, isAtMost
-    , add, minAdd
-    , sub, minSub
+    , negate, abs
+    , add, minAdd, maxAdd
+    , sub, minSub, maxSub
     , toPower, remainderBy, mul, div
     , toInt, toFloat
-    , min, minDown
+    , minNo, min, minDown
     , maxNo, max, maxUp
     , range, minimumAsDifference, maximumAsDifference
-    , N0able(..)
-    , fixed
-    , differenceUp, differenceDown
+    , N0able(..), unlimited
+    , upFixed, downFixed
+    , differenceUp, differenceDown, differenceNegate
     , upDifference, downDifference
+    , maxAtMost
     )
 
 {-| Natural numbers within a typed range.
 
-@docs N
+@docs Z
 
 
 # bounds
 
-@docs In, Min, MaxNo, Exactly
-@docs Up, Down, To, Fixed
+@docs In, Min, Max, Unlimited, UpExactly
+@docs Up, Down, To, UpExact, DownExact
 
 
 # create
 
-@docs abs, randomIn, until
+@docs int, randomIn, until
 
 
 # specific numbers
@@ -45,7 +46,7 @@ If the package exposed every number 0 → 1000+, [tools can become unusably slow
 
 So only 0 → 16 are exposed, while larger numbers have to be generated locally.
 
-Current method: [generate them](https://lue-bird.github.io/elm-bounded-nat/generate/) into a `module exposing (n500, N500, Add500, ...)` + `import as N exposing (n500, ...)`
+Current method: [generate them](https://lue-bird.github.io/elm-bounded-nat/generate/) into a `module exposing (n500, N500, Add500, ...)` + `import as Z exposing (n500, ...)`
 
 In the future, [`elm-generate`](https://github.com/lue-bird/generate-elm) will allow auto-generating via [`elm-review`](https://dark.elm.dmy.fr/packages/jfmengels/elm-review/latest/).
 
@@ -74,11 +75,6 @@ In the future, [`elm-generate`](https://github.com/lue-bird/generate-elm) will a
 ## compare
 
 
-### `Int` clamp
-
-@docs intAtLeast, intIn
-
-
 ## `Int` compare
 
 @docs intIsAtLeast, intIsIn, BelowOrAbove
@@ -96,8 +92,9 @@ In the future, [`elm-generate`](https://github.com/lue-bird/generate-elm) will a
 
 # alter
 
-@docs add, minAdd
-@docs sub, minSub
+@docs negate, abs
+@docs add, minAdd, maxAdd
+@docs sub, minSub, maxSub
 @docs toPower, remainderBy, mul, div
 
 
@@ -108,13 +105,15 @@ In the future, [`elm-generate`](https://github.com/lue-bird/generate-elm) will a
 
 # type information
 
-@docs min, minDown
+@docs minNo, min, minDown
 @docs maxNo, max, maxUp
 
 
 # miss operation x?
 
-Anything that can't be expressed with the available operations? → issue/PR
+Anything that can't be expressed with the available operations
+like `positiveInfinity` and `negativeInfinity`?
+→ issue/PR
 
 
 # fancy
@@ -129,9 +128,9 @@ No shenanigans like runtime errors for impossible cases.
 
 @docs range, minimumAsDifference, maximumAsDifference
 
-@docs N0able
-@docs fixed
-@docs differenceUp, differenceDown
+@docs N0able, unlimited
+@docs upFixed, downFixed
+@docs differenceUp, differenceDown, differenceNegate
 @docs upDifference, downDifference
 
 -}
@@ -144,19 +143,19 @@ import RecordWithoutConstructorFunction exposing (RecordWithoutConstructorFuncti
 import Stack exposing (Stacked)
 
 
-{-| A **bounded** natural number `>= 0`
+{-| A **bounded** number
 
 
 ### argument type
 
     -- ≥ 0, any limitations allowed
-    N range_
+    Z range_
 
     -- ≥ 4
-    N (In (Fixed (Add4 minMinus4_)) max_)
+    Z (In (UpExact (Add4 minMinus4_)) max_)
 
     -- 4 ≤ n ≤ 15
-    N (In (Fixed (Add4 minMinus4_)) (Up maxTo15_ To N15))
+    Z (In (UpExact (Add4 minMinus4_)) (Up maxTo15_ To N15))
 
 `In (Add4 minMinus4_) N15` says:
 
@@ -168,19 +167,19 @@ import Stack exposing (Stacked)
 ### result type
 
     -- ≥ 4
-    N (Min (Up x To (Add4 x)))
+    Z (Min (Up x To (Add4 x)))
 
     -- 2 ≤ n ≤ 12
-    N (In (Up x To (Add2 x)) (Up x To (Add12 x)))
+    Z (In (Up x To (Add2 x)) (Up x To (Add12 x)))
 
-    n3 : N (In (Up minX To (Add3 minX)) (Up maxX To (Add3 maxX)))
+    n3 : Z (In (Up minX To (Add3 minX)) (Up maxX To (Add3 maxX)))
 
 [`Up low To high`] is a representation as a difference of the limit `high - low`
 
 This enables adding, subtracting.
 Consider it an implementation detail.
 
-    n3 |> N.add n6
+    n3 |> Z.add n6
     --→ n9
 
 
@@ -189,63 +188,71 @@ Consider it an implementation detail.
 what to put in declared types like `Model`
 
     -- ≥ 4
-    N (Min (Fixed N4))
+    Z (Min (UpExact N4))
 
     -- 2 ≤ n ≤ 12
-    N (In (Fixed N2) (Fixed N12))
+    Z (In (UpExact N2) (UpExact N12))
 
 They are like [result types](#result-type) but type variables are set to [`N0`](#N0).
 
 more type examples at [`In`](#In), [`Min`](#Min)
 
 -}
-type N range
+type Z range
     = LimitedIn range Int
 
 
 {-| somewhere within a `minimum` & `maximum`
 
-       ↓ minimum   ↓ maximum
-    ⨯ [✓ ✓ ✓ ✓ ✓ ✓ ✓] ⨯ ⨯ ⨯...
+           ↓ minimum   ↓ maximum
+    ....⨯ [✓ ✓ ✓ ✓ ✓ ✓ ✓] ⨯ ⨯ ⨯...
 
 
 ### argument type in a range
 
     -- number between 3 and 5
-    N (In (Fixed (Add3 minX_)) (Up maxTo5_ N5))
+    Z (In (UpExact (Add3 minX_)) (Up maxTo5_ N5))
 
-    percent : N (In min_ (Up maxTo100 To N100)) -> Percent
+    percent : Z (In min_ (Up maxTo100 To N100)) -> Percent
 
 `min ≤ max ≤ N100`
 
-If you want a number where you just care about the minimum, leave `max` as a type _variable_
+Leave limits you don't care about as a type _variable_
 
-       ↓ minimum    ↓ maximum or  →
+    -- any number
+    Z (In min_ max_)
+
+    minimum  maximum
+       ↓     ↓ or  →
     ⨯ [✓ ✓ ✓ ✓ ✓ ✓ ✓...
 
-    -- any natural number
-    N (In min_ max_)
+    -- number, at least 5
+    Z (In (Add5 minMinus5_) max_)
 
-A number, at least 5:
+    minimum       maximum
+    ← or ↓           ↓
+      ...✓ ✓ ✓ ✓ ✓ ✓ ✓] ⨯
 
-    N (In (Add5 minMinus5_) max_)
+    -- number, at most 5
+    Z (In min_ (Up maxTo5_ To N5))
 
-→ `max_` could be a specific maximum or [no maximum at all](#MaxNo)
+  - → `min_` could be a specific maximum or [no minimum at all](#Unlimited)
+  - → `max_` could be a specific maximum or [no maximum at all](#Unlimited)
 
 
 ### result type in a range
 
-    n3 : N (In (Up x0 To (Add3 x0)) (Up x1 To (Add3 x1)))
+    n3 : Z (In (Up minX To (Add3 minX)) (Up maxX To (Add3 maxX)))
 
-    between3And6 : N (In (Up minX To (Add3 minX)) (Up maxX To (Add6 maxX)))
+    between3And6 : Z (In (Up minX To (Add3 minX)) (Up maxX To (Add6 maxX)))
 
-    between3And6 |> N.add n3
-    --: N (In (Up minX To (Add6 minX)) (Up maxX To (Add9 maxX)))
+    between3And6 |> Z.add n3
+    --: Z (In (Up minX To (Add6 minX)) (Up maxX To (Add9 maxX)))
 
 
 ### stored type in a range
 
-Like the result type but every `Up x To (Add<x> x)` becomes [`Fixed N<x>`](#Fixed)
+Like the result type but every `Up x To (Add<x> x)` becomes [`UpExact N<x>`](#UpExact)
 
 An example where this is useful using [typesafe-array](https://package.elm-lang.org/packages/lue-bird/elm-typesafe-array/latest/):
 
@@ -258,9 +265,9 @@ An example where this is useful using [typesafe-array](https://package.elm-lang.
             )
 
     type alias TreeBinary element =
-        Tree (Exactly N2) element
+        Tree (UpExactly N2) element
 
-Remember: ↑ and other [`Min`](#Min)/[`Exactly`](#Exactly)/[`Fixed`](#Fixed) are result/stored types, not argument types.
+Remember: ↑ and other [`Min`](#Min)/[`UpExactly`](#UpExactly)/[`UpExact`](#UpExact) are result/stored types, not argument types.
 
 ---
 
@@ -278,7 +285,8 @@ type alias In minimumAsDifference maximumAsDifference =
 
 {-| Only **stored / result types should use the type `Min`**:
 
-       ↓ minimum    ↓ or →
+    minimum  maximum
+       ↓     ↓ or  →
     ⨯ [✓ ✓ ✓ ✓ ✓ ✓ ✓...
 
 
@@ -286,15 +294,15 @@ type alias In minimumAsDifference maximumAsDifference =
 
 Sometimes, you simply cannot compute a maximum.
 
-    abs : Int -> N (In (Up x To x) ??)
+    abs : Int -> Z (In (Up x To x) ??)
                     ↓
-    abs : Int -> N (Min (Up x To x))
+    abs : Int -> Z (Min (Up x To x))
 
     -- number ≥ 5
-    atLeast5 : N (Min (Up x To (Add5 x)))
+    atLeast5 : Z (Min (Up x To (Add5 x)))
 
-    atLeast5 |> N.minAdd n3
-    --: N (Min (Up x To (Add8 x)))
+    atLeast5 |> Z.minAdd n3
+    --: Z (Min (Up x To (Add8 x)))
 
 
 ### argument type without maximum constraint
@@ -303,16 +311,16 @@ Every `Min min` is of type `In min ...`,
 so using a type variable for the maximum on arguments is highly encouraged
 when no maximum constraint should be enforced.
 
-    -- any natural number
-    N (In min_ max_)
+    -- any number
+    Z (In min_ max_)
 
     -- number, at least 5
-    N (In (Add5 minMinus5_) max_)
+    Z (In (Add5 minMinus5_) max_)
 
 
 ### stored type without maximum constraint
 
-Like the result type but every `Up x To (Add<x> x)` becomes [`Fixed N<x>`](#Fixed)
+Like the result type but every `Up x To (Add<x> x)` becomes [`UpExact N<x>`](#UpExact)
 
 An example where this is useful using [typesafe-array](https://package.elm-lang.org/packages/lue-bird/elm-typesafe-array/latest/):
 
@@ -325,9 +333,9 @@ An example where this is useful using [typesafe-array](https://package.elm-lang.
             )
 
     type alias TreeMulti element =
-        Tree (Min (Fixed N2)) element
+        Tree (Min (UpExact N2)) element
 
-Remember: ↑ and other [`Min`](#Min)/[`Exactly`](#Exactly)/[`Fixed`](#Fixed) are result/stored types, not argument types.
+Remember: ↑ and other [`Min`](#Min)/[`UpExactly`](#UpExactly)/[`UpExact`](#UpExact) are result/stored types, not argument types.
 
 ---
 
@@ -337,28 +345,95 @@ It can lead to elm crashing because [difference](#Up)s are stored as functions.
 
 -}
 type alias Min lowestPossibleValue =
-    In lowestPossibleValue MaxNo
+    In lowestPossibleValue Unlimited
 
 
-{-| Allow only a specific number.
+{-| Only **stored / result types should use the type `Max`**:
+
+    minimum       maximum
+    ← or ↓           ↓
+      ...✓ ✓ ✓ ✓ ✓ ✓ ✓] ⨯
+
+
+### result type without maximum constraint
+
+Sometimes, you simply cannot compute a maximum.
+
+    absNegative : Int -> Z (In (Up x To x) ??)
+                             ↓
+    absNegative : Int -> Z (Max (Up x To x))
+
+    -- number <= 5
+    atMost5 : Z (Max (Up x To (Add5 x)))
+
+    atMost5 |> Z.maxAdd n3
+    --: Z (Max (Up x To (Add8 x)))
+
+
+### argument type without maximum constraint
+
+Every `Min min` is of type `In min ...`,
+so using a type variable for the maximum on arguments is highly encouraged
+when no maximum constraint should be enforced.
+
+    -- any number
+    Z (In min_ max_)
+
+    -- number, at most 5
+    Z (In min_ (Up maxTo5_ To N5))
+
+
+### stored type without maximum constraint
+
+Like the result type but every `Up x To (Add<x> x)` becomes [`UpExact N<x>`](#UpExact)
+
+An example where this is useful using [typesafe-array](https://package.elm-lang.org/packages/lue-bird/elm-typesafe-array/latest/):
+
+    type Tree branchingFactor element
+        = Tree
+            element
+            (ArraySized
+                branchingFactor
+                (Maybe (Tree branchingFactor element))
+            )
+
+    type alias TreeMulti element =
+        Tree (Min (UpExact N2)) element
+
+Remember: ↑ and other [`Min`](#Min)/[`UpExactly`](#UpExactly)/[`UpExact`](#UpExact) are result/stored types, not argument types.
+
+---
+
+Do not use `==` on 2 values storing a range.
+It can lead to elm crashing because [difference](#Up)s are stored as functions.
+[compare](#compare) instead.
+
+-}
+type alias Max max =
+    In Unlimited max
+
+
+{-| Allow only the specific given non-negative number
 
 Useful as a **stored & argument** type in combination with [`typesafe-array`](https://package.elm-lang.org/packages/lue-bird/elm-typesafe-array/latest/)s,
-not with [`N`](#N)s.
+not with [`Z`](#Z)s.
 
-    byte : ArraySized (Exactly N8) Bit -> Byte
+    byte : ArraySized (UpExactly N8) Bit -> Byte
 
 → A given [`ArraySized`](https://package.elm-lang.org/packages/lue-bird/elm-typesafe-array/latest/) must have _exactly 8_ `Bit`s.
 
     type alias TicTacToeBoard =
         ArraySized
-            (Exactly N3)
-            (ArraySized (Exactly N3) TicTacToField)
+            (UpExactly N3)
+            (ArraySized (UpExactly N3) TicTacToField)
 
 → A given [`ArraySized`](https://package.elm-lang.org/packages/lue-bird/elm-typesafe-array/latest/) must have _exactly 3 by 3_ `TicTacToeField`s.
 
+Have a use-case for `DownExactly`? → issue/PR
+
 -}
-type alias Exactly n =
-    In (Fixed n) (Fixed n)
+type alias UpExactly n =
+    In (UpExact n) (UpExact n)
 
 
 {-| `Up low To high`: an exact number as the difference `high - low`.
@@ -389,58 +464,169 @@ type To
     = To Never
 
 
-{-| Flag "The number's upper limit is unknown" used in the definition of [`Min`](#Min):
+{-| Flag "The number's limit is unknown" used in the definitions
 
     type alias Min min =
-        In minimum MaxNo
+        In min Unlimited
+
+    type alias Max max =
+        In Unlimited max
+
+    int : Int -> Z (In Unlimited Unlimited)
 
 -}
-type alias MaxNo =
-    Fixed { maximumUnknown : () }
+type alias Unlimited =
+    Up { unlimited : () } To { unlimited : () }
+
+
+{-| An [`Unlimited`](#Unlimited) [difference](#Up)
+-}
+unlimited : Unlimited
+unlimited =
+    n0Difference
 
 
 {-| The exact number as the difference from 0 to the number.
 
 A stored type looks
 like a [result type](#result-type)
-but every [`Up x To (Add<x> x)`](#Up) becomes [`Fixed N<x>`](#Fixed)
+but every [`Up x To (Add<x> x)`](#Up) becomes [`UpExact N<x>`](#UpExact)
 
 -}
-type alias Fixed n =
+type alias UpExact n =
     Up N0 To n
 
 
-{-| [`To`](#To) the exact given number, create a [fixed difference from 0](#Fixed)
+{-| The exact number as the difference from a number to 0.
+
+A stored type looks
+like a [result type](#result-type)
+but every [`Down (Add<x> x) To x`](#Down) becomes [`DownExact N<x>`](#UpExact)
+
 -}
-fixed : n -> Fixed n
-fixed n =
+type alias DownExact n =
+    Down N0 To n
+
+
+{-| [`To`](#To) the exact given number, create a [fixed difference from 0](#UpExact)
+-}
+upFixed : n -> UpExact n
+upFixed n =
     Difference
         { up = \_ -> n
         , down = \_ -> N0 Possible
         }
 
 
-{-| Add a given [specific](#In) [`N`](#N).
+{-| From the exact given number, create a [fixed difference to 0](#DownExact)
+-}
+downFixed : n -> DownExact n
+downFixed n =
+    Difference
+        { up = \_ -> N0 Possible
+        , down = \_ -> n
+        }
 
-    between70And100 |> N.add n7
-    --: N (In (Up minX To (Add77 minX)) (Up maxX To (Add107 maxX)))
+
+differenceNegate : Up x To upX -> Down x To upX
+differenceNegate =
+    \difference ->
+        Difference
+            { up = difference |> downDifference
+            , down = difference |> upDifference
+            }
+
+
+
+--
+
+
+{-| Flip its sign `+ ⇆ -`
+-}
+negate :
+    Z (In (Up minX To minUpX) (Up maxX To maxUpX))
+    -> Z (In (Down maxX To maxUpX) (Down minX To minUpX))
+negate =
+    \z ->
+        (z |> toInt)
+            |> Basics.negate
+            |> LimitedIn
+                { minimumAsDifference =
+                    (z |> maximumAsDifference)
+                        |> differenceNegate
+                , maximumAsDifference =
+                    (z |> minimumAsDifference)
+                        |> differenceNegate
+                }
+
+
+{-| Its distance from `0` which is always `≥ 0`
+
+    -4
+        |> Z.int
+        |> Z.abs
+        --: Z (Min (Up x To x))
+        |> Z.toInt
+    --> 4
+
+    16 |> Z.int |> Z.abs |> Z.toInt
+    --> 16
+
+Really only use this if you want the absolute value.
+
+    badLength =
+        List.length >> Z.int >> Z.abs
+
+  - maybe, there's a solution that never even theoretically deals with unexpected values:
+
+        mostCorrectLength =
+            List.foldl
+                (\_ -> Z.minAdd n1 >> Z.minDown n1)
+                (n0 |> Z.maxNo)
+
+  - other times, though, like with `Array.length`, which isn't `O(n)`,
+    you can escape with for example
+
+        arrayLength =
+            Array.length >> Z.int >> Z.atLeast n0
+
+To handle the cases negative or not yourself → [`isAtLeast n0`](#isAtLeast)
+
+-}
+abs :
+    Z (In min_ max_)
+    -> Z (Min (Up x To x))
+abs =
+    \z ->
+        case z |> isAtLeast n0 of
+            Ok n0AtLeast ->
+                n0AtLeast |> maxNo
+
+            Err negative ->
+                negative |> minNo |> negate |> min n0
+
+
+{-| Add a given [specific](#In) [`Z`](#Z).
+
+    between70And100 |> Z.add n7
+    --: Z (In (Up minX To (Add77 minX)) (Up maxX To (Add107 maxX)))
 
 One addend has an unconstrained maximum? → [`minAdd`](#minAdd)
 
 -}
 add :
-    N
+    Z
         (In
-            (Up minPlusX To sumMinPlusX)
-            (Up maxPlusX To sumMaxPlusX)
+            (Up minUpX To sumMinUpX)
+            (Up maxUpX To sumMaxUpX)
         )
     ->
-        (N (In (Up minX To minPlusX) (Up maxX To maxPlusX))
+        (Z (In (Up minX To minUpX) (Up maxX To maxUpX))
          ->
-            N
+            Z
                 (In
-                    (Up minX To sumMinPlusX)
-                    (Up maxX To sumMaxPlusX)
+                    (Up minX To sumMinUpX)
+                    (Up maxX To sumMaxUpX)
                 )
         )
 add toAdd =
@@ -459,47 +645,19 @@ add toAdd =
                 }
 
 
-maximumNo : MaxNo
-maximumNo =
-    { maximumUnknown = () } |> fixed
+{-| 1:1 Conversion from a given `Int` to a [`Z`](#Z)
+that neither has minimum nor maximum constraints
 
-
-{-| The absolute value of an `Int` which is always `≥ 0`
-
-    -4
-        |> N.abs
-        --: N (Min (Up x To x))
-        |> N.toInt
-
-    --> 4
-    16 |> N.abs |> N.toInt --> 16
-
-Really only use this if you want the absolute value.
-
-    badLength =
-        List.length >> N.abs
-
-  - maybe, there's a solution that never even theoretically deals with unexpected values:
-
-        mostCorrectLength =
-            List.foldl
-                (\_ -> N.minAdd n1 >> N.minDown n1)
-                (n0 |> N.maxNo)
-
-  - other times, though, like with `Array.length`, which isn't `O(n)`,
-    you can escape with for example
-
-        arrayLength =
-            Array.length >> N.intAtLeast n0
+    -5 |> int
+    --: Z (In Unlimited Unlimited)
 
 -}
-abs : Int -> N (Min (Up x To x))
-abs =
-    Basics.abs
-        >> LimitedIn
-            { minimumAsDifference = n0 |> minimumAsDifference
-            , maximumAsDifference = maximumNo
-            }
+int : Int -> Z (In Unlimited Unlimited)
+int =
+    LimitedIn
+        { minimumAsDifference = unlimited
+        , maximumAsDifference = unlimited
+        }
 
 
 
@@ -507,11 +665,11 @@ abs =
 
 
 untilReverse :
-    N (In (Fixed min_) max)
+    Z (In (UpExact min_) (Up maxX To maxUpX))
     ->
         Emptiable
             (Stacked
-                (N (In (Up x0 To x0) max))
+                (Z (In (Up x0 To x0) (Up maxX To maxUpX)))
             )
             Never
 untilReverse last =
@@ -520,20 +678,20 @@ untilReverse last =
             n0 |> max last |> Stack.only
 
         Ok lastAtLeast1 ->
-            (lastAtLeast1 |> minSub n1 |> untilReverseRecursive)
+            (lastAtLeast1 |> maxUp n1 |> sub n1 |> untilReverseRecursive)
                 |> Stack.onTopLay (lastAtLeast1 |> min n0)
 
 
-{-| [`N`](#N)s increasing from `0` to `n`
+{-| [`Z`](#Z)s increasing from `0` to `n`
 In the end, there are `n` numbers.
 
     import Stack
 
-    N.until n6
-        |> Stack.map (\_ -> N.add n3)
+    Z.until n6
+        |> Stack.map (\_ -> Z.add n3)
         --: Emptiable
         --:     (Stacked
-        --:         (N
+        --:         (Z
         --:             (In
         --:                 (Up minX To (Add3 minX))
         --:                 (Up maxX To (Add9 maxX))
@@ -541,12 +699,12 @@ In the end, there are `n` numbers.
         --:         )
         --:     )
         --:     Never
-        |> Stack.map (\_ -> N.toInt)
+        |> Stack.map (\_ -> Z.toInt)
     --> Stack.topDown 3 [ 4, 5, 6, 7, 8, 9 ]
 
-    N.until atLeast7 |> Stack.map (\_ -> N.minAdd n3)
+    Z.until atLeast7 |> Stack.map (\_ -> Z.minAdd n3)
     --: Emptiable
-    --:     (Stacked (N (Min (Up x To (Add10 x)))))
+    --:     (Stacked (Z (Min (Up x To (Add10 x)))))
     --:     Never
 
 [`typesafe-array`](https://package.elm-lang.org/packages/lue-bird/elm-typesafe-array/latest/ArraySized#until) even knows the length!
@@ -554,11 +712,11 @@ Wanna try it?
 
 -}
 until :
-    N (In (Fixed min_) max)
+    Z (In (UpExact min_) (Up maxX To maxUpX))
     ->
         Emptiable
             (Stacked
-                (N (In (Up x0 To x0) max))
+                (Z (In (Up x0 To x0) (Up maxX To maxUpX)))
             )
             Never
 until last =
@@ -566,22 +724,22 @@ until last =
 
 
 untilReverseRecursive :
-    N (In (Fixed min_) max)
+    Z (In (UpExact min_) (Up maxX To maxUpX))
     ->
         Emptiable
             (Stacked
-                (N (In (Up x0 To x0) max))
+                (Z (In (Up x0 To x0) (Up maxX To maxUpX)))
             )
             Never
 untilReverseRecursive =
     untilReverse
 
 
-{-| Generate a random [`N`](#N) in a range.
+{-| Generate a random [`Z`](#Z) in a range.
 
-    N.randomIn ( n1, n10 )
+    Z.randomIn ( n1, n10 )
     --: Random.Generator
-    --:     (N
+    --:     (Z
     --:         (In
     --:             (Up minX To (Add1 minX))
     --:             (Up maxX To (Add10 maxX))
@@ -590,16 +748,16 @@ untilReverseRecursive =
 
 -}
 randomIn :
-    ( N
+    ( Z
         (In
             lowerLimitMin
             (Up lowerLimitMaxToUpperLimitMin_ To upperLimitMin)
         )
-    , N (In (Fixed upperLimitMin) upperLimitMax)
+    , Z (In (UpExact upperLimitMin) upperLimitMax)
     )
     ->
         Random.Generator
-            (N (In lowerLimitMin upperLimitMax))
+            (Z (In lowerLimitMin upperLimitMax))
 randomIn ( lowestPossible, highestPossible ) =
     Random.int (lowestPossible |> toInt) (highestPossible |> toInt)
         |> Random.map
@@ -610,237 +768,65 @@ randomIn ( lowestPossible, highestPossible ) =
             )
 
 
-{-| Compared to a range from a lower to an upper bound, is the `Int` in range, [`BelowOrAbove`](#BelowOrAbove)?
 
-    inputIntJudge : Int -> Result String (N (In (Up minX To (Add1 minX)) (Up maxX To (Add10 maxX))))
-    inputIntJudge int =
-        case int |> N.intIsIn ( n1, n10 ) of
-            Ok inRange ->
-                inRange |> Ok
-            Err (N.Below _) ->
-                Err "must be ≥ 1"
-            Err (N.Above _) ->
-                Err "must be ≤ 100"
-
-    0 |> inputIntJudge
-    --> Err "must be ≥ 1"
-
--}
-intIsIn :
-    ( N
-        (In
-            lowerLimitMin
-            (Up lowerLimitMaxToUpperLimitMin_ To upperLimitMin)
-        )
-    , N
-        (In
-            (Fixed upperLimitMin)
-            (Up upperLimitMaxX To upperLimitMaxPlusX)
-        )
-    )
-    ->
-        (Int
-         ->
-            Result
-                (BelowOrAbove
-                    Int
-                    (N
-                        (Min
-                            (Up upperLimitMaxX To (Add1 upperLimitMaxPlusX))
-                        )
-                    )
-                )
-                (N (In lowerLimitMin (Up upperLimitMaxX To upperLimitMaxPlusX)))
-        )
-intIsIn ( lowerLimit, upperLimit ) =
-    \int ->
-        if int < (lowerLimit |> toInt) then
-            int |> Below |> Err
-
-        else if int > (upperLimit |> toInt) then
-            int
-                |> LimitedIn
-                    { minimumAsDifference =
-                        (upperLimit |> maximumAsDifference)
-                            |> differenceUp (n1 |> minimumAsDifference)
-                    , maximumAsDifference = maximumNo
-                    }
-                |> Above
-                |> Err
-
-        else
-            int
-                |> LimitedIn
-                    { minimumAsDifference = lowerLimit |> minimumAsDifference
-                    , maximumAsDifference = upperLimit |> maximumAsDifference
-                    }
-                |> Ok
+--
 
 
-{-| If the `Int ≥` a given `minimum`,
-return `Ok` with the `N (Min minimum)`,
-else `Err` with the input `Int`.
-
-    4 |> N.intIsAtLeast n5
-    --: Result Int (N (Min (Up x To (Add5 x))))
-    --> Err 4
-
-    1234 |> N.intIsAtLeast n5 |> Result.map N.toInt
-    --> Ok 1234
-
--}
-intIsAtLeast :
-    N (In min max_)
-    ->
-        (Int
-         -> Result Int (N (Min min))
-        )
-intIsAtLeast minimumLimit =
-    \int ->
-        if int >= (minimumLimit |> toInt) then
-            int
-                |> LimitedIn
-                    { minimumAsDifference = minimumLimit |> minimumAsDifference
-                    , maximumAsDifference = maximumNo
-                    }
-                |> Ok
-
-        else
-            int |> Err
-
-
-{-| Create a `N (In ...)` by **clamping** an `Int` between a minimum & maximum.
+{-| **Clamp** the number to between both a given minimum & maximum
 
   - if the `Int < minimum`, `minimum` is returned
   - if the `Int > maximum`, `maximum` is returned
 
-If you want to handle the cases `< minimum` & `> maximum` explicitly, use [`intIsIn`](#intIsIn).
+.
 
     0
-        |> N.intIn ( n3, n12 )
-        --: N (In (Up minX To (Add3 minX)) (Up minX To (Add12 minX)))
-        |> N.toInt
+        |> Z.int
+        |> Z.in_ ( n3, n12 )
+        --: Z (In (Up minX To (Add3 minX)) (Up minX To (Add12 minX)))
+        |> Z.toInt
     --> 3
 
     99
-        |> N.intIn ( n3, n12 )
-        |> N.toInt
+        |> Z.int
+        |> Z.in_ ( n3, n12 )
+        |> Z.toInt
     --> 12
 
     9
-        |> N.intIn ( n3, n12 )
-        |> N.toInt
+        |> Z.int
+        |> Z.in_ ( n3, n12 )
+        |> Z.toInt
     --> 9
 
 
-    toDigit : Char -> Maybe (N (In (Up minX To minX) (Up maxX To (Add9 maxX))))
-    toDigit char =
-        ((char |> Char.toCode) - ('0' |> Char.toCode))
-            |> N.intIsIn ( n0, n9 )
-            |> Result.toMaybe
-
--}
-intIn :
-    ( N
-        (In
-            lowerLimitMin
-            (Up lowerLimitMaxToUpperLimitMin_ To upperLimitMin)
-        )
-    , N
-        (In
-            (Fixed upperLimitMin)
-            (Up upperLimitMaxX To upperLimitMaxPlusX)
-        )
-    )
-    ->
-        (Int
-         -> N (In lowerLimitMin (Up upperLimitMaxX To upperLimitMaxPlusX))
-        )
-intIn ( lowerLimit, upperLimit ) =
-    intIsIn ( lowerLimit, upperLimit )
-        >> valueElseOnError
-            (\error ->
-                case error of
-                    Below _ ->
-                        (lowerLimit |> toInt)
-                            |> LimitedIn
-                                { minimumAsDifference = lowerLimit |> minimumAsDifference
-                                , maximumAsDifference = upperLimit |> maximumAsDifference
-                                }
-
-                    Above _ ->
-                        (upperLimit |> toInt)
-                            |> LimitedIn
-                                { minimumAsDifference = lowerLimit |> minimumAsDifference
-                                , maximumAsDifference = upperLimit |> maximumAsDifference
-                                }
-            )
 
 
-{-| A `N (Min ...)` from an `Int`;
-if the `Int < minimum`, `minimum` is returned.
 
-    0
-        |> N.intAtLeast n3
-        --: N (Min (Up x To (Add3 x)))
-        |> N.toInt
-    --> 3
+    between5And9 |> Z.in_ ( n10, n10 )
+    --: Z (In (Up x0 To (Add10 x0)) (Up x1 To (Add10 x1)))
 
-    9
-        |> N.intAtLeast n3
-        --: N (Min (Up x To (Add3 x)))
-        |> N.toInt
-    --> 9
+    between5And15 |> Z.in_ ( n5, n10 )
+    --: Z (In (Up minX To (Add5 minX)) (Up maxX To (Add10 maxX)))
 
-You can also use this as an escape hatch
-if you know an `Int` must be at least `minimum`.
-But avoid it if you can do better, like
-
-    goodLength =
-        List.foldl
-            (\_ -> N.minAdd n1 >> N.minDown n1)
-            (n0 |> N.maxNo)
-
-To handle the case `< minimum` yourself → [`intIsAtLeast`](#intIsAtLeast)
-
--}
-intAtLeast :
-    N (In min max_)
-    ->
-        (Int
-         -> N (Min min)
-        )
-intAtLeast minimumLimit =
-    intIsAtLeast minimumLimit
-        >> Result.withDefault (minimumLimit |> maxNo)
-
-
-{-| **Clamp** the number to between both given limits.
-
-    between5And9 |> N.in_ ( n10, n10 )
-    --: N (In (Up x0 To (Add10 x0)) (Up x1 To (Add10 x1)))
-
-    between5And15 |> N.in_ ( n5, n10 )
-    --: N (In (Up minX To (Add5 minX)) (Up maxX To (Add10 maxX)))
-
-    atLeast5 |> N.in_ ( n5, n10 )
-    --: N (In (Up minX To (Add5 minX)) (Up maxX To (Add10 maxX)))
-
-  - There shouldn't be an upper limit? → [`minAtLeast`](#minAtLeast)
-  - To keep the current maximum? → [`atLeast`](#atLeast)
-  - To keep the current minimum? → [`atMost`](#atMost)
+    atLeast5 |> Z.in_ ( n5, n10 )
+    --: Z (In (Up minX To (Add5 minX)) (Up maxX To (Add10 maxX)))
 
 (The type doesn't forbid that the limits you're comparing against
 are beyond the current limits.)
 
+  - To handle the cases `< minimum` & `> maximum` explicitly → [`intIsIn`](#intIsIn)
+  - There shouldn't be an upper limit? → [`minAtLeast`](#minAtLeast)
+  - To keep the current maximum → [`atLeast`](#atLeast)
+  - To keep the current minimum → [`atMost`](#atMost)
+
 -}
 in_ :
-    ( N (In minNew (Up minNewMaxToMaxNewMin_ To maxNewMin))
-    , N (In (Fixed maxNewMin) maxNew)
+    ( Z (In minNew (Up minNewMaxToMaxNewMin_ To maxNewMin))
+    , Z (In (UpExact maxNewMin) maxNew)
     )
     ->
-        (N (In min_ max_)
-         -> N (In minNew maxNew)
+        (Z (In min_ max_)
+         -> Z (In minNew maxNew)
         )
 in_ ( lowerLimit, upperLimit ) =
     \n ->
@@ -858,87 +844,176 @@ in_ ( lowerLimit, upperLimit ) =
                     }
 
 
-{-| **Cap** the [`N`](#N) to `>=` a given new lower limit.
+{-| **Cap** the [`Z`](#Z) without maximum constraint
+to `>=` a given new lower limit.
 
-    n5AtLeast |> N.minAtLeast n10
-    --: N (Min (Up x To (Add10 x)))
+    n5AtLeast |> Z.minAtLeast n10
+    --: Z (Min (Up x To (Add10 x)))
 
 The type doesn't forbid that the lower limit you're comparing against
 is below the current lower limit
 
-    n15AtLeast |> N.minAtLeast n10 |> N.toInt
-    --: N (Min (Up x To (Add10 x)))
+    n15AtLeast |> Z.minAtLeast n10 |> Z.toInt
+    --: Z (Min (Up x To (Add10 x)))
 
-Know both maxima? → [`atLeast`](#atLeast)
+  - Know both maxima? → [`atLeast`](#atLeast)
+  - To handle the case where it's less yourself → [`isAtLeast`](#isAtLeast)
 
 -}
 minAtLeast :
-    N (In minNew maxNew_)
+    Z (In minNew (Up minNewMaxX_ To minNewMaxUpX_))
     ->
-        (N (In min_ max_)
-         -> N (Min minNew)
+        (Z (In min_ max_)
+         -> Z (Min minNew)
         )
 minAtLeast minimumLimit =
-    toInt
-        >> intIsAtLeast minimumLimit
-        >> Result.withDefault (minimumLimit |> maxNo)
+    \z ->
+        case z |> isAtLeast (minimumLimit |> maxUp n1) of
+            Ok atLeastMinimum ->
+                atLeastMinimum |> maxNo
+
+            Err _ ->
+                minimumLimit |> maxNo
 
 
-{-| **Cap** the [`N`](#N) to `<=` a given new upper limit.
+{-| **Cap** the [`Z`](#Z) to `<=` a given new upper limit.
 
     between3And10
-        |> N.atMost between2And5
-    --: N (In (Fixed 2) (Up x To (Add5 x)))
+        |> Z.atMost between2And5
+    --: Z (In (UpExact 2) (Up x To (Add5 x)))
 
-To replace the [`Fixed`](#Fixed) minimum with a [difference](#Up)
+To replace the [`UpExact`](#UpExact) minimum with a [difference](#Up)
 (for results etc.) → [`min`](#min)
 
-To enforce a new minimum, too? → [`in_`](#in_)
+To enforce a new minimum as well → [`in_`](#in_)
 
 -}
 atMost :
-    N (In (Fixed takenMin) takenMax)
+    Z (In (UpExact maxNewMin) maxNew)
     ->
-        (N (In (Up minToTakenMin_ To takenMin) max_)
-         -> N (In (Fixed takenMin) takenMax)
+        (Z (In (Up minToTakenMin_ To maxNewMin) max_)
+         -> Z (In (UpExact maxNewMin) maxNew)
         )
-atMost maximumLimit =
-    \n ->
-        if (n |> toInt) <= (maximumLimit |> toInt) then
-            (n |> toInt)
-                |> LimitedIn
-                    { minimumAsDifference = maximumLimit |> minimumAsDifference
-                    , maximumAsDifference = maximumLimit |> maximumAsDifference
-                    }
+atMost maximumLimitNew =
+    -- TODO check correctness:
+    -- min = Up x To (Add3 x), UpExact N4
+    --     works
+    -- min = Up x To (Add3 x), DownExact N2
+    --     correctly doesn't work
+    -- min = Up (Add3 x) To x, UpExact N4
+    --     works
+    -- min = Up (Add3 x) To x, DownExact N2
+    --     impossible
+    \z ->
+        case z |> isAtMost maximumLimitNew of
+            Ok atMostMaximumLimit ->
+                (atMostMaximumLimit |> toInt)
+                    |> LimitedIn
+                        { minimumAsDifference = maximumLimitNew |> minimumAsDifference
+                        , maximumAsDifference = maximumLimitNew |> maximumAsDifference
+                        }
 
-        else
-            maximumLimit
+            Err _ ->
+                maximumLimitNew
 
 
-{-| **Cap** the [`N`](#N) to `>=` a given new lower limit.
+{-| **Cap** the [`Z`](#Z) to `<=` a given new upper limit.
 
-    between5And12 |> N.atLeast n10
-    --: N (In (Up x To (Add10 x)) (Fixed N12))
+    atMost10
+        |> Z.minAtMost between2And5
+    --: Z (Max (Up x To (Add5 x)))
+
+  - Know both maxima? → [`atMost`](#atMost)
+  - To enforce a new minimum as well → [`in_`](#in_)
+
+-}
+maxAtMost :
+    Z (In (Up maxNewMinX_ To maxNewMinUpX_) maxNew)
+    ->
+        (Z (In min_ max_)
+         -> Z (Max maxNew)
+        )
+maxAtMost maximumLimitNew =
+    \z ->
+        case z |> isAtMost maximumLimitNew of
+            Err _ ->
+                maximumLimitNew |> minNo
+
+            Ok atMostMaximumLimitNew ->
+                atMostMaximumLimitNew |> minNo
+
+
+
+{- \n ->
+   if (n |> toInt) <= (maximumLimit |> toInt) then
+       (n |> toInt)
+           |> LimitedIn
+               { minimumAsDifference = maximumLimit |> minimumAsDifference
+               , maximumAsDifference = maximumLimit |> maximumAsDifference
+               }
+
+   else
+       maximumLimit
+-}
+
+
+{-| **Cap** the [`Z`](#Z) to `>=` a given new lower limit.
+
+    between5And12 |> Z.atLeast n10
+    --: Z (In (Up x To (Add10 x)) (UpExact N12))
+
+    0
+        |> Z.int
+        |> Z.atLeast n3
+        --: Z (Min (Up x To (Add3 x)))
+        |> Z.toInt
+    --> 3
+
+    9
+        |> Z.int
+        |> Z.atLeast n3
+        --: Z (Min (Up x To (Add3 x)))
+        |> Z.toInt
+    --> 9
+
+You can also use this as an escape hatch
+if you know an `Int` must be at least `minimum`.
+But avoid it if you can do better, like
+
+    goodLength =
+        List.foldl
+            (\_ -> Z.minAdd n1 >> Z.minDown n1)
+            (n0 |> Z.maxNo)
 
 The type doesn't forbid that the lower limit you're comparing against
 is below the current lower limit
 
     n15
-        |> N.atLeast n10
-        --: N (In (Up x To (Add10 x)) (Fixed N15))
-        |> N.toInt
+        |> Z.atLeast n10
+        --: Z (In (Up x To (Add10 x)) (UpExact N15))
+        |> Z.toInt
     --> 15
 
-Don't know both maxima? → [`minAtLeast`](#minAtLeast)
+  - Don't know both maxima? → [`minAtLeast`](#minAtLeast)
+  - To handle the case where it's less yourself → [`isAtLeast`](#isAtLeast)
 
 -}
 atLeast :
-    N (In minNew (Up minNewMaxToMax_ To max))
+    Z (In minNew (Up minNewMaxToMax_ To max))
     ->
-        (N (In min_ (Fixed max))
-         -> N (In minNew (Fixed max))
+        (Z (In min_ (UpExact max))
+         -> Z (In minNew (UpExact max))
         )
 atLeast minimumLimit =
+    -- TODO check correctness:
+    -- min = Up x To (Add3 x), UpExact N4
+    --     works
+    -- min = Up x To (Add3 x), DownExact N2
+    --     correctly doesn't work
+    -- min = Up (Add3 x) To x, UpExact N4
+    --     works
+    -- min = Up (Add3 x) To x, DownExact N2
+    --     impossible
     \n ->
         if (n |> toInt) >= (minimumLimit |> toInt) then
             (n |> toInt)
@@ -955,21 +1030,25 @@ atLeast minimumLimit =
                     }
 
 
-{-| Multiply by a given [`n`](#N) `≥ 1`.
+
+--
+
+
+{-| Multiply by a given [`n`](#Z) `≥ 1`.
 which means `x * n ≥ x`.
 
-    atLeast5 |> N.mul n2
-    --: N (Min (Up x To (Add5 x)))
+    atLeast5 |> Z.mul n2
+    --: Z (Min (Up x To (Add5 x)))
 
-    atLeast2 |> N.mul n5
-    --: N (Min (Up x To (Add2 x)))
+    atLeast2 |> Z.mul n5
+    --: Z (Min (Up x To (Add2 x)))
 
 -}
 mul :
-    N (In (Fixed (Add1 multiplicandMinMinus1_)) multiplicandMax_)
+    Z (In (UpExact (Add1 multiplicandMinMinus1_)) multiplicandMax_)
     ->
-        (N (In min max_)
-         -> N (Min min)
+        (Z (In min max_)
+         -> Z (Min min)
         )
 mul multiplicand =
     \n ->
@@ -977,11 +1056,11 @@ mul multiplicand =
             * (multiplicand |> toInt)
             |> LimitedIn
                 { minimumAsDifference = n |> minimumAsDifference
-                , maximumAsDifference = maximumNo
+                , maximumAsDifference = unlimited
                 }
 
 
-{-| Divide (`//`) by an [`N`](#N) `d ≥ 1`.
+{-| Divide (`//`) by an [`Z`](#Z) `d ≥ 1`.
 
   - → `/ 0` is impossible
   - → `x / d <= x`
@@ -989,16 +1068,16 @@ mul multiplicand =
 .
 
     atMost7
-        |> N.div n3
-        --: N (In (Up minX To minX) (Up maxX To (Add7 maxX)))
-        |> N.toInt
+        |> Z.div n3
+        --: Z (In (Up minX To minX) (Up maxX To (Add7 maxX)))
+        |> Z.toInt
 
 -}
 div :
-    N (In (Fixed (Add1 divisorMinMinus1_)) divisorMax_)
+    Z (In (UpExact (Add1 divisorMinMinus1_)) divisorMax_)
     ->
-        (N (In min_ max)
-         -> N (In (Up minX To minX) max)
+        (Z (In min_ max)
+         -> Z (In (Up minX To minX) max)
         )
 div divisor =
     \n ->
@@ -1010,26 +1089,26 @@ div divisor =
                 }
 
 
-{-| The remainder after dividing by a [`N`](#N) `d ≥ 1`.
+{-| The remainder after dividing by a [`Z`](#Z) `d ≥ 1`.
 We know `x % d ≤ d - 1`
 
-    atMost7 |> N.remainderBy n3
-    --: N (In (Up minX To minX) (Up maxX To (Add2 maxX)))
+    atMost7 |> Z.remainderBy n3
+    --: Z (In (Up minX To minX) (Up maxX To (Add2 maxX)))
 
 -}
 remainderBy :
-    N
+    Z
         (In
-            (Fixed (Add1 divisorMinMinus1_))
-            (Up divX To (Add1 divisorMaxPlusXMinus1))
+            (UpExact (Add1 divisorMinMinus1_))
+            (Up divX To (Add1 divisorMaxUpXMinus1))
         )
     ->
-        (N (In min_ max_)
+        (Z (In min_ max_)
          ->
-            N
+            Z
                 (In
                     (Up x0 To x0)
-                    (Up divX To divisorMaxPlusXMinus1)
+                    (Up divX To divisorMaxUpXMinus1)
                 )
         )
 remainderBy divisor =
@@ -1044,21 +1123,21 @@ remainderBy divisor =
                 }
 
 
-{-| [`N`](#N) Raised to a given power `p ≥ 1`
+{-| [`Z`](#Z) Raised to a given power `p ≥ 1`
 → `x ^ p ≥ x`
 
-    atLeast5 |> N.toPower n2
-    --: N (Min (Up x To (Add5 x)))
+    atLeast5 |> Z.toPower n2
+    --: Z (Min (Up x To (Add5 x)))
 
-    atLeast2 |> N.toPower n5
-    --: N (Min (Up x To (Add2 x)))
+    atLeast2 |> Z.toPower n5
+    --: Z (Min (Up x To (Add2 x)))
 
 -}
 toPower :
-    N (In (Fixed (Add1 exponentMinMinus1_)) exponentMax_)
+    Z (In (UpExact (Add1 exponentMinMinus1_)) exponentMax_)
     ->
-        (N (In min max_)
-         -> N (Min min)
+        (Z (In min max_)
+         -> Z (Min min)
         )
 toPower exponent =
     \n ->
@@ -1066,7 +1145,39 @@ toPower exponent =
             ^ (exponent |> toInt)
             |> LimitedIn
                 { minimumAsDifference = n |> minimumAsDifference
-                , maximumAsDifference = maximumNo
+                , maximumAsDifference = unlimited
+                }
+
+
+
+-- type information
+
+
+{-| On `Z (In min max)`'s type, drop `min` to get a `Z (Max max)`.
+
+    between3And10 |> Z.minNo
+    --: Z (Max (Up x To (Add10 x)))
+
+Use it to unify different types of number minimum constraints like
+
+    [ atMost1, between1And10 ]
+
+elm complains:
+
+> But all the previous elements in the list are: `Z (Max (Up x To (Add1 x)))`
+
+    [ atMost1
+    , between1And10 |> Z.minNo
+    ]
+
+-}
+minNo : Z (In min_ max) -> Z (Max max)
+minNo =
+    \n ->
+        (n |> toInt)
+            |> LimitedIn
+                { minimumAsDifference = unlimited
+                , maximumAsDifference = n |> maximumAsDifference
                 }
 
 
@@ -1076,53 +1187,80 @@ toPower exponent =
 
 Elm complains:
 
-> But all the previous elements in the list are: `N (Min N3)`
+> But all the previous elements in the list are: `Z (Min N3)`
 
     [ atLeast3
-    , atLeast4 |> N.min n3
+    , atLeast4 |> Z.min n3
     ]
 
 -}
 min :
-    N (In minNew (Up minNewMaxToMin_ To min))
+    Z (In minNew (Up minNewMaxToMin_ To min))
     ->
-        (N (In (Fixed min) max)
-         -> N (In minNew max)
+        (Z (In (UpExact min) max)
+         -> Z (In minNew max)
         )
-min newMinimum =
+min minimumNew =
     \n ->
         (n |> toInt)
             |> LimitedIn
-                { minimumAsDifference = newMinimum |> minimumAsDifference
+                { minimumAsDifference = minimumNew |> minimumAsDifference
                 , maximumAsDifference = n |> maximumAsDifference
                 }
 
 
-{-| On `N (In min max)`'s type, drop `max` to get a `N (Min min)`.
+{-| Have a specific minimum in mind? → [`min`](#min)
 
-    between3And10 |> N.maxNo
-    --: N (Min (Up x To (Add3 x)))
+Want to decrease the lower bound by a fixed amount? → [`minDown`](#minDown)
 
-Use it to unify different types of number minimum constraints like
+-}
+minDown :
+    Z
+        (In
+            maxIncreasedMin_
+            (Down minUpX To minDecreasedUpX)
+        )
+    ->
+        (Z (In (Up x To minUpX) max)
+         -> Z (In (Up x To minDecreasedUpX) max)
+        )
+minDown minRelativeDecrease =
+    \n ->
+        (n |> toInt)
+            |> LimitedIn
+                { minimumAsDifference =
+                    (n |> minimumAsDifference)
+                        |> differenceDown
+                            (minRelativeDecrease |> maximumAsDifference)
+                , maximumAsDifference = n |> maximumAsDifference
+                }
+
+
+{-| On `Z (In min max)`'s type, drop `max` to get a `Z (Min min)`.
+
+    between3And10 |> Z.maxNo
+    --: Z (Min (Up x To (Add3 x)))
+
+Use it to unify different types of number maximum constraints like
 
     [ atLeast1, between1And10 ]
 
 elm complains:
 
-> But all the previous elements in the list are: `N (Min (Up x To (Add1 x)))`
+> But all the previous elements in the list are: `Z (Min (Up x To (Add1 x)))`
 
     [ atLeast1
-    , between1And10 |> N.maxNo
+    , between1And10 |> Z.maxNo
     ]
 
 -}
-maxNo : N (In min max_) -> N (Min min)
+maxNo : Z (In min max_) -> Z (Min min)
 maxNo =
     \n ->
         (n |> toInt)
             |> LimitedIn
                 { minimumAsDifference = n |> minimumAsDifference
-                , maximumAsDifference = maximumNo
+                , maximumAsDifference = unlimited
                 }
 
 
@@ -1130,7 +1268,7 @@ maxNo =
 
 You should type arguments and stored types as broad as possible.
 
-    onlyAtMost18 : N (In min_ (Up maxX To (Add18 maxX)) -> ...
+    onlyAtMost18 : Z (In min_ (Up maxX To (Add18 maxX)) -> ...
 
     onlyAtMost18 between3And8 -- works
 
@@ -1138,14 +1276,14 @@ But once you implement `onlyAtMost18`, you might use the n in `onlyAtMost19`:
 
     onlyAtMost18 n =
         -- onlyAtMost19 n → error
-        onlyAtMost19 (n |> N.max n18)
+        onlyAtMost19 (n |> Z.max n18)
 
 -}
 max :
-    N (In (Fixed maxNewMin) maxNew)
+    Z (In (UpExact maxNewMin) maxNew)
     ->
-        (N (In min (Up maxToMaxNewMin_ To maxNewMin))
-         -> N (In min maxNew)
+        (Z (In min (Up maxToMaxNewMin_ To maxNewMin))
+         -> Z (In min maxNew)
         )
 max maximumNew =
     \n ->
@@ -1162,14 +1300,15 @@ Want to increase the upper bound by a fixed amount? → [`maxUp`](#maxUp)
 
 -}
 maxUp :
-    N
+    Z
         (In
-            maxIncreasedMin_
-            (Up maxPlusX To maxIncreasedPlusX)
+            -- min = UpExact guarantees that max is actually an increase
+            (UpExact maxIncreasedMin_)
+            (Up maxUpX To maxIncreasedUpX)
         )
     ->
-        (N (In min (Up x To maxPlusX))
-         -> N (In min (Up x To maxIncreasedPlusX))
+        (Z (In min (Up x To maxUpX))
+         -> Z (In min (Up x To maxIncreasedUpX))
         )
 maxUp maxRelativeIncrease =
     \n ->
@@ -1183,34 +1322,11 @@ maxUp maxRelativeIncrease =
                 }
 
 
-{-| Have a specific minimum in mind? → [`min`](#min)
 
-Want to decrease the lower bound by a fixed amount? → [`minDown`](#minDown)
-
--}
-minDown :
-    N
-        (In
-            maxIncreasedMin_
-            (Down minPlusX To minDecreasedPlusX)
-        )
-    ->
-        (N (In (Up x To minPlusX) max)
-         -> N (In (Up x To minDecreasedPlusX) max)
-        )
-minDown minRelativeDecrease =
-    \n ->
-        (n |> toInt)
-            |> LimitedIn
-                { minimumAsDifference =
-                    (n |> minimumAsDifference)
-                        |> differenceDown
-                            (minRelativeDecrease |> maximumAsDifference)
-                , maximumAsDifference = n |> maximumAsDifference
-                }
+-- compare
 
 
-{-| The error result of comparing [`N`](#N)s.
+{-| The error result of comparing [`Z`](#Z)s.
 
   - `Above`: greater
   - `Below`: less
@@ -1226,15 +1342,15 @@ type BelowOrAbove below above
 {-| Drop the range constraints
 to feed another library with its `Int` representation.
 -}
-toInt : N range_ -> Int
+toInt : Z range_ -> Int
 toInt =
-    \(LimitedIn _ int) -> int
+    \(LimitedIn _ intValue) -> intValue
 
 
 {-| Drop the range constraints
 to feed another library with its `Float` representation.
 -}
-toFloat : N range_ -> Float
+toFloat : Z range_ -> Float
 toFloat =
     toInt >> Basics.toFloat
 
@@ -1243,59 +1359,59 @@ toFloat =
 -- transform
 
 
-{-| Is the [`N`](#N) equal to, [`BelowOrAbove`](#BelowOrAbove) a given number?
+{-| Is the [`Z`](#Z) equal to, [`BelowOrAbove`](#BelowOrAbove) a given number?
 
     giveAPresent { age } =
-        case age |> N.is n18 of
-            Err (N.Below younger) ->
+        case age |> Z.is n18 of
+            Err (Z.Below younger) ->
                 toy { age = younger }
 
-            Err (N.Above older) ->
+            Err (Z.Above older) ->
                 book { age = older }
 
             Ok _ ->
                 bigPresent
 
-    toy : { age : N (In min_ (Up maxX To (Add17 maxX)) } -> Toy
+    toy : { age : Z (In min_ (Up maxX To (Add17 maxX)) } -> Toy
 
     book :
-        { age : N (In (Fixed (Add19 minMinus19_)) max_) }
+        { age : Z (In (UpExact (Add19 minMinus19_)) max_) }
         -> Book
 
 (The type doesn't forbid that the number you're comparing against
 is below the current minimum or above the current maximum.
-→ `Err` or `Ok` values don't necessarily follow `min <= max` for `N (In min max ...)`
+→ `Err` or `Ok` values don't necessarily follow `min <= max` for `Z (In min max ...)`
 Luckily that's not a problem, since the values won't be produced anyway.)
 
 -}
 is :
-    N
+    Z
         (In
-            (Up minX To (Add1 comparedAgainstMinPlusXMinus1))
-            (Up maxX To (Add1 comparedAgainstMaxPlusXMinus1))
+            (Up minX To (Add1 comparedAgainstMinUpXMinus1))
+            (Up maxX To (Add1 comparedAgainstMaxUpXMinus1))
         )
     ->
-        (N (In min max)
+        (Z (In min max)
          ->
             Result
                 (BelowOrAbove
-                    (N
+                    (Z
                         (In
                             min
-                            (Up maxX To comparedAgainstMaxPlusXMinus1)
+                            (Up maxX To comparedAgainstMaxUpXMinus1)
                         )
                     )
-                    (N
+                    (Z
                         (In
-                            (Up minX To (Add2 comparedAgainstMinPlusXMinus1))
+                            (Up minX To (Add2 comparedAgainstMinUpXMinus1))
                             max
                         )
                     )
                 )
-                (N
+                (Z
                     (In
-                        (Up minX To (Add1 comparedAgainstMinPlusXMinus1))
-                        (Up maxX To (Add1 comparedAgainstMaxPlusXMinus1))
+                        (Up minX To (Add1 comparedAgainstMinUpXMinus1))
+                        (Up maxX To (Add1 comparedAgainstMaxUpXMinus1))
                     )
                 )
         )
@@ -1330,22 +1446,42 @@ is comparedAgainst =
 
 
 {-| Compared to a range from a lower to an upper bound,
-is the [`N`](#N) in range or [`BelowOrAbove`](#BelowOrAbove)?
+is the [`Z`](#Z) in range or [`BelowOrAbove`](#BelowOrAbove)?
 
-    isIn3To10 : N (In min_ max_) -> Maybe (N (In (Up minX To (Add3 minX)) (Up maxX To (Add10 maxX))))
+    isIn3To10 : Z (In min_ max_) -> Maybe (Z (In (Up minX To (Add3 minX)) (Up maxX To (Add10 maxX))))
     isIn3To10 =
-        N.isIn ( n3, n10 )
+        Z.isIn ( n3, n10 )
             >> Result.toMaybe
 
-    n9 |> isIn3To10 |> Maybe.map N.toInt
+    n9 |> isIn3To10 |> Maybe.map Z.toInt
     --> Just 9
 
     n12 |> isIn3To10
     --> Nothing
 
+    inputIntJudge : Int -> Result String (Z (In (Up minX To (Add1 minX)) (Up maxX To (Add10 maxX))))
+    inputIntJudge int =
+        case int |> Z.int |> Z.isIn ( n1, n10 ) of
+            Ok inRange ->
+                inRange |> Ok
+            Err (Z.Below _) ->
+                Err "must be ≥ 1"
+            Err (Z.Above _) ->
+                Err "must be ≤ 100"
+
+    0 |> inputIntJudge
+    --> Err "must be ≥ 1"
+
+    toDigit : Char -> Maybe (Z (In (Up minX To minX) (Up maxX To (Add9 maxX))))
+    toDigit char =
+        ((char |> Char.toCode) - ('0' |> Char.toCode))
+            |> Z.int
+            |> Z.isIn ( n0, n9 )
+            |> Result.toMaybe
+
 (The type doesn't forbid that the limits you're comparing against
 are below the current minimum, above the current maximum or in the wrong order.
-→ `Err` or `Ok` values don't necessarily follow `min <= max` for `N (In min max ...)`
+→ `Err` or `Ok` values don't necessarily follow `min <= max` for `Z (In min max ...)`
 Luckily that's not a problem, since the values won't be produced anyway.)
 
 Here's some example-cases:
@@ -1370,36 +1506,36 @@ Here's some example-cases:
 
 -}
 isIn :
-    ( N
+    ( Z
         (In
             lowerLimitMin
-            (Up lowerLimitMaxX To (Add1 lowerLimitMaxPlusXMinus1))
+            (Up lowerLimitMaxX To (Add1 lowerLimitMaxUpXMinus1))
         )
-    , N
+    , Z
         (In
-            (Up upperLimitMinX To upperLimitMinPlusX)
+            (Up upperLimitMinX To upperLimitMinUpX)
             upperLimitMax
         )
     )
     ->
-        (N (In min max)
+        (Z (In min max)
          ->
             Result
                 (BelowOrAbove
-                    (N
+                    (Z
                         (In
                             min
-                            (Up lowerLimitMaxX To lowerLimitMaxPlusXMinus1)
+                            (Up lowerLimitMaxX To lowerLimitMaxUpXMinus1)
                         )
                     )
-                    (N
+                    (Z
                         (In
-                            (Up upperLimitMinX To (Add1 upperLimitMinPlusX))
+                            (Up upperLimitMinX To (Add1 upperLimitMinUpX))
                             max
                         )
                     )
                 )
-                (N (In lowerLimitMin upperLimitMax))
+                (Z (In lowerLimitMin upperLimitMax))
         )
 isIn ( lowerLimit, upperLimit ) =
     \n ->
@@ -1439,14 +1575,21 @@ isIn ( lowerLimit, upperLimit ) =
 --
 
 
-{-| Is the [`N`](#N) below than or at least as big as a given number?
+{-| Is the [`Z`](#Z) below than or at least as big as a given number?
+
+    4 |> Z.int |> Z.isAtLeast n5
+    --: Result Int (Z (Min (Up x To (Add5 x))))
+    --> Err 4
+
+    1234 |> Z.int |> Z.isAtLeast n5 |> Result.map Z.toInt
+    --> Ok 1234
 
     vote :
-        { age : N (In (Fixed (Add18 minMinus18_)) max_) }
+        { age : Z (In (UpExact (Add18 minMinus18_)) max_) }
         -> Vote
 
     tryToVote { age } =
-        case age |> N.isAtLeast n18 of
+        case age |> Z.isAtLeast n18 of
             Err _ ->
                 --😓
                 Nothing
@@ -1454,38 +1597,38 @@ isIn ( lowerLimit, upperLimit ) =
             Ok oldEnough ->
                 vote { age = oldEnough } |> Just
 
-    factorial : N (In min_ max_) -> N (Min (Up x To (Add1 x)))
+    factorial : Z (In min_ max_) -> Z (Min (Up x To (Add1 x)))
     factorial =
         factorialBody
 
-    factorialBody : N (In min_ max_) -> N (Min (Up x To (Add1 x)))
+    factorialBody : Z (In min_ max_) -> Z (Min (Up x To (Add1 x)))
     factorialBody x =
-        case x |> N.isAtLeast n1 of
+        case x |> Z.isAtLeast n1 of
             Err _ ->
-                n1 |> N.maxNo
+                n1 |> Z.maxNo
 
             Ok atLeast1 ->
-                factorial (atLeast1 |> N.minSub n1)
-                    |> N.mul atLeast1
+                factorial (atLeast1 |> Z.minSub n1)
+                    |> Z.mul atLeast1
 
 (The type doesn't forbid that the lower limit you're comparing against
 is below the current minimum or above the current maximum.
-→ `Err` or `Ok` values don't necessarily follow `min <= max` for `N (In min max ...)`
+→ `Err` or `Ok` values don't necessarily follow `min <= max` for `Z (In min max ...)`
 Luckily that's not a problem, since the values won't be produced anyway.)
 
 -}
 isAtLeast :
-    N
+    Z
         (In
             lowerLimitMin
-            (Up lowerLimitMaxX To (Add1 lowerLimitMaxMinus1PlusX))
+            (Up lowerLimitMaxX To (Add1 lowerLimitMaxMinus1UpX))
         )
     ->
-        (N (In min max)
+        (Z (In min max)
          ->
             Result
-                (N (In min (Up lowerLimitMaxX To lowerLimitMaxMinus1PlusX)))
-                (N (In lowerLimitMin max))
+                (Z (In min (Up lowerLimitMaxX To lowerLimitMaxMinus1UpX)))
+                (Z (In lowerLimitMin max))
         )
 isAtLeast lowerLimit =
     \n ->
@@ -1508,12 +1651,12 @@ isAtLeast lowerLimit =
                 |> Err
 
 
-{-| Is the [`N`](#N) at most (`Ok`) or greater than (`Err`) a given number?
+{-| Is the [`Z`](#Z) at most (`Ok`) or greater than (`Err`) a given number?
 
-    goToBelow18Party : { age : N (In min_ (Up maxTo17 To N17)) } -> Snack
+    goToBelow18Party : { age : Z (In min_ (Up maxTo17 To N17)) } -> Snack
 
     tryToGoToBelow18Party { age } =
-        case age |> N.isAtMost n17 of
+        case age |> Z.isAtMost n17 of
             Ok below18 ->
                 goToBelow18Party { age = below18 } |> Just
 
@@ -1522,18 +1665,18 @@ isAtLeast lowerLimit =
 
 (The type doesn't forbid that the upper limit you're comparing against
 is below the current minimum or above the current maximum.
-→ `Err` or `Ok` values don't necessarily follow `min <= max` for `N (In min max ...)`
+→ `Err` or `Ok` values don't necessarily follow `min <= max` for `Z (In min max ...)`
 Luckily that's not a problem, since the values won't be produced anyway.)
 
 -}
 isAtMost :
-    N (In (Up upperLimitMinX To upperLimitMinPlusX) upperLimitMax)
+    Z (In (Up upperLimitMinX To upperLimitMinUpX) upperLimitMax)
     ->
-        (N (In min max)
+        (Z (In min max)
          ->
             Result
-                (N (In (Up upperLimitMinX To (Add1 upperLimitMinPlusX)) max))
-                (N (In min upperLimitMax))
+                (Z (In (Up upperLimitMinX To (Add1 upperLimitMinUpX)) max))
+                (Z (In min upperLimitMax))
         )
 isAtMost upperLimit =
     \n ->
@@ -1556,116 +1699,153 @@ isAtMost upperLimit =
                 |> Err
 
 
-{-| To the [`N`](#N) without a known maximum-constraint,
+{-| To the [`Z`](#Z) without a known maximum-constraint,
 add a number that (only) has [information on how to add](#Up) the minima.
 
-    atLeast70 |> N.minAdd n7
-    --: N (Min (Up x To (Add77 x))
+    atLeast70 |> Z.minAdd n7
+    --: Z (Min (Up x To (Add77 x))
 
-Use [`add`](#add) if both maxima are known [difference](#Up)s as well.
+    Z.minAdd toAdd =
+        Z.maxNo >> Z.add (toAdd |> Z.maxNo)
 
-If the added minimum is [`Fixed`](#Fixed), supply the [`min`](#min) manually
-to re-enable adding both minimum types!
-
-    atLeast5 |> N.minAdd (min n2 atLeastFixed2)
-    --: N (Min (Up x To (Add7 x)))
+Both maxima are known [difference](#Up)s? → [`add`](#add)
 
 -}
 minAdd :
-    N
+    Z
         (In
-            (Up minPlusX To sumMinPlusX)
+            (Up minUpX To sumMinUpX)
             addedMax_
         )
     ->
-        (N (In (Up x To minPlusX) max_)
-         -> N (Min (Up x To sumMinPlusX))
+        (Z (In (Up x To minUpX) max_)
+         -> Z (Min (Up x To sumMinUpX))
         )
 minAdd toAdd =
-    \n ->
-        ((n |> toInt) + (toAdd |> toInt))
-            |> LimitedIn
-                { minimumAsDifference =
-                    (n |> minimumAsDifference)
-                        |> differenceUp (toAdd |> minimumAsDifference)
-                , maximumAsDifference = maximumNo
-                }
+    maxNo >> add (toAdd |> maxNo)
 
 
-{-| From the [`N`](#N) in a range subtract another [`N`](#N) in a range.
+{-| To the [`Z`](#Z) without a known minimum-constraint,
+add a number that (only) has [information on how to add](#Up) the maxima.
 
-    n6 |> N.sub n5
+    atMost70 |> Z.maxAdd n7
+    --: Z (Max (Up x To (Add77 x))
+
+    Z.maxAdd toAdd =
+        Z.minNo >> Z.add (toAdd |> Z.minNo)
+
+Both maxima are known [difference](#Up)s? → [`add`](#add)
+
+-}
+maxAdd :
+    Z
+        (In
+            addedMin_
+            (Up maxUpX To sumMaxUpX)
+        )
+    ->
+        (Z (In min_ (Up x To maxUpX))
+         -> Z (Max (Up x To sumMaxUpX))
+        )
+maxAdd toAdd =
+    minNo >> add (toAdd |> minNo)
+
+
+{-| From the [`Z`](#Z) in a range subtract another [`Z`](#Z) in a range.
+
+    n6 |> Z.sub n5
     --→ n1
-    --: N (In (Fixed N1) (Fixed N1))
+    --: Z (In (Up minX To (Add1 minX)) (Up maxX To (Add1 maxX)))
+
+    Z.sub toSubtract =
+        Z.add (toSubtract |> Z.negate)
 
 One of the terms has no maximum constraint? → [`minSub`](#minSub)
 
 -}
 sub :
-    N
+    Z
         (In
-            (Down maxPlusX To differenceMaxPlusX)
-            (Down min To differenceMin)
+            (Down maxUpX To differenceMaxUpX)
+            (Down minUpX To differenceMinUpX)
         )
     ->
-        (N (In (Fixed min) (Up maxX To maxPlusX))
+        (Z (In (Up minX To minUpX) (Up maxX To maxUpX))
          ->
-            N
+            Z
                 (In
-                    (Fixed differenceMin)
-                    (Up maxX To differenceMaxPlusX)
+                    (Up minX To differenceMinUpX)
+                    (Up maxX To differenceMaxUpX)
                 )
         )
 sub toSubtract =
-    \n ->
-        (n |> toInt)
-            - (toSubtract |> toInt)
-            |> LimitedIn
-                { minimumAsDifference =
-                    (n |> minimumAsDifference)
-                        |> differenceDown (toSubtract |> maximumAsDifference)
-                , maximumAsDifference =
-                    (n |> maximumAsDifference)
-                        |> differenceDown (toSubtract |> minimumAsDifference)
-                }
+    add (toSubtract |> negate)
 
 
-{-| From an [`N`](#N) with an unknown maximum constraint,
+{-| From an [`Z`](#Z) with an unknown maximum constraint,
 subtract a [specific number](#In)
 
-    atLeast7 |> N.minSub n2
-    --: N (Min (Fixed N5))
+    atLeast7 |> Z.minSub n2
+    --: Z (Min (UpExact N5))
 
-    atLeast6 |> N.minSub between0And5
-    --: N (Min (Fixed N1))
+    atLeast6 |> Z.minSub between0And5
+    --: Z (Min (UpExact N1))
 
-    between6And12 |> N.minSub between1And5
-    --: N (In (Fixed min) (Up maxX To (Add12 maxX)))
+    between6And12 |> Z.minSub between1And5
+    --: Z (In (UpExact min) (Up maxX To (Add12 maxX)))
 
-Use [`sub`](#sub) if you want to subtract an [`N`](#N) in a range.
+    Z.minSub subtrahend =
+        Z.minAdd (subtrahend |> Z.negate)
+
+Use [`sub`](#sub) if you want to subtract an [`Z`](#Z) in a range.
 
 -}
 minSub :
-    N
+    Z
         (In
-            subtractedDifference0_
-            (Down min To differenceMin)
+            (Up subtrahendMinX_ To subtrahendMinUpX_)
+            (Down minUpX To differenceMinUpX)
         )
     ->
-        (N (In (Fixed min) max)
-         -> N (In (Fixed differenceMin) max)
+        (Z (In (Up minX To minUpX) max_)
+         -> Z (Min (Up minX To differenceMinUpX))
         )
 minSub subtrahend =
-    \n ->
-        (n |> toInt)
-            - (subtrahend |> toInt)
-            |> LimitedIn
-                { minimumAsDifference =
-                    (n |> minimumAsDifference)
-                        |> differenceDown
-                            (subtrahend |> maximumAsDifference)
-                , maximumAsDifference = n |> maximumAsDifference
-                }
+    minAdd (subtrahend |> negate)
+
+
+{-| From an [`Z`](#Z) with an unknown minimum constraint,
+subtract another [`Z`](#Z)
+
+TODO: fix doc
+
+    atLeast7 |> Z.maxSub n2
+    --: Z (Min (UpExact N5))
+
+    atLeast6 |> Z.maxSub between0And5
+    --: Z (Min (UpExact N1))
+
+    between6And12 |> Z.maxSub between1And5
+    --: Z (In (UpExact min) (Up maxX To (Add12 maxX)))
+
+    Z.maxSub subtrahend =
+        Z.maxAdd (subtrahend |> Z.negate)
+
+Use [`sub`](#sub) if you want to subtract an [`Z`](#Z) in a range.
+
+-}
+maxSub :
+    Z
+        (In
+            (Down maxUpX To differenceMinUpX)
+            (Up subtrahendMaxX_ To subtrahendMaxUpX_)
+        )
+    ->
+        (Z (In min_ (Up maxX To maxUpX))
+         -> Z (Max (Up maxX To differenceMinUpX))
+        )
+maxSub subtrahend =
+    maxAdd (subtrahend |> negate)
 
 
 
@@ -1676,7 +1856,7 @@ minSub subtrahend =
 Both its [`minimumAsDifference`](#minimumAsDifference)
 and its [`maximumAsDifference`](#maximumAsDifference)
 -}
-range : N range -> range
+range : Z range -> range
 range =
     \(LimitedIn rangeLimits _) -> rangeLimits
 
@@ -1684,7 +1864,7 @@ range =
 {-| The smallest allowed number promised by the range type
 as its representation as a [difference](#Up)
 -}
-minimumAsDifference : N (In minimumAsDifference maximum_) -> minimumAsDifference
+minimumAsDifference : Z (In minimumAsDifference maximum_) -> minimumAsDifference
 minimumAsDifference =
     range >> .minimumAsDifference
 
@@ -1692,7 +1872,7 @@ minimumAsDifference =
 {-| The greatest allowed number promised by the range type
 as its representation as a [difference](#Up)
 -}
-maximumAsDifference : N (In min_ maximumAsDifference) -> maximumAsDifference
+maximumAsDifference : Z (In min_ maximumAsDifference) -> maximumAsDifference
 maximumAsDifference =
     range >> .maximumAsDifference
 
@@ -1757,7 +1937,7 @@ differenceDown differenceMiddleToHigh =
 
 {-| The specific natural number `0`
 -}
-n0 : N (In (Up minX To minX) (Up maxX To maxX))
+n0 : Z (In (Up minX To minX) (Up maxX To maxX))
 n0 =
     0
         |> LimitedIn
@@ -1781,7 +1961,7 @@ n0Difference =
 {-| The specific natural number `1`
 -}
 n1 :
-    N
+    Z
         (In
             (Up minX To (Add1 minX))
             (Up maxX To (Add1 maxX))
@@ -1811,105 +1991,105 @@ n1Difference =
 
 {-| The specific natural number `2`
 -}
-n2 : N (In (Up minX To (Add2 minX)) (Up maxX To (Add2 maxX)))
+n2 : Z (In (Up minX To (Add2 minX)) (Up maxX To (Add2 maxX)))
 n2 =
     n1 |> add n1
 
 
 {-| The specific natural number `3`
 -}
-n3 : N (In (Up minX To (Add3 minX)) (Up maxX To (Add3 maxX)))
+n3 : Z (In (Up minX To (Add3 minX)) (Up maxX To (Add3 maxX)))
 n3 =
     n2 |> add n1
 
 
 {-| The specific natural number `4`
 -}
-n4 : N (In (Up minX To (Add4 minX)) (Up maxX To (Add4 maxX)))
+n4 : Z (In (Up minX To (Add4 minX)) (Up maxX To (Add4 maxX)))
 n4 =
     n3 |> add n1
 
 
 {-| The specific natural number `5`
 -}
-n5 : N (In (Up minX To (Add5 minX)) (Up maxX To (Add5 maxX)))
+n5 : Z (In (Up minX To (Add5 minX)) (Up maxX To (Add5 maxX)))
 n5 =
     n4 |> add n1
 
 
 {-| The specific natural number `6`
 -}
-n6 : N (In (Up minX To (Add6 minX)) (Up maxX To (Add6 maxX)))
+n6 : Z (In (Up minX To (Add6 minX)) (Up maxX To (Add6 maxX)))
 n6 =
     n5 |> add n1
 
 
 {-| The specific natural number `7`
 -}
-n7 : N (In (Up minX To (Add7 minX)) (Up maxX To (Add7 maxX)))
+n7 : Z (In (Up minX To (Add7 minX)) (Up maxX To (Add7 maxX)))
 n7 =
     n6 |> add n1
 
 
 {-| The specific natural number `8`
 -}
-n8 : N (In (Up minX To (Add8 minX)) (Up maxX To (Add8 maxX)))
+n8 : Z (In (Up minX To (Add8 minX)) (Up maxX To (Add8 maxX)))
 n8 =
     n7 |> add n1
 
 
 {-| The specific natural number `9`
 -}
-n9 : N (In (Up minX To (Add9 minX)) (Up maxX To (Add9 maxX)))
+n9 : Z (In (Up minX To (Add9 minX)) (Up maxX To (Add9 maxX)))
 n9 =
     n8 |> add n1
 
 
 {-| The specific natural number `10`
 -}
-n10 : N (In (Up minX To (Add10 minX)) (Up maxX To (Add10 maxX)))
+n10 : Z (In (Up minX To (Add10 minX)) (Up maxX To (Add10 maxX)))
 n10 =
     n9 |> add n1
 
 
 {-| The specific natural number `11`
 -}
-n11 : N (In (Up minX To (Add11 minX)) (Up maxX To (Add11 maxX)))
+n11 : Z (In (Up minX To (Add11 minX)) (Up maxX To (Add11 maxX)))
 n11 =
     n10 |> add n1
 
 
 {-| The specific natural number `12`
 -}
-n12 : N (In (Up minX To (Add12 minX)) (Up maxX To (Add12 maxX)))
+n12 : Z (In (Up minX To (Add12 minX)) (Up maxX To (Add12 maxX)))
 n12 =
     n11 |> add n1
 
 
 {-| The specific natural number `13`
 -}
-n13 : N (In (Up minX To (Add13 minX)) (Up maxX To (Add13 maxX)))
+n13 : Z (In (Up minX To (Add13 minX)) (Up maxX To (Add13 maxX)))
 n13 =
     n12 |> add n1
 
 
 {-| The specific natural number `14`
 -}
-n14 : N (In (Up minX To (Add14 minX)) (Up maxX To (Add14 maxX)))
+n14 : Z (In (Up minX To (Add14 minX)) (Up maxX To (Add14 maxX)))
 n14 =
     n13 |> add n1
 
 
 {-| The specific natural number `15`
 -}
-n15 : N (In (Up minX To (Add15 minX)) (Up maxX To (Add15 maxX)))
+n15 : Z (In (Up minX To (Add15 minX)) (Up maxX To (Add15 maxX)))
 n15 =
     n14 |> add n1
 
 
 {-| The specific natural number `16`
 -}
-n16 : N (In (Up minX To (Add16 minX)) (Up maxX To (Add16 maxX)))
+n16 : Z (In (Up minX To (Add16 minX)) (Up maxX To (Add16 maxX)))
 n16 =
     n15 |> add n1
 

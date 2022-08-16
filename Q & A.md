@@ -19,7 +19,7 @@ Can't we define `MaxNo` so that it unifies with the other `Up low To (Add<x> low
         Add1 Infinity
     
     type alias MaxNo =
-        Fixed Infinity
+        UpFixed Infinity
 
 but: elm doesn't like recursive aliases and rightfully so here
 because such a value is `Never` constructable.

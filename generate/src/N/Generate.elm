@@ -1,4 +1,4 @@
-module N.Generate exposing (main)
+module Z.Generate exposing (main)
 
 {-| Helps you generate the source code of the module `Ns`.
 
@@ -166,7 +166,7 @@ nX x =
 
 nType : Generation.TypeAnnotation -> Generation.TypeAnnotation
 nType n =
-    typed "N" [ n ]
+    typed "Z" [ n ]
 
 
 minAsDifferenceAndMaxType : Int -> Generation.TypeAnnotation
@@ -202,7 +202,7 @@ toType =
 nXType : Int -> Generation.TypeAnnotation
 nXType x =
     typed
-        ([ "N", x |> String.fromInt ] |> String.concat)
+        ([ "Z", x |> String.fromInt ] |> String.concat)
         []
 
 
@@ -335,7 +335,7 @@ n0To16Module =
                 (\n ->
                     packageExposedAliasDecl TypeExact
                         (exactDoc n)
-                        ([ "N", n |> String.fromInt ] |> String.concat)
+                        ([ "Z", n |> String.fromInt ] |> String.concat)
                         []
                         (List.repeat n ()
                             |> List.foldl
@@ -352,7 +352,7 @@ n0To16Module =
 
 nBinaryModule : Int -> Module NsTag
 nBinaryModule n =
-    { name = [ "N", "Binary" ]
+    { name = [ "Z", "Binary" ]
     , roleInPackage =
         PackageExposedModule
             { moduleComment =
@@ -361,10 +361,10 @@ nBinaryModule n =
                     ]
             }
     , imports =
-        [ importStmt [ "N" ]
+        [ importStmt [ "Z" ]
             noAlias
             (exposingExplicit
-                (aliasExpose [ "N", "In", "To", "Up", "N0", "Add1", "Add2", "Add4", "Add8", "Add16" ]
+                (aliasExpose [ "Z", "In", "To", "Up", "N0", "Add1", "Add2", "Add4", "Add8", "Add16" ]
                     ++ funExpose [ "n1", "n2", "n4", "n8", "n16", "add" ]
                 )
             )
@@ -458,7 +458,7 @@ nBinaryModule n =
                     |> String.concat
                 )
             ]
-            ([ "N", n |> String.fromInt ] |> String.concat)
+            ([ "Z", n |> String.fromInt ] |> String.concat)
             []
             (addXType n
                 (n0ableType neverType possiblyType)
@@ -469,7 +469,7 @@ nBinaryModule n =
 
 nLinearModule : Int -> Module NsTag
 nLinearModule n =
-    { name = [ "N", "Linear" ]
+    { name = [ "Z", "Linear" ]
     , roleInPackage =
         PackageExposedModule
             { moduleComment =
@@ -478,10 +478,10 @@ nLinearModule n =
                     ]
             }
     , imports =
-        [ importStmt [ "N" ]
+        [ importStmt [ "Z" ]
             noAlias
             (exposingExplicit
-                (aliasExpose [ "N", "In", "To", "Up", "N0able" ]
+                (aliasExpose [ "Z", "In", "To", "Up", "N0able" ]
                     ++ funExpose [ "n1", "n2", "n4", "n8", "n16", "add" ]
                 )
             )
@@ -514,7 +514,7 @@ nLinearModule n =
                     |> String.concat
                 )
             ]
-            ([ "N", n |> String.fromInt ] |> String.concat)
+            ([ "Z", n |> String.fromInt ] |> String.concat)
             []
             (List.repeat n ()
                 |> List.foldl
