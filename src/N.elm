@@ -1,7 +1,7 @@
 module N exposing
     ( N
     , In, Min, MaxNo, Exactly
-    , Up(..), Down, To, Fixed
+    , Up, Down, To, Fixed
     , abs, randomIn, until
     , N0, N1, N2, N3, N4, N5, N6, N7, N8, N9, N10, N11, N12, N13, N14, N15, N16
     , Add1, Add2, Add3, Add4, Add5, Add6, Add7, Add8, Add9, Add10, Add11, Add12, Add13, Add14, Add15, Add16
@@ -17,10 +17,11 @@ module N exposing
     , min, minDown
     , maxNo, max, maxUp
     , range, minimumAsDifference, maximumAsDifference
-    , N0able(..)
-    , fixed
+    , differenceToInt
+    , specific
     , differenceUp, differenceDown
     , upDifference, downDifference
+    , N0able(..)
     )
 
 {-| Natural numbers within a typed range.
@@ -119,8 +120,10 @@ Anything that can't be expressed with the available operations? → issue/PR
 
 # fancy
 
-Building extensions to this library
-– like [`typesafe-array`](https://dark.elm.dmy.fr/packages/lue-bird/elm-typesafe-array/latest/) or other structures
+Building extensions to this library like
+
+  - [`typesafe-array`](https://dark.elm.dmy.fr/packages/lue-bird/elm-typesafe-array/latest/)
+  - [`morph`]()
 
 While the internally stored `Int` can't directly be guaranteed to be in bounds by elm,
 [minimum](#minimumAsDifference), [maximum](#maximumAsDifference) as their representation as a [difference](#Up)
@@ -128,11 +131,12 @@ must be built as actual values checked by the compiler.
 No shenanigans like runtime errors for impossible cases.
 
 @docs range, minimumAsDifference, maximumAsDifference
-
-@docs N0able
-@docs fixed
+@docs differenceToInt
+@docs specific
 @docs differenceUp, differenceDown
 @docs upDifference, downDifference
+
+@docs N0able
 
 -}
 
@@ -367,6 +371,7 @@ type Up low toTag high
     = Difference
         { up : low -> high
         , down : high -> low
+        , toInt : () -> Int
         }
 
 
@@ -396,7 +401,7 @@ type To
 
 -}
 type alias MaxNo =
-    Fixed { maximumUnknown : () }
+    Fixed { infinity : () }
 
 
 {-| The exact number as the difference from 0 to the number.
@@ -408,16 +413,6 @@ but every [`Up x To (Add<x> x)`](#Up) becomes [`Fixed N<x>`](#Fixed)
 -}
 type alias Fixed n =
     Up N0 To n
-
-
-{-| [`To`](#To) the exact given number, create a [fixed difference from 0](#Fixed)
--}
-fixed : n -> Fixed n
-fixed n =
-    Difference
-        { up = \_ -> n
-        , down = \_ -> N0 Possible
-        }
 
 
 {-| Add a given [specific](#In) [`N`](#N).
@@ -461,7 +456,11 @@ add toAdd =
 
 maximumNo : MaxNo
 maximumNo =
-    { maximumUnknown = () } |> fixed
+    { up = \_ -> { infinity = () }
+    , down = \_ -> N0 Possible
+    , toInt = \() -> (1 / 0) |> round
+    }
+        |> Difference
 
 
 {-| The absolute value of an `Int` which is always `≥ 0`
@@ -1697,6 +1696,47 @@ maximumAsDifference =
     range >> .maximumAsDifference
 
 
+{-| Create an [`N`](#N) with the value = minimum = maximum of a given difference
+
+    N.exactly (between3And6 |> N.minimumAsDifference)
+        |> N.maximumAsDifference
+        |> N.differenceToInt
+    --→ 3
+
+See [`differenceToInt`](#differenceToInt)
+
+-}
+specific :
+    Up low To high
+    -> N (In (Up low To high) (Up low To high))
+specific specificDifference =
+    (specificDifference |> differenceToInt)
+        |> LimitedIn
+            { minimumAsDifference = specificDifference
+            , maximumAsDifference = specificDifference
+            }
+
+
+{-| A [difference](#Up) represented as an `Int` `>= 0`
+
+    between3And6
+        |> N.maximumAsDifference
+        |> N.differenceToInt
+    --→ 6
+
+This enables for example [`specific`](#specific)
+
+-}
+differenceToInt : Up low_ To high_ -> Int
+differenceToInt =
+    \(Difference difference) ->
+        difference.toInt ()
+
+
+
+--
+
+
 {-| To the [number](#N0able),
 add another [number](#N0able) like shown in a given [difference](#Up)
 -}
@@ -1732,6 +1772,10 @@ differenceUp differenceMiddleToHigh =
             , down =
                 downDifference differenceMiddleToHigh
                     >> downDifference diffLowToMiddle
+            , toInt =
+                \() ->
+                    (diffLowToMiddle |> differenceToInt)
+                        + (differenceMiddleToHigh |> differenceToInt)
             }
 
 
@@ -1752,6 +1796,10 @@ differenceDown differenceMiddleToHigh =
             , down =
                 upDifference differenceMiddleToHigh
                     >> downDifference diffLowToHigh
+            , toInt =
+                \() ->
+                    (diffLowToHigh |> differenceToInt)
+                        - (differenceMiddleToHigh |> differenceToInt)
             }
 
 
@@ -1771,6 +1819,7 @@ n0Difference =
     Difference
         { up = identity
         , down = identity
+        , toInt = \() -> 0
         }
 
 
@@ -1806,6 +1855,7 @@ n1Difference =
 
                     N0 possible ->
                         possible |> never
+        , toInt = \() -> 1
         }
 
 
@@ -1912,6 +1962,10 @@ n15 =
 n16 : N (In (Up minX To (Add16 minX)) (Up maxX To (Add16 maxX)))
 n16 =
     n15 |> add n1
+
+
+
+--
 
 
 {-| Base type of [`N0`](#N0), [`Add1 n`](#Add1) following [`allowable-state`](https://dark.elm.dmy.fr/packages/lue-bird/elm-allowable-state/latest/):
