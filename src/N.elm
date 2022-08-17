@@ -1,6 +1,6 @@
 module N exposing
     ( N
-    , In, Min, MaxNo, Exactly
+    , In, Min, Infinity, Exactly
     , Up, Down, To, Fixed
     , abs, randomIn, until
     , N0, N1, N2, N3, N4, N5, N6, N7, N8, N9, N10, N11, N12, N13, N14, N15, N16
@@ -17,6 +17,7 @@ module N exposing
     , min, minDown
     , maxNo, max, maxUp
     , range, minimumAsDifference, maximumAsDifference
+    , differenceInfinity
     , differenceToInt
     , specific
     , differenceUp, differenceDown
@@ -31,7 +32,7 @@ module N exposing
 
 # bounds
 
-@docs In, Min, MaxNo, Exactly
+@docs In, Min, Infinity, Exactly
 @docs Up, Down, To, Fixed
 
 
@@ -123,7 +124,7 @@ Anything that can't be expressed with the available operations? → issue/PR
 Building extensions to this library like
 
   - [`typesafe-array`](https://dark.elm.dmy.fr/packages/lue-bird/elm-typesafe-array/latest/)
-  - [`morph`]()
+  - [`morph`](https://github.com/lue-bird/elm-morph)
 
 While the internally stored `Int` can't directly be guaranteed to be in bounds by elm,
 [minimum](#minimumAsDifference), [maximum](#maximumAsDifference) as their representation as a [difference](#Up)
@@ -131,6 +132,7 @@ must be built as actual values checked by the compiler.
 No shenanigans like runtime errors for impossible cases.
 
 @docs range, minimumAsDifference, maximumAsDifference
+@docs differenceInfinity
 @docs differenceToInt
 @docs specific
 @docs differenceUp, differenceDown
@@ -234,7 +236,7 @@ A number, at least 5:
 
     N (In (Add5 minMinus5_) max_)
 
-→ `max_` could be a specific maximum or [no maximum at all](#MaxNo)
+→ `max_` could be a specific maximum or [no maximum at all](#Infinity)
 
 
 ### result type in a range
@@ -341,7 +343,7 @@ It can lead to elm crashing because [difference](#Up)s are stored as functions.
 
 -}
 type alias Min lowestPossibleValue =
-    In lowestPossibleValue MaxNo
+    In lowestPossibleValue Infinity
 
 
 {-| Allow only a specific number.
@@ -397,10 +399,10 @@ type To
 {-| Flag "The number's upper limit is unknown" used in the definition of [`Min`](#Min):
 
     type alias Min min =
-        In minimum MaxNo
+        In minimum Infinity
 
 -}
-type alias MaxNo =
+type alias Infinity =
     Fixed { infinity : () }
 
 
@@ -454,8 +456,10 @@ add toAdd =
                 }
 
 
-maximumNo : MaxNo
-maximumNo =
+{-| [Difference up](#Up) to [`Infinity`](#Infinity)
+-}
+differenceInfinity : Infinity
+differenceInfinity =
     { up = \_ -> { infinity = () }
     , down = \_ -> N0 Possible
     , toInt = \() -> (1 / 0) |> round
@@ -497,7 +501,7 @@ abs =
     Basics.abs
         >> LimitedIn
             { minimumAsDifference = n0 |> minimumAsDifference
-            , maximumAsDifference = maximumNo
+            , maximumAsDifference = differenceInfinity
             }
 
 
@@ -662,7 +666,7 @@ intIsIn ( lowerLimit, upperLimit ) =
                     { minimumAsDifference =
                         (upperLimit |> maximumAsDifference)
                             |> differenceUp (n1 |> minimumAsDifference)
-                    , maximumAsDifference = maximumNo
+                    , maximumAsDifference = differenceInfinity
                     }
                 |> Above
                 |> Err
@@ -700,7 +704,7 @@ intIsAtLeast minimumLimit =
             int
                 |> LimitedIn
                     { minimumAsDifference = minimumLimit |> minimumAsDifference
-                    , maximumAsDifference = maximumNo
+                    , maximumAsDifference = differenceInfinity
                     }
                 |> Ok
 
@@ -976,7 +980,7 @@ mul multiplicand =
             * (multiplicand |> toInt)
             |> LimitedIn
                 { minimumAsDifference = n |> minimumAsDifference
-                , maximumAsDifference = maximumNo
+                , maximumAsDifference = differenceInfinity
                 }
 
 
@@ -1065,7 +1069,7 @@ toPower exponent =
             ^ (exponent |> toInt)
             |> LimitedIn
                 { minimumAsDifference = n |> minimumAsDifference
-                , maximumAsDifference = maximumNo
+                , maximumAsDifference = differenceInfinity
                 }
 
 
@@ -1121,7 +1125,7 @@ maxNo =
         (n |> toInt)
             |> LimitedIn
                 { minimumAsDifference = n |> minimumAsDifference
-                , maximumAsDifference = maximumNo
+                , maximumAsDifference = differenceInfinity
                 }
 
 
@@ -1587,7 +1591,7 @@ minAdd toAdd =
                 { minimumAsDifference =
                     (n |> minimumAsDifference)
                         |> differenceUp (toAdd |> minimumAsDifference)
-                , maximumAsDifference = maximumNo
+                , maximumAsDifference = differenceInfinity
                 }
 
 

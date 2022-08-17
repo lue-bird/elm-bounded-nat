@@ -13,12 +13,12 @@ If you have questions, don't hesitate to ask (e.g. in slack (@lue lue.the.bird@g
 
 ### why all the `min`- versions?
 
-Can't we define `MaxNo` so that it unifies with the other `Up low To (Add<x> low)` types?
+Can't we define `Infinity` so that it unifies with the other `Up low To (Add<x> low)` types?
 
-    type alias Infinity =
-        Add1 Infinity
+    type alias RecursiveInfinity =
+        Add1 RecursiveInfinity
     
-    type alias MaxNo =
+    type alias Infinity =
         Fixed Infinity
 
 but: elm doesn't like recursive aliases and rightfully so here

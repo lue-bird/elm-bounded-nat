@@ -14,6 +14,16 @@
 
 # changelog
 
+## 25.0.0
+
+  - `Difference` made opaque
+      - so that `toInt` can't be messed with
+  - `fixed` remove
+  - `MaxNo = Fixed { maximumUnknown : () }`
+    → `Infinity = Fixed { infinity : () }`
+  - `differenceToInt` add
+  - `specific` add
+
 ## 24.0.0
 
   - `sub`, `minSub` minimum subtraction `Fixed`
