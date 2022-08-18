@@ -14,6 +14,12 @@
 
 # changelog
 
+### 25.1.0
+
+  - fixed `Value` types, conversions add
+      - not including functions
+  - `InFixed` add
+
 ## 25.0.0
 
   - `Difference` made opaque

@@ -1,7 +1,8 @@
 module N exposing
     ( N
-    , In, Min, Infinity, Exactly
-    , Up, Down, To, Fixed
+    , In, Min
+    , Fixed, InFixed, Exactly, Infinity
+    , Up, Down, To
     , abs, randomIn, until
     , N0, N1, N2, N3, N4, N5, N6, N7, N8, N9, N10, N11, N12, N13, N14, N15, N16
     , Add1, Add2, Add3, Add4, Add5, Add6, Add7, Add8, Add9, Add10, Add11, Add12, Add13, Add14, Add15, Add16
@@ -14,8 +15,10 @@ module N exposing
     , sub, minSub
     , toPower, remainderBy, mul, div
     , toInt, toFloat
+    , Value, InValue, ExactlyValue, MinValue, InfinityValue
+    , toValue, fromValue
     , min, minDown
-    , maxNo, max, maxUp
+    , max, maxUp, maxNo
     , range, minimumAsDifference, maximumAsDifference
     , differenceInfinity
     , differenceToInt
@@ -23,6 +26,7 @@ module N exposing
     , differenceUp, differenceDown
     , upDifference, downDifference
     , N0able(..)
+    , fixedToValue, inFixedToValue, inValueToFixed, valueToFixed
     )
 
 {-| Natural numbers within a typed range.
@@ -32,8 +36,9 @@ module N exposing
 
 # bounds
 
-@docs In, Min, Infinity, Exactly
-@docs Up, Down, To, Fixed
+@docs In, Min
+@docs Fixed, InFixed, Exactly, Infinity
+@docs Up, Down, To
 
 
 # create
@@ -108,10 +113,16 @@ In the future, [`elm-generate`](https://github.com/lue-bird/generate-elm) will a
 @docs toInt, toFloat
 
 
+# without internal functions
+
+@docs Value, InValue, ExactlyValue, MinValue, InfinityValue
+@docs toValue, fromValue
+
+
 # type information
 
 @docs min, minDown
-@docs maxNo, max, maxUp
+@docs max, maxUp, maxNo
 
 
 # miss operation x?
@@ -140,10 +151,15 @@ No shenanigans like runtime errors for impossible cases.
 
 @docs N0able
 
+
+## fancy without internal functions
+
+@docs fixedToValue, inFixedToValue, inValueToFixed, valueToFixed
+
 -}
 
 import Emptiable exposing (Emptiable)
-import Help exposing (valueElseOnError)
+import Help exposing (restoreTry)
 import Possibly exposing (Possibly(..))
 import Random
 import RecordWithoutConstructorFunction exposing (RecordWithoutConstructorFunction)
@@ -198,7 +214,7 @@ what to put in declared types like `Model`
     N (Min (Fixed N4))
 
     -- 2 ≤ n ≤ 12
-    N (In (Fixed N2) (Fixed N12))
+    N (InFixed N2 N12)
 
 They are like [result types](#result-type) but type variables are set to [`N0`](#N0).
 
@@ -266,13 +282,18 @@ An example where this is useful using [typesafe-array](https://package.elm-lang.
     type alias TreeBinary element =
         Tree (Exactly N2) element
 
-Remember: ↑ and other [`Min`](#Min)/[`Exactly`](#Exactly)/[`Fixed`](#Fixed) are result/stored types, not argument types.
+Remember: ↑ and other [`Min`](#Min) `(` [`Fixed`](#Fixed) `...)` / [`Exactly`](#Exactly) / [`InFixed`](#InFixed) aren't argument types.
 
 ---
 
 Do not use `==` on 2 values storing a range.
-It can lead to elm crashing because [difference](#Up)s are stored as functions.
-[compare](#compare) instead.
+It will lead to elm crashing because [difference](#Up)s are stored as functions.
+
+instead,
+
+  - [compare](#compare) in _your_ code
+  - convert to [`Value`](#Value) for _other_ code
+    that relies (or performs better) on structural `==`
 
 -}
 type alias In minimumAsDifference maximumAsDifference =
@@ -318,7 +339,7 @@ when no maximum constraint should be enforced.
 
 ### stored type without maximum constraint
 
-Like the result type but every `Up x To (Add<x> x)` becomes [`Fixed N<x>`](#Fixed)
+Like the result type but `Up x To (Add<x> x)` becomes [`Fixed N<x>`](#Fixed)
 
 An example where this is useful using [typesafe-array](https://package.elm-lang.org/packages/lue-bird/elm-typesafe-array/latest/):
 
@@ -335,18 +356,23 @@ An example where this is useful using [typesafe-array](https://package.elm-lang.
 
 Remember: ↑ and other [`Min`](#Min)/[`Exactly`](#Exactly)/[`Fixed`](#Fixed) are result/stored types, not argument types.
 
----
-
-Do not use `==` on 2 values storing a range.
-It can lead to elm crashing because [difference](#Up)s are stored as functions.
-[compare](#compare) instead.
+Can't store functions? → [`MinValue`](#MinValue)
 
 -}
 type alias Min lowestPossibleValue =
     In lowestPossibleValue Infinity
 
 
-{-| Allow only a specific number.
+{-| Lower and upper limits [`Fixed`](#Fixed). For stored types only.
+
+Can't store functions? → [`InValue`](#InValue)
+
+-}
+type alias InFixed min max =
+    In (Fixed min) (Fixed max)
+
+
+{-| Allow only a specific [`Fixed`](#Fixed) number.
 
 Useful as a **stored & argument** type in combination with [`typesafe-array`](https://package.elm-lang.org/packages/lue-bird/elm-typesafe-array/latest/)s,
 not with [`N`](#N)s.
@@ -364,17 +390,152 @@ not with [`N`](#N)s.
 
 -}
 type alias Exactly n =
-    In (Fixed n) (Fixed n)
+    InFixed n n
 
 
 {-| `Up low To high`: an exact number as the difference `high - low`.
 -}
 type Up low toTag high
     = Difference
+        -- hidden so that the `Int` can't be messed with
         { up : low -> high
         , down : high -> low
         , toInt : () -> Int
         }
+
+
+{-| In some cases, it's better or required not to store functions etc. in app state, events, ...:
+
+  - serializability, for example
+      - json import/export on the debugger → doesn't work
+  - calling `==` (accidentally) → crash, for example
+      - [lamdera](https://www.lamdera.com/) → doesn't work
+
+Calling `==` on a [`Value`](#Value) will yield the correct result instead of crashing
+
+[`Fixed` is defined as a difference from 0](#Fixed), so this independent type needed to be created.
+
+You can just use [`Fixed`](#Fixed) when you don't have disadvantages storing functions.
+
+-}
+type Value n
+    = FixedValue
+        -- hidden so that the `Int` can't be messed with
+        -- detail:
+        --     ((1 / 0) |> round) == ((1 / 0) |> round)
+        --     --> True
+        -- which is nice for our purposes.
+        -- If this changes in the future, is found to be unreliable or something else,
+        -- change to  `| Finite Int | Infinity`
+        { number : n
+        , int : Int
+        }
+
+
+{-| Lower and upper limits as [`Value`](#Value)s. For stored types only.
+
+You can just use [`InFixed`](#InFixed) when you don't have disadvantages storing functions.
+See [`Value`](#Value)
+
+-}
+type alias InValue min max =
+    In (Value min) (Value max)
+
+
+{-| For **storing** in a type. Allow only a specific [`Value`](#Value).
+
+You can just use [`Exactly`](#Exactly) when you don't have disadvantages storing functions.
+See [`Value`](#Value)
+
+-}
+type alias ExactlyValue n =
+    InValue n n
+
+
+{-| [`Infinity`](#Infinity) as a [`Value`](#Value). Used in
+
+    type alias MinValue min =
+        In (Value min) InfinityValue
+
+You can just use [`Infinity`](#Infinity) when you don't have disadvantages storing functions.
+See [`Value`](#Value)
+
+-}
+type alias InfinityValue =
+    Value { infinity : () }
+
+
+{-| A lower limit as a [`Value`](#Value). For stored types only.
+
+You can just use [`Min`](#Min) `(` [`Fixed`](#Fixed) `...)` when you don't have disadvantages storing functions.
+See [`Value`](#Value)
+
+-}
+type alias MinValue min =
+    In (Value min) InfinityValue
+
+
+{-| [`Fixed`](#Fixed) → equatable [`Value`](#Value)
+-}
+fixedToValue : Fixed n -> Value n
+fixedToValue =
+    \fixed ->
+        FixedValue
+            { number = N0 Possible |> upDifference fixed
+            , int = fixed |> differenceToInt
+            }
+
+
+{-| [`Fixed`](#Fixed) → equatable [`Value`](#Value)
+-}
+valueToFixed : Value n -> Fixed n
+valueToFixed =
+    \(FixedValue value) ->
+        Difference
+            { up = \_ -> value.number
+            , down = \_ -> N0 Possible
+            , toInt = \() -> value.int
+            }
+
+
+{-| [`InFixed`](#InFixed) → equatable [`InValue`](#InValue)
+-}
+inFixedToValue : InFixed min max -> InValue min max
+inFixedToValue =
+    \inFixed ->
+        { minimumAsDifference = inFixed |> .minimumAsDifference |> fixedToValue
+        , maximumAsDifference = inFixed |> .maximumAsDifference |> fixedToValue
+        }
+
+
+{-| equatable [`InValue`](#InValue) → [`InFixed`](#InFixed) to be altered, ...
+-}
+inValueToFixed : InValue min max -> InFixed min max
+inValueToFixed =
+    \inValue ->
+        { minimumAsDifference = inValue |> .minimumAsDifference |> valueToFixed
+        , maximumAsDifference = inValue |> .maximumAsDifference |> valueToFixed
+        }
+
+
+{-| Number with [`Fixed` range](#InFixed) → number with equatable [`Value` range](#InFixed)
+-}
+toValue : N (InFixed min max) -> N (InValue min max)
+toValue =
+    \n ->
+        (n |> toInt)
+            |> LimitedIn
+                (n |> range |> inFixedToValue)
+
+
+{-| Number with equatable [`Value` range](#InFixed) → number with [`Fixed` range](#InFixed) to be [altered](#alter), [compared](#compare), ...
+-}
+fromValue : N (InValue min max) -> N (InFixed min max)
+fromValue =
+    \n ->
+        (n |> toInt)
+            |> LimitedIn
+                (n |> range |> inValueToFixed)
 
 
 {-| `Down high To low`: an exact number as the difference `high - low`.
@@ -411,6 +572,15 @@ type alias Infinity =
 A stored type looks
 like a [result type](#result-type)
 but every [`Up x To (Add<x> x)`](#Up) becomes [`Fixed N<x>`](#Fixed)
+
+Do not use `==` on 2 numbers of a `Fixed` [difference](#Up).
+It will lead to elm crashing because [difference](#Up)s are stored as functions.
+
+instead,
+
+  - [compare](#compare) in _your_ code
+  - convert to [`Value`](#Value) for _other_ code
+    that relies (or performs better) on structural `==`
 
 -}
 type alias Fixed n =
@@ -761,7 +931,7 @@ intIn :
         )
 intIn ( lowerLimit, upperLimit ) =
     intIsIn ( lowerLimit, upperLimit )
-        >> valueElseOnError
+        >> restoreTry
             (\error ->
                 case error of
                     Below _ ->
@@ -1599,7 +1769,7 @@ minAdd toAdd =
 
     n6 |> N.sub n5
     --→ n1
-    --: N (In (Fixed N1) (Fixed N1))
+    --: N (In (Fixed N1) (Up x To (Add1 x)))
 
 One of the terms has no maximum constraint? → [`minSub`](#minSub)
 

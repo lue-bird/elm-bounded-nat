@@ -10,6 +10,18 @@ suite =
     describe "N"
         [ maximumUnconstrainedTest
         , maximumConstrainedTest
+        , test "infinity == infinity"
+            (\() ->
+                (N.differenceInfinity |> N.differenceToInt |> toFloat)
+                    |> Expect.within (Expect.Absolute 0.1)
+                        (N.differenceInfinity |> N.differenceToInt |> toFloat)
+            )
+        , test "Value == Value"
+            (\() ->
+                (n9 |> N.toValue)
+                    |> Expect.equal
+                        (n9 |> N.toValue)
+            )
         ]
 
 

@@ -1,8 +1,8 @@
-module Help exposing (valueElseOnError)
+module Help exposing (restoreTry)
 
 
-valueElseOnError : (error -> value) -> (Result error value -> value)
-valueElseOnError errorToValue =
+restoreTry : (error -> value) -> (Result error value -> value)
+restoreTry errorToValue =
     \result ->
         case result of
             Ok value ->
