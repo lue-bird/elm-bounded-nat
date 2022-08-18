@@ -390,7 +390,8 @@ not with [`N`](#N)s.
 
 -}
 type alias Exactly n =
-    InFixed n n
+    -- InFixed n n  (changing would trigger a breaking change)
+    In (Fixed n) (Fixed n)
 
 
 {-| `Up low To high`: an exact number as the difference `high - low`.

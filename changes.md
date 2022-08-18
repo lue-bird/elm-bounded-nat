@@ -1,4 +1,17 @@
-### 24.1.0 plans
+## 26.0.0 plans
+
+  - ```elm
+    type alias Exactly n =
+        In (Fixed n) (Fixed n)
+    ```
+    →
+    ```elm
+    InFixed n n
+    ```
+      - changing would trigger a breaking change
+    
+
+### 25.2.0 plans
 
   - `fuzzIn ( min, max ) : ... -> Fuzzer (N (In ...))` add
       - currently waiting for `elm-test` major version 2
