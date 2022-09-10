@@ -1,5 +1,6 @@
 ## 26.0.0 plans
 
+  - `until` name → `upTo`
   - ```elm
     type alias Exactly n =
         In (Fixed n) (Fixed n)
