@@ -14,7 +14,7 @@ module N exposing
     , add, minAdd
     , sub, minSub
     , toPower, remainderBy, mul, div
-    , toInt, toFloat
+    , toInt, toFloat, toString
     , Value, InValue, ExactlyValue, MinValue, InfinityValue
     , toValue, fromValue
     , min, minDown
@@ -110,7 +110,7 @@ In the future, [`elm-generate`](https://github.com/lue-bird/generate-elm) will a
 
 ## broaden
 
-@docs toInt, toFloat
+@docs toInt, toFloat, toString
 
 
 # without internal functions
@@ -1411,6 +1411,19 @@ to feed another library with its `Float` representation.
 toFloat : N range_ -> Float
 toFloat =
     toInt >> Basics.toFloat
+
+
+{-| Drop the range constraints
+to feed another library with its `String` representation.
+
+The same as
+
+    toInt |> String.fromInt
+
+-}
+toString : N range_ -> String
+toString =
+    toInt >> String.fromInt
 
 
 
