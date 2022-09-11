@@ -1745,15 +1745,20 @@ isAtMost upperLimit =
 
 {-| The maximum
 
-    Stack.topDown
-        (N.intIn n0 n10 3)
-        [ N.intIn n0 n10 1
-        , N.intIn n0 n10 4
-        , N.intIn n0 n10 1
-        ]
-    --→ N.intIn n0 n10 4
+    import Stack
 
-You think exposing a version of this with 2 [`N`](#N) arguments would be beneficial?
+    Stack.topDown
+        (N.intIn ( n0, n10 ) 3)
+        [ N.intIn ( n0, n10 ) 1
+        , N.intIn ( n0, n10 ) 4
+        , N.intIn ( n0, n10 ) 1
+        ]
+        |> N.greatest
+        |> N.toInt
+    --> 4
+
+You think exposing a version of this with 2 [`N`](#N) arguments would be beneficial
+even though [`atLeast`](#atLeast) already exists?
 → issue/PR
 
 -}
@@ -1774,15 +1779,20 @@ greater minimum =
 
 {-| The minimum
 
-    Stack.topDown
-        (N.intIn n0 n10 3)
-        [ N.intIn n0 n10 1
-        , N.intIn n0 n10 4
-        , N.intIn n0 n10 1
-        ]
-    --→ N.intIn n0 n10 1
+    import Stack
 
-You think exposing a version of this with 2 [`N`](#N) arguments would be beneficial?
+    Stack.topDown
+        (N.intIn ( n0, n10 ) 3)
+        [ N.intIn ( n0, n10 ) 1
+        , N.intIn ( n0, n10 ) 4
+        , N.intIn ( n0, n10 ) 1
+        ]
+        |> N.smallest
+        |> N.toInt
+    --> 1
+
+You think exposing a version of this with 2 [`N`](#N) arguments would be beneficial
+even though [`atMost`](#atMost) already exists?
 → issue/PR
 
 -}
