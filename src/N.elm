@@ -7,11 +7,11 @@ module N exposing
     , N0, N1, N2, N3, N4, N5, N6, N7, N8, N9, N10, N11, N12, N13, N14, N15, N16
     , Add1, Add2, Add3, Add4, Add5, Add6, Add7, Add8, Add9, Add10, Add11, Add12, Add13, Add14, Add15, Add16
     , n0, n1, n2, n3, n4, n5, n6, n7, n8, n9, n10, n11, n12, n13, n14, n15, n16
-    , intAtLeast, intIn
-    , intIsAtLeast, intIsIn, BelowOrAbove(..)
     , atLeast, minAtLeast, atMost, in_
+    , intAtLeast, intIn
     , is, isIn, isAtLeast, isAtMost
     , greatest, smallest
+    , intIsAtLeast, intIsIn, BelowOrAbove(..)
     , add, minAdd
     , sub, minSub
     , toPower, remainderBy, mul, div
@@ -79,7 +79,9 @@ In the future, [`elm-generate`](https://github.com/lue-bird/generate-elm) will a
 @docs n0, n1, n2, n3, n4, n5, n6, n7, n8, n9, n10, n11, n12, n13, n14, n15, n16
 
 
-## compare
+## clamp
+
+@docs atLeast, minAtLeast, atMost, in_
 
 
 ### `Int` clamp
@@ -87,20 +89,15 @@ In the future, [`elm-generate`](https://github.com/lue-bird/generate-elm) will a
 @docs intAtLeast, intIn
 
 
-## `Int` compare
-
-@docs intIsAtLeast, intIsIn, BelowOrAbove
-
-
-## clamp
-
-@docs atLeast, minAtLeast, atMost, in_
-
-
 ## compare
 
 @docs is, isIn, isAtLeast, isAtMost
 @docs greatest, smallest
+
+
+### `Int` compare
+
+@docs intIsAtLeast, intIsIn, BelowOrAbove
 
 
 # alter
