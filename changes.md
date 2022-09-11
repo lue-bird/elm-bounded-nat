@@ -10,7 +10,7 @@
     InFixed n n
     ```
       - changing would trigger a breaking change
-    
+  - split off `module N.Value`
 
 ### 25.3.0 plans
 
