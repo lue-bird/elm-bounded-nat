@@ -12,7 +12,7 @@
       - changing would trigger a breaking change
   - split off `module N.Value`
 
-### 25.3.0 plans
+### 25.4.0 plans
 
   - `fuzzIn ( min, max ) : ... -> Fuzzer (N (In ...))` add
       - currently waiting for `elm-test` major version 2
@@ -27,6 +27,10 @@
       - 👍 is readable
 
 # changelog
+
+### 25.3.0
+
+  - `smaller`, `greater` add
 
 ### 25.2.0
 

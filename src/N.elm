@@ -9,9 +9,9 @@ module N exposing
     , n0, n1, n2, n3, n4, n5, n6, n7, n8, n9, n10, n11, n12, n13, n14, n15, n16
     , atLeast, minAtLeast, atMost, in_
     , intAtLeast, intIn
-    , is, isIn, isAtLeast, isAtMost
-    , greatest, smallest
-    , intIsAtLeast, intIsIn, BelowOrAbove(..)
+    , is, isIn, BelowOrAbove(..), isAtLeast, isAtMost
+    , greatest, smallest, greater, smaller
+    , intIsAtLeast, intIsIn
     , add, minAdd
     , sub, minSub
     , toPower, remainderBy, mul, div
@@ -91,13 +91,13 @@ In the future, [`elm-generate`](https://github.com/lue-bird/generate-elm) will a
 
 ## compare
 
-@docs is, isIn, isAtLeast, isAtMost
-@docs greatest, smallest
+@docs is, isIn, BelowOrAbove, isAtLeast, isAtMost
+@docs greatest, smallest, greater, smaller
 
 
 ### `Int` compare
 
-@docs intIsAtLeast, intIsIn, BelowOrAbove
+@docs intIsAtLeast, intIsIn
 
 
 # alter
@@ -1743,7 +1743,7 @@ isAtMost upperLimit =
                 |> Err
 
 
-{-| The maximum
+{-| The maximum of a stack of [`N`](#N)s in the same range
 
     import Stack
 
@@ -1757,9 +1757,9 @@ isAtMost upperLimit =
         |> N.toInt
     --> 4
 
-You think exposing a version of this with 2 [`N`](#N) arguments would be beneficial
-even though [`atLeast`](#atLeast) already exists?
-→ issue/PR
+It's implementation is equivalent to
+
+    Stack.fold Up N.greater
 
 -}
 greatest : Emptiable (Stacked (N range)) Never -> N range
@@ -1767,6 +1767,27 @@ greatest =
     Stack.fold Up greater
 
 
+{-| The maximum of both given numbers in the same range
+
+Even though you can just use directly
+
+    N.intIn ( n0, n10 ) 3
+        |> N.greater (N.intIn ( n0, n10 ) 1)
+        |> N.toInt
+    --> 3
+
+    N.intIn ( n0, n10 ) 3
+        |> N.greater (N.intIn ( n0, n10 ) 4)
+        |> N.toInt
+    --> 4
+
+this is rather supposed to be used as a primitive to build a structure maximum function:
+
+    ArraySized.fold Up N.greater
+
+For clamping, try [`atLeast`](#atLeast) instead!
+
+-}
 greater : N range -> N range -> N range
 greater minimum =
     \n ->
@@ -1791,16 +1812,33 @@ greater minimum =
         |> N.toInt
     --> 1
 
-You think exposing a version of this with 2 [`N`](#N) arguments would be beneficial
-even though [`atMost`](#atMost) already exists?
-→ issue/PR
-
 -}
 smallest : Emptiable (Stacked (N range)) Never -> N range
 smallest =
     Stack.fold Up smaller
 
 
+{-| The minimum of both given numbers in the same range
+
+Even though you can just use directly
+
+    N.intIn ( n0, n10 ) 3
+        |> N.greater (N.intIn ( n0, n10 ) 1)
+        |> N.toInt
+    --> 1
+
+    N.intIn ( n0, n10 ) 3
+        |> N.greater (N.intIn ( n0, n10 ) 4)
+        |> N.toInt
+    --> 3
+
+this is rather supposed to be used as a primitive to build a structure maximum function:
+
+    ArraySized.fold Up N.smaller
+
+For clamping, try [`atMost`](#atMost) instead!
+
+-}
 smaller : N range -> N range -> N range
 smaller maximum =
     \n ->
