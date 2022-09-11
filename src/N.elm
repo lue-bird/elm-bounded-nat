@@ -11,6 +11,7 @@ module N exposing
     , intIsAtLeast, intIsIn, BelowOrAbove(..)
     , atLeast, minAtLeast, atMost, in_
     , is, isIn, isAtLeast, isAtMost
+    , greatest, smallest
     , add, minAdd
     , sub, minSub
     , toPower, remainderBy, mul, div
@@ -96,9 +97,10 @@ In the future, [`elm-generate`](https://github.com/lue-bird/generate-elm) will a
 @docs atLeast, minAtLeast, atMost, in_
 
 
-## compare maximum constrained
+## compare
 
 @docs is, isIn, isAtLeast, isAtMost
+@docs greatest, smallest
 
 
 # alter
@@ -160,6 +162,7 @@ No shenanigans like runtime errors for impossible cases.
 
 import Emptiable exposing (Emptiable)
 import Help exposing (restoreTry)
+import Linear exposing (DirectionLinear(..))
 import Possibly exposing (Possibly(..))
 import Random
 import RecordWithoutConstructorFunction exposing (RecordWithoutConstructorFunction)
@@ -1741,6 +1744,68 @@ isAtMost upperLimit =
                     , maximumAsDifference = n |> maximumAsDifference
                     }
                 |> Err
+
+
+{-| The maximum
+
+    Stack.topDown
+        (N.intIn n0 n10 3)
+        [ N.intIn n0 n10 1
+        , N.intIn n0 n10 4
+        , N.intIn n0 n10 1
+        ]
+    --→ N.intIn n0 n10 4
+
+You think exposing a version of this with 2 [`N`](#N) arguments would be beneficial?
+→ issue/PR
+
+-}
+greatest : Emptiable (Stacked (N range)) Never -> N range
+greatest =
+    Stack.fold Up greater
+
+
+greater : N range -> N range -> N range
+greater minimum =
+    \n ->
+        if (n |> toInt) >= (minimum |> toInt) then
+            n
+
+        else
+            minimum
+
+
+{-| The minimum
+
+    Stack.topDown
+        (N.intIn n0 n10 3)
+        [ N.intIn n0 n10 1
+        , N.intIn n0 n10 4
+        , N.intIn n0 n10 1
+        ]
+    --→ N.intIn n0 n10 1
+
+You think exposing a version of this with 2 [`N`](#N) arguments would be beneficial?
+→ issue/PR
+
+-}
+smallest : Emptiable (Stacked (N range)) Never -> N range
+smallest =
+    Stack.fold Up smaller
+
+
+smaller : N range -> N range -> N range
+smaller maximum =
+    \n ->
+        if (n |> toInt) <= (maximum |> toInt) then
+            n
+
+        else
+            maximum
+
+
+
+--
 
 
 {-| To the [`N`](#N) without a known maximum-constraint,

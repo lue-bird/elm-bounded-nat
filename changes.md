@@ -31,6 +31,7 @@
 ### 25.2.0
 
   - `toString` add
+  - `smallest`, `greatest` add
 
 ### 25.1.0
 
