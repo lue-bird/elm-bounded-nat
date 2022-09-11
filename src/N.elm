@@ -1743,6 +1743,57 @@ isAtMost upperLimit =
                 |> Err
 
 
+{-| The minimum
+
+    import Stack
+
+    Stack.topDown
+        (N.intIn ( n0, n10 ) 3)
+        [ N.intIn ( n0, n10 ) 1
+        , N.intIn ( n0, n10 ) 4
+        , N.intIn ( n0, n10 ) 1
+        ]
+        |> N.smallest
+        |> N.toInt
+    --> 1
+
+-}
+smallest : Emptiable (Stacked (N range)) Never -> N range
+smallest =
+    Stack.fold Up smaller
+
+
+{-| The minimum of both given numbers in the same range
+
+Even though you can just use directly
+
+    N.intIn ( n0, n10 ) 3
+        |> N.greater (N.intIn ( n0, n10 ) 1)
+        |> N.toInt
+    --> 1
+
+    N.intIn ( n0, n10 ) 3
+        |> N.greater (N.intIn ( n0, n10 ) 4)
+        |> N.toInt
+    --> 3
+
+this is rather supposed to be used as a primitive to build a structure maximum function:
+
+    ArraySized.fold Up N.smaller
+
+For clamping, try [`atMost`](#atMost) instead!
+
+-}
+smaller : N range -> N range -> N range
+smaller maximum =
+    \n ->
+        if (n |> toInt) <= (maximum |> toInt) then
+            n
+
+        else
+            maximum
+
+
 {-| The maximum of a stack of [`N`](#N)s in the same range
 
     import Stack
@@ -1796,57 +1847,6 @@ greater minimum =
 
         else
             minimum
-
-
-{-| The minimum
-
-    import Stack
-
-    Stack.topDown
-        (N.intIn ( n0, n10 ) 3)
-        [ N.intIn ( n0, n10 ) 1
-        , N.intIn ( n0, n10 ) 4
-        , N.intIn ( n0, n10 ) 1
-        ]
-        |> N.smallest
-        |> N.toInt
-    --> 1
-
--}
-smallest : Emptiable (Stacked (N range)) Never -> N range
-smallest =
-    Stack.fold Up smaller
-
-
-{-| The minimum of both given numbers in the same range
-
-Even though you can just use directly
-
-    N.intIn ( n0, n10 ) 3
-        |> N.greater (N.intIn ( n0, n10 ) 1)
-        |> N.toInt
-    --> 1
-
-    N.intIn ( n0, n10 ) 3
-        |> N.greater (N.intIn ( n0, n10 ) 4)
-        |> N.toInt
-    --> 3
-
-this is rather supposed to be used as a primitive to build a structure maximum function:
-
-    ArraySized.fold Up N.smaller
-
-For clamping, try [`atMost`](#atMost) instead!
-
--}
-smaller : N range -> N range -> N range
-smaller maximum =
-    \n ->
-        if (n |> toInt) <= (maximum |> toInt) then
-            n
-
-        else
-            maximum
 
 
 
