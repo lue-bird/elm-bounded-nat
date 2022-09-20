@@ -368,6 +368,9 @@ nBinaryModule n =
                     ++ funExpose [ "n1", "n2", "n4", "n8", "n16", "add" ]
                 )
             )
+        , importStmt [ "Possibly" ]
+            noAlias
+            (exposingExplicit (aliasExpose [ "Possibly" ]))
         ]
     , declarations =
         [ packageExposedFunDecl NDiffValue
@@ -485,6 +488,9 @@ nLinearModule n =
                     ++ funExpose [ "n1", "n2", "n4", "n8", "n16", "add" ]
                 )
             )
+        , importStmt [ "Possibly" ]
+            noAlias
+            (exposingExplicit (aliasExpose [ "Possibly" ]))
         ]
     , declarations =
         [ packageExposedAliasDecl TypeAdd
