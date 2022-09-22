@@ -1,6 +1,6 @@
 ## 26.0.0 plans
 
-  - `until` name → `upTo`
+  - split off `module N.Value`
   - ```elm
     type alias Exactly n =
         In (Fixed n) (Fixed n)
@@ -10,7 +10,11 @@
     InFixed n n
     ```
       - changing would trigger a breaking change
-  - split off `module N.Value`
+  - `until` name → `upTo`
+  - `min` name → `minTo`
+  - `max` name → `maxTo`
+  - `maxNo` name → `min`
+      - to conform with `Min`
 
 ### 25.4.0 plans
 
