@@ -10,7 +10,10 @@
     InFixed n n
     ```
       - changing would trigger a breaking change
-  - `until` name → `upTo`
+  - `emptiness-typed` dependency remove
+      - move `until` as `upTo` into `module Stack`
+      - move `greatest` as `nGreatest` into `module Stack`
+      - move `smallest` as `nSmallest` into `module Stack`
   - `min` name → `minTo`
   - `max` name → `maxTo`
   - `maxNo` name → `min`
