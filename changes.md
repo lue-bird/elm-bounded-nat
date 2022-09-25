@@ -1,6 +1,41 @@
-## 26.0.0 plans
+### 26.1.0 plans
 
-  - split off `module N.Value`
+  - `fuzzIn ( min, max ) : ... -> Fuzzer (N (In ...))` add
+      - currently waiting for `elm-test` major version 2
+        to avoid a major version bump as a result
+  - `N.Generator` that auto-generates `N<x>`, `Add<x>` and `n<x>` for x >= 17 add
+
+# change log
+
+## 26.0.0
+
+  - `emptiness-typed`, `linear-direction` uses remove
+      - `until` is already in `module ArraySized`
+      - `smallest`, `greatest` remove
+          - in favor of `Stack.fold Up N.smaller/N.greater`
+  - `type N0able successorMinus1 n0PossiblyOrNever`
+    →
+    `N0OrAdd1 n0PossiblyOrNever successorMinus1`
+      - more readable and understandable
+  - `no-record-type-alias-constructor-function` dependency remove
+      - `type alias In ... = RecordWithoutConstructorFunction { ... }`
+        →
+        `type In ... = Range { ... }`
+  - `min`, `max` name → `minTo`, `maxTo`
+      - make obvious it sets absolute
+  - `maxNo` name → `maxToInfinity`
+      - to make obvious it sets absolute like `maxTo` but up to `Infinity`
+  - `minimumAsDifference`, `maximumAsDifference` name → `min`, `max`
+      - to be more consistent with `minTo`, `maxTo`, `maxToInfinity`, `minDown`, `maxUp`, `maxToValue`, `maxFromValue`, ...
+  - `valueToFixed`, `inValueToFixed` name → `fixedFromValue`, `inFixedFromValue`
+  - `div`, `mul`, `sub` name → `divideBy`, `multiplyBy`, `subtract`
+      - not aggressively common things should get descriptive names!
+  - `minAdd`, `minSub` name → `addMin`, `subtractMin`
+  - `upDifference`, `downDifference`, `differenceUp`, `differenceDown` name
+    → `addDifference`, `subtractDifference`, `differenceAdd`, `differenceSubtract`
+  - `Up0→16` add
+      - to improve result write- and readability
+  - `maxFromValue`, `maxToValue`, `minFromValue`, `minToValue` add
   - ```elm
     type alias Exactly n =
         In (Fixed n) (Fixed n)
@@ -9,31 +44,6 @@
     ```elm
     InFixed n n
     ```
-      - changing would trigger a breaking change
-  - `emptiness-typed` dependency remove
-      - move `until` as `upTo` into `module Stack`
-      - move `greatest` as `nGreatest` into `module Stack`
-      - move `smallest` as `nSmallest` into `module Stack`
-  - `min` name → `minTo`
-  - `max` name → `maxTo`
-  - `maxNo` name → `min`
-      - to conform with `Min`
-
-### 25.4.0 plans
-
-  - `fuzzIn ( min, max ) : ... -> Fuzzer (N (In ...))` add
-      - currently waiting for `elm-test` major version 2
-        to avoid a major version bump as a result
-  - `N.Generator` that auto-generates `N<x>`, `Add<x>` and `n<x>` for x >= 17 add
-
-### rejected
-
-  - `N` name → `ℕ`, `Add<x>` name → `ℕ<x>𐊛`
-      - 👎 must be copied
-      - 👎 is confusing
-      - 👍 is readable
-
-# changelog
 
 ### 25.3.0
 

@@ -13,7 +13,7 @@ If you have questions, don't hesitate to ask (e.g. in slack (@lue lue.the.bird@g
 
 ### why all the `min`- versions?
 
-Can't we define `Infinity` so that it unifies with the other `Up low To (Add<x> low)` types?
+Can't we define `Infinity` so that it unifies with all other `Up` types?
 
     type alias RecursiveInfinity =
         Add1 RecursiveInfinity
