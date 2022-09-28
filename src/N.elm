@@ -8,7 +8,7 @@ module N exposing
     , Add1, Add2, Add3, Add4, Add5, Add6, Add7, Add8, Add9, Add10, Add11, Add12, Add13, Add14, Add15, Add16
     , Up0, Up1, Up2, Up3, Up4, Up5, Up6, Up7, Up8, Up9, Up10, Up11, Up12, Up13, Up14, Up15, Up16
     , n0, n1, n2, n3, n4, n5, n6, n7, n8, n9, n10, n11, n12, n13, n14, n15, n16
-    , atLeast, minAtLeast, atMost, minAtMost, in_
+    , atLeast, minAtLeast, atMost, in_
     , intAtLeast, intIn
     , is, isIn, BelowOrAbove(..), isAtLeast, isAtMost
     , greater, smaller
@@ -99,7 +99,7 @@ In the future, [`elm-generate`](https://github.com/lue-bird/generate-elm) will a
 
 ## clamp
 
-@docs atLeast, minAtLeast, atMost, minAtMost, in_
+@docs atLeast, minAtLeast, atMost, in_
 
 
 ### `Int` clamp
@@ -1115,48 +1115,20 @@ minAtLeast lowerLimit =
 
 {-| **Cap** the [`N`](#N) to `<=` a given new upper limit
 
-    between3And10
-        |> N.atMost between4And5
-    --: N (In (Up3 minX_) (Up5 maxX_))
-
-  - To enforce a new minimum, too → [`in_`](#in_)
-  - Its maximum is unconstrained? → [`minAtMost`](#minAtMost)
-
--}
-atMost :
-    N (In (Up upperLimitMinToMax_ To max) upperLimitMax)
-    ->
-        (N (In min (Fixed max))
-         -> N (In min upperLimitMax)
-        )
-atMost upperLimit =
-    \n ->
-        Basics.min (n |> toInt) (upperLimit |> toInt)
-            |> LimitedIn
-                (Range
-                    { min = n |> min
-                    , max = upperLimit |> max
-                    }
-                )
-
-
-{-| **Cap** the [`N`](#N) to `<=` a given new upper limit
-
     atLeast3
         |> N.atMost (between4And5 |> N.min n3)
     --: N (In (Up3 minX_) (Up5 maxX_))
 
   - To enforce a new minimum, too → [`in_`](#in_)
-  - Its maximum is constrained? → [`atMost`](#atMost)
 
 -}
-minAtMost :
+atMost :
     N (In min upperLimitMax)
     ->
-        (N (Min min)
+        (N (In min max_)
          -> N (In min upperLimitMax)
         )
-minAtMost upperLimit =
+atMost upperLimit =
     \n ->
         Basics.min (n |> toInt) (upperLimit |> toInt)
             |> LimitedIn

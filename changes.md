@@ -1,4 +1,4 @@
-### 27.1.0 plans
+### 28.1.0 plans
 
   - `fuzzIn ( min, max ) : ... -> Fuzzer (N (In ...))` add
       - currently waiting for `elm-test` major version 2
@@ -6,6 +6,12 @@
   - `N.Generator` that auto-generates `N<x>`, `Add<x>` and `n<x>` for x >= 17 add
 
 # change log
+
+## 28.0.0
+
+  - `N.atMost` remove
+      - type was impossible to set safely
+  - `N.minAtMost` → `atMost` with arguments without max infinity allowed
 
 ## 27.0.0
 
