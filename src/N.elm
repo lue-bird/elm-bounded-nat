@@ -8,7 +8,7 @@ module N exposing
     , Add1, Add2, Add3, Add4, Add5, Add6, Add7, Add8, Add9, Add10, Add11, Add12, Add13, Add14, Add15, Add16
     , Up0, Up1, Up2, Up3, Up4, Up5, Up6, Up7, Up8, Up9, Up10, Up11, Up12, Up13, Up14, Up15, Up16
     , n0, n1, n2, n3, n4, n5, n6, n7, n8, n9, n10, n11, n12, n13, n14, n15, n16
-    , atLeast, minAtLeast, atMost, in_
+    , atLeast, minAtLeast, atMost, minAtMost, in_
     , intAtLeast, intIn
     , is, isIn, BelowOrAbove(..), isAtLeast, isAtMost
     , greater, smaller
@@ -99,7 +99,7 @@ In the future, [`elm-generate`](https://github.com/lue-bird/generate-elm) will a
 
 ## clamp
 
-@docs atLeast, minAtLeast, atMost, in_
+@docs atLeast, minAtLeast, atMost, minAtMost, in_
 
 
 ### `Int` clamp
@@ -181,7 +181,6 @@ Having those exposed can be useful when building extensions to this library like
 
 -}
 
-import Help exposing (restoreTry)
 import Possibly exposing (Possibly(..))
 import Random
 
@@ -925,13 +924,13 @@ intIsAtLeast :
         (Int
          -> Result Int (N (Min min))
         )
-intIsAtLeast minimumLimit =
+intIsAtLeast lowerLimit =
     \int ->
-        if int >= (minimumLimit |> toInt) then
+        if int >= (lowerLimit |> toInt) then
             int
                 |> LimitedIn
                     (Range
-                        { min = minimumLimit |> min
+                        { min = lowerLimit |> min
                         , max = differenceInfinity
                         }
                     )
@@ -981,35 +980,23 @@ intIn :
     , N
         (In
             (Fixed upperLimitMin)
-            (Up upperLimitMaxX To upperLimitMaxPlusX)
+            upperLimitMax
         )
     )
     ->
         (Int
-         -> N (In lowerLimitMin (Up upperLimitMaxX To upperLimitMaxPlusX))
+         -> N (In lowerLimitMin upperLimitMax)
         )
 intIn ( lowerLimit, upperLimit ) =
     \int ->
         int
-            |> intIsIn ( lowerLimit, upperLimit )
-            |> restoreTry
-                (\error ->
-                    let
-                        exceededLimit =
-                            case error of
-                                Below _ ->
-                                    lowerLimit |> toInt
-
-                                Above _ ->
-                                    upperLimit |> toInt
-                    in
-                    exceededLimit
-                        |> LimitedIn
-                            (Range
-                                { min = lowerLimit |> min
-                                , max = upperLimit |> max
-                                }
-                            )
+            |> Basics.max (lowerLimit |> toInt)
+            |> Basics.min (upperLimit |> toInt)
+            |> LimitedIn
+                (Range
+                    { min = lowerLimit |> min
+                    , max = upperLimit |> max
+                    }
                 )
 
 
@@ -1041,16 +1028,16 @@ To handle the case `< minimum` yourself → [`intIsAtLeast`](#intIsAtLeast)
 
 -}
 intAtLeast :
-    N (In min max_)
+    N (In lowerLimitMin lowerLimitMax_)
     ->
         (Int
-         -> N (Min min)
+         -> N (Min lowerLimitMin)
         )
-intAtLeast minimumLimit =
+intAtLeast lowerLimit =
     \int ->
         int
-            |> intIsAtLeast minimumLimit
-            |> Result.withDefault (minimumLimit |> maxToInfinity)
+            |> intIsAtLeast lowerLimit
+            |> Result.withDefault (lowerLimit |> maxToInfinity)
 
 
 {-| **Clamp** the number to between both given limits
@@ -1073,12 +1060,12 @@ are beyond the current limits.)
 
 -}
 in_ :
-    ( N (In minNew (Up minNewMaxToMaxNewMin_ To maxNewMin))
-    , N (In (Fixed maxNewMin) maxNew)
+    ( N (In lowerLimitMin (Up minNewMaxToMaxNewMin_ To upperLimitMin))
+    , N (In (Fixed upperLimitMin) upperLimitMax)
     )
     ->
         (N (In min_ max_)
-         -> N (In minNew maxNew)
+         -> N (In lowerLimitMin upperLimitMax)
         )
 in_ ( lowerLimit, upperLimit ) =
     \n ->
@@ -1113,50 +1100,71 @@ Know both maxima? → [`atLeast`](#atLeast)
 
 -}
 minAtLeast :
-    N (In minNew maxNew_)
+    N (In lowerLimitMin lowerLimitMax_)
     ->
         (N (In min_ max_)
-         -> N (Min minNew)
+         -> N (Min lowerLimitMin)
         )
-minAtLeast minimumLimit =
+minAtLeast lowerLimit =
     \n ->
         n
             |> toInt
-            |> intIsAtLeast minimumLimit
-            |> Result.withDefault (minimumLimit |> maxToInfinity)
+            |> intIsAtLeast lowerLimit
+            |> Result.withDefault (lowerLimit |> maxToInfinity)
 
 
 {-| **Cap** the [`N`](#N) to `<=` a given new upper limit
 
     between3And10
-        |> N.atMost between2And5
-    --: N (In (Fixed 2) (Up5 x_))
+        |> N.atMost between4And5
+    --: N (In (Up3 minX_) (Up5 maxX_))
 
-To replace the [`Fixed`](#Fixed) minimum with a [difference](#Up)
-(for results etc.) → [`N.minTo`](#minTo)
-
-To enforce a new minimum, too? → [`in_`](#in_)
+  - To enforce a new minimum, too → [`in_`](#in_)
+  - Its maximum is unconstrained? → [`minAtMost`](#minAtMost)
 
 -}
 atMost :
-    N (In (Fixed takenMin) takenMax)
+    N (In (Up upperLimitMinToMax_ To max) upperLimitMax)
     ->
-        (N (In (Up minToTakenMin_ To takenMin) max_)
-         -> N (In (Fixed takenMin) takenMax)
+        (N (In min (Fixed max))
+         -> N (In min upperLimitMax)
         )
-atMost maximumLimit =
+atMost upperLimit =
     \n ->
-        if (n |> toInt) <= (maximumLimit |> toInt) then
-            (n |> toInt)
-                |> LimitedIn
-                    (Range
-                        { min = maximumLimit |> min
-                        , max = maximumLimit |> max
-                        }
-                    )
+        Basics.min (n |> toInt) (upperLimit |> toInt)
+            |> LimitedIn
+                (Range
+                    { min = n |> min
+                    , max = upperLimit |> max
+                    }
+                )
 
-        else
-            maximumLimit
+
+{-| **Cap** the [`N`](#N) to `<=` a given new upper limit
+
+    atLeast3
+        |> N.atMost (between4And5 |> N.min n3)
+    --: N (In (Up3 minX_) (Up5 maxX_))
+
+  - To enforce a new minimum, too → [`in_`](#in_)
+  - Its maximum is constrained? → [`atMost`](#atMost)
+
+-}
+minAtMost :
+    N (In min upperLimitMax)
+    ->
+        (N (Min min)
+         -> N (In min upperLimitMax)
+        )
+minAtMost upperLimit =
+    \n ->
+        Basics.min (n |> toInt) (upperLimit |> toInt)
+            |> LimitedIn
+                (Range
+                    { min = n |> min
+                    , max = upperLimit |> max
+                    }
+                )
 
 
 {-| **Cap** the [`N`](#N) to `>=` a given new lower limit
@@ -1182,12 +1190,12 @@ atLeast :
         (N (In min_ (Fixed max))
          -> N (In minNew (Fixed max))
         )
-atLeast minimumLimit =
+atLeast lowerLimit =
     \n ->
-        Basics.max (n |> toInt) (minimumLimit |> toInt)
+        Basics.max (n |> toInt) (lowerLimit |> toInt)
             |> LimitedIn
                 (Range
-                    { min = minimumLimit |> min
+                    { min = lowerLimit |> min
                     , max = n |> max
                     }
                 )

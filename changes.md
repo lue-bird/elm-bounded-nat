@@ -1,4 +1,4 @@
-### 26.1.0 plans
+### 27.1.0 plans
 
   - `fuzzIn ( min, max ) : ... -> Fuzzer (N (In ...))` add
       - currently waiting for `elm-test` major version 2
@@ -6,6 +6,23 @@
   - `N.Generator` that auto-generates `N<x>`, `Add<x>` and `n<x>` for x >= 17 add
 
 # change log
+
+## 27.0.0
+
+  - `N.atMost` type correct
+    ```elm
+    N (In (Fixed takenMin) takenMax)
+    -> N (In (Up minToTakenMin_ To takenMin) max_)
+    -> N (In (Fixed takenMin) takenMax)
+    ```
+    →
+    ```elm
+    N (In (Up upperLimitMinToMax_ To upperLimitMin) upperLimitMax)
+    -> N (In min (Fixed max))
+    -> N (In min upperLimitMax)
+    ```
+  - `N.minAtMost` add
+  - `N.intIn` upper limit maximum allowed to be more broad
 
 ## 26.0.0
 
