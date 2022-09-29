@@ -5793,6 +5793,7 @@ var $elm$time$Time$Zone = F2(
 var $elm$time$Time$customZone = $elm$time$Time$Zone;
 var $elm$time$Time$here = _Time_here(_Utils_Tuple0);
 var $author$project$N$Generate$Linear = {$: 'Linear'};
+var $author$project$N$Generate$Local = {$: 'Local'};
 var $author$project$Elm$CodeGen$Extra$PackageExposedModule = function (a) {
 	return {$: 'PackageExposedModule', a: a};
 };
@@ -6195,6 +6196,18 @@ var $author$project$N$Generate$nType = function (n) {
 		_List_fromArray(
 			[n]));
 };
+var $author$project$N$Generate$onDependency = function (dependencyName) {
+	return function (location) {
+		if (location.$ === 'Local') {
+			return '';
+		} else {
+			return $elm$core$String$concat(
+				_List_fromArray(
+					['https://dark.elm.dmy.fr/packages/', dependencyName, '/latest/']));
+		}
+	};
+};
+var $author$project$N$Generate$onDependencyBoundedNat = $author$project$N$Generate$onDependency('lue-bird/bounded-nat');
 var $author$project$Elm$CodeGen$Extra$Exposed = function (a) {
 	return {$: 'Exposed', a: a};
 };
@@ -6330,29 +6343,32 @@ var $author$project$Elm$CodeGen$Extra$packageExposedFunDecl = F6(
 			A2($elm$core$List$map, $the_sett$elm_syntax_dsl$Elm$CodeGen$varPattern, argumentNames),
 			expression);
 	});
-var $author$project$N$Generate$nNDeclaration = function (linearOrBinary) {
-	return function (n) {
-		return A6(
-			$author$project$Elm$CodeGen$Extra$packageExposedFunDecl,
-			$author$project$N$Generate$Exact,
-			_List_fromArray(
-				[
-					$the_sett$elm_syntax_dsl$Elm$CodeGen$markdown(
-					$elm$core$String$concat(
-						_List_fromArray(
-							[
-								'The [`N`](#N) `',
-								$elm$core$String$fromInt(n),
-								'`'
-							])))
-				]),
-			$author$project$N$Generate$nType(
-				$author$project$N$Generate$minAsDifferenceAndMaxType(n)),
-			$author$project$N$Generate$nX(n),
-			_List_Nil,
-			A2($author$project$N$Generate$nNImplementation, linearOrBinary, n));
-	};
-};
+var $author$project$N$Generate$nNDeclaration = F2(
+	function (linearOrBinary, nLocation) {
+		return function (n) {
+			return A6(
+				$author$project$Elm$CodeGen$Extra$packageExposedFunDecl,
+				$author$project$N$Generate$Exact,
+				_List_fromArray(
+					[
+						$the_sett$elm_syntax_dsl$Elm$CodeGen$markdown(
+						$elm$core$String$concat(
+							_List_fromArray(
+								[
+									'The [`N`](N',
+									$author$project$N$Generate$onDependencyBoundedNat(nLocation),
+									'#N) `',
+									$elm$core$String$fromInt(n),
+									'`'
+								])))
+					]),
+				$author$project$N$Generate$nType(
+					$author$project$N$Generate$minAsDifferenceAndMaxType(n)),
+				$author$project$N$Generate$nX(n),
+				_List_Nil,
+				A2($author$project$N$Generate$nNImplementation, linearOrBinary, n));
+		};
+	});
 var $author$project$N$Generate$TypeAdd = {$: 'TypeAdd'};
 var $author$project$N$Generate$addN = function (n) {
 	return $elm$core$String$concat(
@@ -6498,28 +6514,31 @@ var $author$project$N$Generate$typeAddNImplementation = function (linearOrBinary
 			}
 		});
 };
-var $author$project$N$Generate$typeAddNDeclaration = function (linearOrBinary) {
-	return function (n) {
-		return A5(
-			$author$project$Elm$CodeGen$Extra$packageExposedAliasDecl,
-			$author$project$N$Generate$TypeAdd,
-			_List_fromArray(
-				[
-					$the_sett$elm_syntax_dsl$Elm$CodeGen$markdown(
-					$elm$core$String$concat(
-						_List_fromArray(
-							[
-								'The [natural number](#N0OrAdd1) `',
-								$elm$core$String$fromInt(n),
-								' +` a given `n`'
-							])))
-				]),
-			$author$project$N$Generate$addN(n),
-			_List_fromArray(
-				['n']),
-			A3($author$project$N$Generate$typeAddNImplementation, linearOrBinary, n, 'n'));
-	};
-};
+var $author$project$N$Generate$typeAddNDeclaration = F2(
+	function (linearOrBinary, nLocation) {
+		return function (n) {
+			return A5(
+				$author$project$Elm$CodeGen$Extra$packageExposedAliasDecl,
+				$author$project$N$Generate$TypeAdd,
+				_List_fromArray(
+					[
+						$the_sett$elm_syntax_dsl$Elm$CodeGen$markdown(
+						$elm$core$String$concat(
+							_List_fromArray(
+								[
+									'The [natural number](N',
+									$author$project$N$Generate$onDependencyBoundedNat(nLocation),
+									'#N0OrAdd1) `',
+									$elm$core$String$fromInt(n),
+									' +` a given `n`'
+								])))
+					]),
+				$author$project$N$Generate$addN(n),
+				_List_fromArray(
+					['n']),
+				A3($author$project$N$Generate$typeAddNImplementation, linearOrBinary, n, 'n'));
+		};
+	});
 var $author$project$N$Generate$TypeExact = {$: 'TypeExact'};
 var $author$project$N$Generate$typeNNImplementation = function (linearOrBinary) {
 	return function (n) {
@@ -6563,32 +6582,35 @@ var $author$project$N$Generate$typeNNImplementation = function (linearOrBinary) 
 		}
 	};
 };
-var $author$project$N$Generate$typeNNDeclaration = function (linearOrBinary) {
-	return function (n) {
-		return A5(
-			$author$project$Elm$CodeGen$Extra$packageExposedAliasDecl,
-			$author$project$N$Generate$TypeExact,
-			_List_fromArray(
-				[
-					$the_sett$elm_syntax_dsl$Elm$CodeGen$markdown(
-					$elm$core$String$concat(
-						_List_fromArray(
-							[
-								'The [natural number](#N0OrAdd1) `',
-								$elm$core$String$fromInt(n),
-								'`'
-							])))
-				]),
-			$elm$core$String$concat(
+var $author$project$N$Generate$typeNNDeclaration = F2(
+	function (linearOrBinary, nLocation) {
+		return function (n) {
+			return A5(
+				$author$project$Elm$CodeGen$Extra$packageExposedAliasDecl,
+				$author$project$N$Generate$TypeExact,
 				_List_fromArray(
 					[
-						'N',
-						$elm$core$String$fromInt(n)
-					])),
-			_List_Nil,
-			A2($author$project$N$Generate$typeNNImplementation, linearOrBinary, n));
-	};
-};
+						$the_sett$elm_syntax_dsl$Elm$CodeGen$markdown(
+						$elm$core$String$concat(
+							_List_fromArray(
+								[
+									'The [natural number](',
+									$author$project$N$Generate$onDependencyBoundedNat(nLocation),
+									'N#N0OrAdd1) `',
+									$elm$core$String$fromInt(n),
+									'`'
+								])))
+					]),
+				$elm$core$String$concat(
+					_List_fromArray(
+						[
+							'N',
+							$elm$core$String$fromInt(n)
+						])),
+				_List_Nil,
+				A2($author$project$N$Generate$typeNNImplementation, linearOrBinary, n));
+		};
+	});
 var $author$project$N$Generate$TypeUp = {$: 'TypeUp'};
 var $the_sett$elm_pretty_printer$Internals$NLine = F3(
 	function (a, b, c) {
@@ -7381,11 +7403,11 @@ var $author$project$N$Generate$n0To16Module = function () {
 				[
 					A2(
 					$elm$core$List$map,
-					$author$project$N$Generate$typeAddNDeclaration($author$project$N$Generate$Linear),
+					A2($author$project$N$Generate$typeAddNDeclaration, $author$project$N$Generate$Linear, $author$project$N$Generate$Local),
 					A2($elm$core$List$range, 1, lastN)),
 					A2(
 					$elm$core$List$map,
-					$author$project$N$Generate$typeNNDeclaration($author$project$N$Generate$Linear),
+					A2($author$project$N$Generate$typeNNDeclaration, $author$project$N$Generate$Linear, $author$project$N$Generate$Local),
 					A2($elm$core$List$range, 0, lastN)),
 					A2(
 					$elm$core$List$map,
@@ -7393,7 +7415,7 @@ var $author$project$N$Generate$n0To16Module = function () {
 					A2($elm$core$List$range, 0, lastN)),
 					A2(
 					$elm$core$List$map,
-					$author$project$N$Generate$nNDeclaration($author$project$N$Generate$Linear),
+					A2($author$project$N$Generate$nNDeclaration, $author$project$N$Generate$Linear, $author$project$N$Generate$Local),
 					A2($elm$core$List$range, 2, lastN))
 				])),
 		imports: _List_Nil,
@@ -19631,6 +19653,7 @@ var $mdgriffith$elm_ui$Element$moveUp = function (y) {
 		$mdgriffith$elm_ui$Internal$Model$MoveY(-y));
 };
 var $author$project$N$Generate$Binary = {$: 'Binary'};
+var $author$project$N$Generate$Dependency = {$: 'Dependency'};
 var $author$project$Elm$CodeGen$Extra$aliasExpose = function (names) {
 	return A2($elm$core$List$map, $the_sett$elm_syntax_dsl$Elm$CodeGen$typeOrAliasExpose, names);
 };
@@ -19658,10 +19681,10 @@ var $author$project$N$Generate$nBinaryModule = function (n) {
 	return {
 		declarations: _List_fromArray(
 			[
-				A2($author$project$N$Generate$typeAddNDeclaration, $author$project$N$Generate$Binary, n),
-				A2($author$project$N$Generate$typeNNDeclaration, $author$project$N$Generate$Binary, n),
+				A3($author$project$N$Generate$typeAddNDeclaration, $author$project$N$Generate$Binary, $author$project$N$Generate$Dependency, n),
+				A3($author$project$N$Generate$typeNNDeclaration, $author$project$N$Generate$Binary, $author$project$N$Generate$Dependency, n),
 				A2($author$project$N$Generate$typeUpXDeclaration, $author$project$N$Generate$Binary, n),
-				A2($author$project$N$Generate$nNDeclaration, $author$project$N$Generate$Binary, n)
+				A3($author$project$N$Generate$nNDeclaration, $author$project$N$Generate$Binary, $author$project$N$Generate$Dependency, n)
 			]),
 		imports: _List_fromArray(
 			[
@@ -19695,7 +19718,7 @@ var $author$project$N$Generate$nBinaryModule = function (n) {
 				moduleComment: function (declarations) {
 					return _List_fromArray(
 						[
-							$the_sett$elm_syntax_dsl$Elm$CodeGen$markdown('When you need big numbers or multiple medium sized ones.')
+							$the_sett$elm_syntax_dsl$Elm$CodeGen$markdown('When you need big numbers or multiple medium sized ones')
 						]);
 				}
 			})
@@ -19705,10 +19728,10 @@ var $author$project$N$Generate$nLinearModule = function (n) {
 	return {
 		declarations: _List_fromArray(
 			[
-				A2($author$project$N$Generate$typeAddNDeclaration, $author$project$N$Generate$Linear, n),
-				A2($author$project$N$Generate$typeNNDeclaration, $author$project$N$Generate$Linear, n),
+				A3($author$project$N$Generate$typeAddNDeclaration, $author$project$N$Generate$Linear, $author$project$N$Generate$Dependency, n),
+				A3($author$project$N$Generate$typeNNDeclaration, $author$project$N$Generate$Linear, $author$project$N$Generate$Dependency, n),
 				A2($author$project$N$Generate$typeUpXDeclaration, $author$project$N$Generate$Linear, n),
-				A2($author$project$N$Generate$nNDeclaration, $author$project$N$Generate$Binary, n)
+				A3($author$project$N$Generate$nNDeclaration, $author$project$N$Generate$Binary, $author$project$N$Generate$Dependency, n)
 			]),
 		imports: _List_fromArray(
 			[

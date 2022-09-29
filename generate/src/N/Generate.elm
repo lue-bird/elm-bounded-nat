@@ -261,12 +261,39 @@ type NTag
 --
 
 
-typeNNDeclaration : LinearOrBinary -> (Int -> Declaration NTag)
-typeNNDeclaration linearOrBinary =
+type Location
+    = Local
+    | Dependency
+
+
+onDependencyBoundedNat : Location -> String
+onDependencyBoundedNat =
+    onDependency "lue-bird/bounded-nat"
+
+
+onDependency : String -> (Location -> String)
+onDependency dependencyName =
+    \location ->
+        case location of
+            Local ->
+                ""
+
+            Dependency ->
+                [ "https://dark.elm.dmy.fr/packages/", dependencyName, "/latest/" ]
+                    |> String.concat
+
+
+typeNNDeclaration :
+    LinearOrBinary
+    -> Location
+    -> (Int -> Declaration NTag)
+typeNNDeclaration linearOrBinary nLocation =
     \n ->
         packageExposedAliasDecl TypeExact
             [ markdown
-                ([ "The [natural number](#N0OrAdd1) `"
+                ([ "The [natural number]("
+                 , nLocation |> onDependencyBoundedNat
+                 , "N#N0OrAdd1) `"
                  , String.fromInt n
                  , "`"
                  ]
@@ -314,12 +341,17 @@ typeNNImplementation linearOrBinary =
                         (n0OrAdd1Type typeNever typePossibly)
 
 
-typeAddNDeclaration : LinearOrBinary -> (Int -> Declaration NTag)
-typeAddNDeclaration linearOrBinary =
+typeAddNDeclaration :
+    LinearOrBinary
+    -> Location
+    -> (Int -> Declaration NTag)
+typeAddNDeclaration linearOrBinary nLocation =
     \n ->
         packageExposedAliasDecl TypeAdd
             [ markdown
-                ([ "The [natural number](#N0OrAdd1) `"
+                ([ "The [natural number](N"
+                 , nLocation |> onDependencyBoundedNat
+                 , "#N0OrAdd1) `"
                  , n |> String.fromInt
                  , " +` a given `n`"
                  ]
@@ -372,7 +404,9 @@ type LinearOrBinary
     | Binary
 
 
-typeUpXDeclaration : LinearOrBinary -> (Int -> Declaration NTag)
+typeUpXDeclaration :
+    LinearOrBinary
+    -> (Int -> Declaration NTag)
 typeUpXDeclaration linearOrBinary =
     \x ->
         packageExposedAliasDecl TypeUp
@@ -402,12 +436,20 @@ typeUpXDeclaration linearOrBinary =
             )
 
 
-nNDeclaration : LinearOrBinary -> (Int -> Declaration NTag)
-nNDeclaration linearOrBinary =
+nNDeclaration :
+    LinearOrBinary
+    -> Location
+    -> (Int -> Declaration NTag)
+nNDeclaration linearOrBinary nLocation =
     \n ->
         packageExposedFunDecl Exact
             [ markdown
-                ([ "The [`N`](#N) `", n |> String.fromInt, "`" ]
+                ([ "The [`N`](N"
+                 , nLocation |> onDependencyBoundedNat
+                 , "#N) `"
+                 , n |> String.fromInt
+                 , "`"
+                 ]
                     |> String.concat
                 )
             ]
@@ -484,13 +526,13 @@ n0To16Module =
     , imports = []
     , declarations =
         [ List.range 1 lastN
-            |> List.map (typeAddNDeclaration Linear)
+            |> List.map (typeAddNDeclaration Linear Local)
         , List.range 0 lastN
-            |> List.map (typeNNDeclaration Linear)
+            |> List.map (typeNNDeclaration Linear Local)
         , List.range 0 lastN
             |> List.map (typeUpXDeclaration Linear)
         , List.range 2 lastN
-            |> List.map (nNDeclaration Linear)
+            |> List.map (nNDeclaration Linear Local)
         ]
             |> List.concat
     }
@@ -519,10 +561,10 @@ nLinearModule n =
             (exposingExplicit (aliasExpose [ "Possibly" ]))
         ]
     , declarations =
-        [ n |> typeAddNDeclaration Linear
-        , n |> typeNNDeclaration Linear
+        [ n |> typeAddNDeclaration Linear Dependency
+        , n |> typeNNDeclaration Linear Dependency
         , n |> typeUpXDeclaration Linear
-        , n |> nNDeclaration Binary
+        , n |> nNDeclaration Binary Dependency
         ]
     }
 
@@ -534,7 +576,7 @@ nBinaryModule n =
         PackageExposedModule
             { moduleComment =
                 \declarations ->
-                    [ markdown "When you need big numbers or multiple medium sized ones."
+                    [ markdown "When you need big numbers or multiple medium sized ones"
                     ]
             }
     , imports =
@@ -550,10 +592,10 @@ nBinaryModule n =
             (exposingExplicit (aliasExpose [ "Possibly" ]))
         ]
     , declarations =
-        [ n |> typeAddNDeclaration Binary
-        , n |> typeNNDeclaration Binary
+        [ n |> typeAddNDeclaration Binary Dependency
+        , n |> typeNNDeclaration Binary Dependency
         , n |> typeUpXDeclaration Binary
-        , n |> nNDeclaration Binary
+        , n |> nNDeclaration Binary Dependency
         ]
     }
 
@@ -565,7 +607,10 @@ nBinaryModule n =
 intToPowersOf : Int -> (Int -> List { power : Int, amount : Int })
 intToPowersOf power =
     intToAllPowersOf power
-        >> List.indexedMap (\multiple amount -> { power = multiple, amount = amount })
+        >> List.indexedMap
+            (\multiple amount ->
+                { power = multiple, amount = amount }
+            )
         >> List.filter (\part -> part.amount /= 0)
 
 
