@@ -3,7 +3,7 @@ module N exposing
     , In, Min
     , Fixed, InFixed, Exactly, Infinity
     , Up, Down, To
-    , abs, randomIn
+    , abs, randomIn, inFuzz, inFuzzUniform
     , N0, N1, N2, N3, N4, N5, N6, N7, N8, N9, N10, N11, N12, N13, N14, N15, N16
     , Add1, Add2, Add3, Add4, Add5, Add6, Add7, Add8, Add9, Add10, Add11, Add12, Add13, Add14, Add15, Add16
     , Up0, Up1, Up2, Up3, Up4, Up5, Up6, Up7, Up8, Up9, Up10, Up11, Up12, Up13, Up14, Up15, Up16
@@ -48,7 +48,7 @@ module N exposing
 
 # create
 
-@docs abs, randomIn
+@docs abs, randomIn, inFuzz, inFuzzUniform
 
 [`ArraySized.upTo`](https://package.elm-lang.org/packages/lue-bird/elm-typesafe-array/latest/ArraySized#upTo)
 to create increasing [`N`](#N)s.
@@ -181,6 +181,7 @@ Having those exposed can be useful when building extensions to this library like
 
 -}
 
+import Fuzz exposing (Fuzzer)
 import Possibly exposing (Possibly(..))
 import Random
 
@@ -822,15 +823,49 @@ randomIn :
         Random.Generator
             (N (In lowerLimitMin upperLimitMax))
 randomIn ( lowestPossible, highestPossible ) =
-    Random.int (lowestPossible |> toInt) (highestPossible |> toInt)
-        |> Random.map
-            (LimitedIn
-                (Range
-                    { min = lowestPossible |> min
-                    , max = highestPossible |> max
-                    }
-                )
-            )
+    Random.map (intIn ( lowestPossible, highestPossible ))
+        (Random.int (lowestPossible |> toInt) (highestPossible |> toInt))
+
+
+{-| `Fuzzer` for an [`N`](#N) in a given range.
+For larger ranges, smaller [`N`](#N)s are preferred
+-}
+inFuzz :
+    ( N
+        (In
+            lowerLimitMin
+            (Up lowerLimitMaxToUpperLimitMin_ To upperLimitMin)
+        )
+    , N (In (Fixed upperLimitMin) upperLimitMax)
+    )
+    -> Fuzzer (N (In lowerLimitMin upperLimitMax))
+inFuzz ( lowestPossible, highestPossible ) =
+    Fuzz.map (intIn ( lowestPossible, highestPossible ))
+        (Fuzz.intRange (lowestPossible |> toInt) (highestPossible |> toInt))
+
+
+{-| `Fuzzer` for an [`N`](#N) in a given range.
+In contrast to [`N.inFuzz`](#inFuzz),
+all [`N`](#N)s are equally as likely, even for larger ranges.
+-}
+inFuzzUniform :
+    ( N
+        (In
+            lowerLimitMin
+            (Up lowerLimitMaxToUpperLimitMin_ To upperLimitMin)
+        )
+    , N (In (Fixed upperLimitMin) upperLimitMax)
+    )
+    -> Fuzzer (N (In lowerLimitMin upperLimitMax))
+inFuzzUniform ( lowestPossible, highestPossible ) =
+    Fuzz.map
+        (\int0ToHighestMinusLowest ->
+            intIn ( lowestPossible, highestPossible )
+                ((lowestPossible |> toInt) + int0ToHighestMinusLowest)
+        )
+        (Fuzz.uniformInt
+            ((highestPossible |> toInt) - (lowestPossible |> toInt))
+        )
 
 
 {-| Compared to a range from a lower to an upper bound, is the `Int` in range, [`BelowOrAbove`](#BelowOrAbove)?
