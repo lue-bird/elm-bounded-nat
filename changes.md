@@ -1,11 +1,22 @@
-### 28.1.0 plans
+### 29.1.0 plans
 
-  - `fuzzIn ( min, max ) : ... -> Fuzzer (N (In ...))` add
-      - currently waiting for `elm-test` major version 2
-        to avoid a major version bump as a result
   - `N.Generator` that auto-generates `N<x>`, `Add<x>` and `n<x>` for x >= 17 add
 
 # change log
+
+### 29.0.0
+
+  - `minAtLeast` name → `atLeastMin`
+  - `abs` name → `absoluteInt`
+      - consistent with `inInt`, `atLeastInt`, ...
+  - `Value`, `InValue` name → `FixedValue`, `InFixedValue`
+      - consistent with `ExactlyValue`, `MinValue`, `InfinityValue`
+  - `intAtLeast`, `intIn`, `intIsAtLeast`, `intIsIn`
+    name → `atLeastInt`, `inInt`, `isAtLeastInt`, `isInInt`
+  - `randomIn` name → `inRandom`
+      - consistent with `inFuzz`, `inFuzzUniform`
+  - `inFuzz ( lo, hi )`, `inFuzzUniform ( lo, hi )` add
+  - `modulusByInt` add
 
 ## 28.0.0
 

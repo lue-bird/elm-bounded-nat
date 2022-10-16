@@ -40,14 +40,14 @@ Users can prove this by _explicitly_
     ```elm
     toPositive : Int -> Maybe (N (Min (Up1 x_)))
     toPositive =
-        N.intIsAtLeast n1 >> Result.toMaybe
+        N.isAtLeastInt n1 >> Result.toMaybe
     ```
 
   - clamping
 
     ```elm
     floatPercent float =
-        float * 100 |> round |> N.intIn ( n0, n100 )
+        float * 100 |> round |> N.inInt ( n0, n100 )
     ```
 
   - there are more ways, but you get the idea 🙂

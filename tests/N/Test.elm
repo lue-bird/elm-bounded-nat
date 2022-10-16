@@ -16,7 +16,7 @@ suite =
                     |> Expect.within (Expect.Absolute 0.1)
                         (N.differenceInfinity |> N.differenceToInt |> toFloat)
             )
-        , test "Value == Value"
+        , test "FixedValue == FixedValue"
             (\() ->
                 (n9 |> N.toValue)
                     |> Expect.equal
@@ -99,7 +99,7 @@ toDigit :
             (N (In (Up0 minX_) (Up9 maxX)))
 toDigit char =
     ((char |> Char.toCode) - ('0' |> Char.toCode))
-        |> N.intIsIn ( n0, n9 )
+        |> N.isInInt ( n0, n9 )
 
 
 
