@@ -1,7 +1,7 @@
 module N.Test exposing (suite)
 
 import Expect
-import N exposing (Add1, Add10, Add9, In, Min, N, To, Up, Up0, Up1, Up10, Up9, n0, n1, n3, n9)
+import N exposing (In, Min, N, To, Up, Up0, Up1, Up10, Up9, n0, n1, n3, n9)
 import Test exposing (Test, describe, test)
 
 
