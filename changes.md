@@ -4,7 +4,7 @@
 
 # change log
 
-### 29.0.0
+## 29.0.0
 
   - `minAtLeast` name → `atLeastMin`
   - `abs` name → `absoluteInt`
