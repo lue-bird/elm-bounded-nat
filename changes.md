@@ -1,8 +1,12 @@
-### 29.1.0 plans
+### 29.2.0 plans
 
   - `N.Generator` that auto-generates `N<x>`, `Add<x>` and `n<x>` for x >= 17 add
 
 # change log
+
+### 28.1.0
+
+  - `order` add
 
 ## 29.0.0
 

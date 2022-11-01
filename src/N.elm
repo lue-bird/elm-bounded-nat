@@ -12,7 +12,7 @@ module N exposing
     , isAtLeastInt, isInInt
     , isAtLeast, isAtMost
     , BelowOrAbove(..), is, isIn
-    , greater, smaller
+    , greater, smaller, order
     , add, addMin
     , subtract, subtractMin
     , toPower, remainderBy, multiplyBy, divideBy
@@ -112,7 +112,7 @@ In the future, [`elm-generate`](https://github.com/lue-bird/generate-elm) will a
 
 @docs isAtLeast, isAtMost
 @docs BelowOrAbove, is, isIn
-@docs greater, smaller
+@docs greater, smaller, order
 
 
 # alter
@@ -1985,6 +1985,25 @@ greater minimum =
 
         else
             minimum
+
+
+{-| Increasing [`Order`](https://dark.elm.dmy.fr/packages/lue-bird/elm-linear-direction/latest/Order)
+between 2 [`N`](#N)s
+
+    N.order n14 n2
+    --> GT
+
+    N.order n4 n4
+    --> EQ
+
+    n12 |> N.order n4
+    --> LT
+
+-}
+order : N range0_ -> N range1_ -> Order
+order =
+    \n0_ n1_ ->
+        compare (n0_ |> toInt) (n1_ |> toInt)
 
 
 
