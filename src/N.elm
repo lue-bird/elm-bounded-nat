@@ -2581,6 +2581,8 @@ type N0OrAdd1 n0PossiblyOrNever successorMinus1
 
 using [`N.min0Adapt`](#min0Adapt)
 
+Stack and Emptiable are part of [`emptiness-typed`](#https://dark.elm.dmy.fr/packages/lue-bird/elm-emptiness-typed/latest/)
+
 Cool, right?
 
 -}
@@ -2637,6 +2639,8 @@ isAtLeast1 =
                         |> N.min0Adapt never
 
 using [`isAtLeast1`](#isAtLeast1).
+
+Stack and Emptiable are part of [`emptiness-typed`](#https://dark.elm.dmy.fr/packages/lue-bird/elm-emptiness-typed/latest/)
 
 with `(\_ -> Possible)` it's just a worse version of [`minSubtract`](#minSubtract)
 that might be useful in ultra rare situations
