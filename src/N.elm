@@ -24,6 +24,7 @@ module N exposing
     , maxToValue, maxFromValue
     , minTo, minSubtract
     , maxTo, maxToInfinity, maxAdd
+    , isAtLeast1, min0Adapt
     , range, min, max
     , fixedInfinity, fixedToNumber
     , exactly
@@ -31,6 +32,7 @@ module N exposing
     , differenceToInt
     , addDifference, subtractDifference
     , N0OrAdd1(..)
+    , number0Adapt, fixed0Adapt
     , fixedToValue, fixedFromValue
     , inFixedToValue, inFixedFromValue
     )
@@ -114,6 +116,8 @@ In the future, [`elm-generate`](https://github.com/lue-bird/generate-elm) will a
 @docs BelowOrAbove, is, isIn
 @docs greater, smaller
 
+More advanced stuff in [section type information ) allowable-state](#allowable-state)
+
 
 # alter
 
@@ -146,6 +150,15 @@ In the future, [`elm-generate`](https://github.com/lue-bird/generate-elm) will a
 @docs maxTo, maxToInfinity, maxAdd
 
 
+## allowable-state
+
+Consider this an advanced technique for packages that use
+[`allowable-state`](https://dark.elm.dmy.fr/packages/lue-bird/elm-allowable-state/latest/).
+Any questions @lue in slack!
+
+@docs isAtLeast1, min0Adapt
+
+
 # miss an operation?
 
 Anything that can't be expressed with the available operations? → issue/PR
@@ -174,6 +187,11 @@ Having those exposed can be useful when building extensions to this library like
 @docs addDifference, subtractDifference
 
 @docs N0OrAdd1
+
+
+## [allowable-state](https://dark.elm.dmy.fr/packages/lue-bird/elm-allowable-state/latest/)
+
+@docs number0Adapt, fixed0Adapt
 
 
 ## safe internals without functions
@@ -758,8 +776,8 @@ Instead,
     that relies (or performs better) on structural `==`
 
 -}
-type alias Fixed representationAsNumber =
-    Up N0 To representationAsNumber
+type alias Fixed asNumber =
+    Up N0 To asNumber
 
 
 {-| Add a given [specific](#In) [`N`](#N)
@@ -2510,6 +2528,177 @@ n16 =
 type N0OrAdd1 n0PossiblyOrNever successorMinus1
     = N0 n0PossiblyOrNever
     | Add1 successorMinus1
+
+
+{-| Transfer the knowledge about whether [`n0`](#n0) is a possible value
+
+    trySubtracting1 :
+        N (In (Fixed (N0OrAdd1 n0PossiblyOrNever minMinus1)) max)
+        -> Emptiable (N (In (Fixed minMinus1) max)) possiblyOrNever
+    trySubtracting1 =
+        \n ->
+            case n |> N.isAtLeast1 of
+                Err possiblyOrNever ->
+                    Emptiable.Empty possiblyOrNever
+
+                Ok atLeast1 ->
+                    atLeast1 |> N.sub n1
+
+    stackRepeat :
+        element
+        -> N (In (Fixed (N0OrAdd1 possiblyOrNever minMinus1_)) max_)
+        -> Emptiable (Stacked element) possiblyOrNever
+    stackRepeat toRepeat length =
+        case length |> N.isAtLeast1 of
+            Err possiblyOrNever ->
+                Emptiable.Empty possiblyOrNever
+
+            Ok lengthAtLeast1 ->
+                Stack.topBelow
+                    toRepeat
+                    (List.repeat
+                        (lengthAtLeast1 |> N.sub n1 |> N.toInt)
+                        toRepeat
+                    )
+
+    stackLength :
+        Emptiable (Stacked element) possiblyOrNever
+        -> N (Min (Fixed (N0OrAdd1 possiblyOrNever N0)))
+    stackLength =
+        \stack ->
+            case stack of
+                Emptiable.Empty possiblyOrNever ->
+                    -- adapt the variable minimum
+                    n0 |> N.min0Adapt (\_ -> possiblyOrNever) |> N.maxToInfinity
+
+                Emptiable.Filled (TopBelow ( _, belowTop )) ->
+                    belowTop
+                        |> List.length
+                        |> N.intToAtLeast n0
+                        |> N.add n1
+                        -- downgrade the minimum
+                        |> N.min0Adapt never
+
+using [`N.min0Adapt`](#min0Adapt)
+
+Cool, right?
+
+-}
+isAtLeast1 :
+    N (In (Fixed (N0OrAdd1 n0PossiblyOrNever minMinus1)) max)
+    ->
+        Result
+            n0PossiblyOrNever
+            (N (In (Fixed (Add1 minMinus1)) max))
+isAtLeast1 =
+    \n ->
+        case n |> min |> fixedToNumber of
+            N0 possiblyOrNever ->
+                possiblyOrNever |> Err
+
+            Add1 successor ->
+                n
+                    |> toInt
+                    |> LimitedIn
+                        (Range
+                            { min =
+                                Difference
+                                    { up = \_ -> successor |> Add1
+                                    , down = \_ -> N0 Possible
+                                    , toInt = n |> min |> differenceToInt
+                                    }
+                            , max = n |> max
+                            }
+                        )
+                    |> Ok
+
+
+{-| Change the `possiblyOrNever` type for the case that its [`min`](#min) is 0
+
+`never` allows you to adapt any variable,
+`\_ -> yourVariablePossiblyOrNever` swaps it for your given variable
+
+    stackLength :
+        Emptiable (Stacked element) possiblyOrNever
+        -> N (Min (Fixed (N0OrAdd1 possiblyOrNever N0)))
+    stackLength =
+        \stack ->
+            case stack of
+                Emptiable.Empty possiblyOrNever ->
+                    -- adapt the variable minimum
+                    n0 |> N.min0Adapt (\_ -> possiblyOrNever) |> N.maxToInfinity
+
+                Emptiable.Filled (TopBelow ( _, belowTop )) ->
+                    belowTop
+                        |> List.length
+                        |> N.intToAtLeast n0
+                        |> N.add n1
+                        -- downgrade the minimum
+                        |> N.min0Adapt never
+
+using [`isAtLeast1`](#isAtLeast1).
+
+with `(\_ -> Possible)` it's just a worse version of [`minSubtract`](#minSubtract)
+that might be useful in ultra rare situations
+
+    minSubtract1IfPossible :
+        N (In (Fixed (N0OrAdd1 possiblyOrNever minMinus1)) max)
+        -> N (In (Fixed (N0OrAdd1 Possibly minMinus1)) max)
+    minSubtract1IfPossible =
+        N.min0Adapt (\_ -> Possibly)
+
+-}
+min0Adapt :
+    (possiblyOrNever -> adaptedPossiblyOrNever)
+    -> N (In (Fixed (N0OrAdd1 possiblyOrNever minMinus1)) max)
+    -> N (In (Fixed (N0OrAdd1 adaptedPossiblyOrNever minMinus1)) max)
+min0Adapt n0PossiblyOrNeverAdapt =
+    \n ->
+        n
+            |> toInt
+            |> LimitedIn
+                (Range
+                    { min = n |> min |> fixed0Adapt n0PossiblyOrNeverAdapt
+                    , max = n |> max
+                    }
+                )
+
+
+{-| Change the `possiblyOrNever` type
+for the case that its [`N0OrAdd1`](#N0OrAdd1) representation is [`N0`](#N0OrAdd1)
+-}
+fixed0Adapt :
+    (possiblyOrNever -> adaptedPossiblyOrNever)
+    -> Fixed (N0OrAdd1 possiblyOrNever endMinus1)
+    -> Fixed (N0OrAdd1 adaptedPossiblyOrNever endMinus1)
+fixed0Adapt n0PossiblyOrNeverAdapt =
+    \(Difference difference) ->
+        Difference
+            { up =
+                \start ->
+                    start
+                        |> difference.up
+                        |> number0Adapt n0PossiblyOrNeverAdapt
+            , down = \_ -> N0 Possible
+            , toInt = difference.toInt
+            }
+
+
+{-| Change the `possiblyOrNever` type
+for the case that the [`N0OrAdd1`](#N0OrAdd1) is [`N0`](#N0OrAdd1)
+-}
+number0Adapt :
+    (n0PossiblyOrNever -> adaptedN0PossiblyOrNever)
+    -> N0OrAdd1 n0PossiblyOrNever minus1
+    -> N0OrAdd1 adaptedN0PossiblyOrNever minus1
+number0Adapt n0PossiblyOrNeverAdapt =
+    \n ->
+        case n of
+            Add1 minus1 ->
+                minus1 |> Add1
+
+            N0 possiblyOrNever ->
+                N0 (possiblyOrNever |> n0PossiblyOrNeverAdapt)
 
 
 {-| The [natural number](#N0OrAdd1) `1 +` a given `n`
