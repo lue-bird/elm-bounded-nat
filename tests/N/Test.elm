@@ -12,9 +12,9 @@ suite =
         , maximumConstrainedTest
         , test "infinity == infinity"
             (\() ->
-                (N.differenceInfinity |> N.differenceToInt |> toFloat)
+                (N.fixedInfinity |> N.differenceToInt |> toFloat)
                     |> Expect.within (Expect.Absolute 0.1)
-                        (N.differenceInfinity |> N.differenceToInt |> toFloat)
+                        (N.fixedInfinity |> N.differenceToInt |> toFloat)
             )
         , test "FixedValue == FixedValue"
             (\() ->
@@ -60,7 +60,7 @@ maximumUnconstrainedTest =
 listLength : List a_ -> N (Min (Up0 x_))
 listLength =
     List.foldl
-        (\_ -> N.addMin n1 >> N.minDown n1)
+        (\_ -> N.addMin n1 >> N.minSubtract n1)
         (n0 |> N.maxToInfinity)
 
 
@@ -99,7 +99,7 @@ toDigit :
             (N (In (Up0 minX_) (Up9 maxX)))
 toDigit char =
     ((char |> Char.toCode) - ('0' |> Char.toCode))
-        |> N.isInInt ( n0, n9 )
+        |> N.intIsIn ( n0, n9 )
 
 
 

@@ -1,10 +1,33 @@
-### 29.2.0 plans
+### 30.1.0 plans
 
   - `N.Generator` that auto-generates `N<x>`, `Add<x>` and `n<x>` for x >= 17 add
 
 # change log
 
-### 28.1.0
+## 30.0.0
+
+  - ```elm
+    { infinity : () }
+    ```
+    redefine as
+    ```elm
+    exposing (Infinity(..))
+    type Infinity
+        = Infinity
+    ```
+  - `Infinity`, `InfinityValue` remove
+      - in favor of `Fixed Infinity`, `FixedValue Infinity`
+  - `order` remove
+  - `MinValue` name → `MinFixedValue`
+  - `differenceInfinity` name → `fixedInfinity`
+  - `absoluteInt`, `modByInt`, `atLeastInt`, `inInt`, `isAtLeastInt`, `isInInt` name → `intToAbsolute`, `intModBy`, `intToAtLeast`, `intIn`, `intIsAtLeast`, `intIsIn`
+  - `in_`, `atLeast`, `atLeastMin`, `atMost` name → `toIn`, `toAtLeast`, `toAtLeastMin`, `toAtMost`
+      - subject first
+  - `minDown`, `maxUp` name → `minSubtract`, `maxAdd`
+      - consistent with `add`/`subtract` and `differenceAdd`/`differenceSubtract`
+  - `fixedToNumber` add
+
+### 29.1.0
 
   - `order` add
 
