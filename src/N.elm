@@ -24,7 +24,8 @@ module N exposing
     , maxToValue, maxFromValue
     , minTo, minSubtract
     , maxTo, maxToInfinity, maxAdd
-    , isAtLeast1, min0Adapt
+    , isAtLeast1
+    , min0Adapt, minMinus1Never
     , range, min, max
     , fixedInfinity, fixedToNumber
     , exactly
@@ -32,7 +33,8 @@ module N exposing
     , differenceToInt
     , addDifference, subtractDifference
     , N0OrAdd1(..)
-    , number0Adapt, fixed0Adapt
+    , number0Adapt, numberMinus1Map
+    , fixed0Adapt, fixedMinus1Map
     , fixedToValue, fixedFromValue
     , inFixedToValue, inFixedFromValue
     )
@@ -156,7 +158,8 @@ Consider this an advanced technique for packages that use
 [`allowable-state`](https://dark.elm.dmy.fr/packages/lue-bird/elm-allowable-state/latest/).
 Any questions @lue in slack!
 
-@docs isAtLeast1, min0Adapt
+@docs isAtLeast1
+@docs min0Adapt, minMinus1Never
 
 
 # miss an operation?
@@ -191,7 +194,8 @@ Having those exposed can be useful when building extensions to this library like
 
 ## [allowable-state](https://dark.elm.dmy.fr/packages/lue-bird/elm-allowable-state/latest/)
 
-@docs number0Adapt, fixed0Adapt
+@docs number0Adapt, numberMinus1Map
+@docs fixed0Adapt, fixedMinus1Map
 
 
 ## safe internals without functions
@@ -2627,8 +2631,12 @@ isAtLeast1 =
         \stack ->
             case stack of
                 Emptiable.Empty possiblyOrNever ->
-                    -- adapt the variable minimum
-                    n0 |> N.min0Adapt (\_ -> possiblyOrNever) |> N.maxToInfinity
+                    n0
+                        -- adapt the variable minimum
+                        |> N.min0Adapt (\_ -> possiblyOrNever)
+                        -- allow a different min successor type
+                        |> N.minMinus1Never
+                        |> N.maxToInfinity
 
                 Emptiable.Filled (TopBelow ( _, belowTop )) ->
                     belowTop
@@ -2638,7 +2646,7 @@ isAtLeast1 =
                         -- downgrade the minimum
                         |> N.min0Adapt never
 
-using [`isAtLeast1`](#isAtLeast1).
+using [`isAtLeast1`](#isAtLeast1), [`minMinus1Never`](#minMinus1Never).
 
 Stack and Emptiable are part of [`emptiness-typed`](#https://dark.elm.dmy.fr/packages/lue-bird/elm-emptiness-typed/latest/)
 
@@ -2668,13 +2676,56 @@ min0Adapt n0PossiblyOrNeverAdapt =
                 )
 
 
+{-| Change the successor type for the case that its [`min`](#min) is 1 + ...
+to allow adapting any variable
+
+    stackLength :
+        Emptiable (Stacked element) possiblyOrNever
+        -> N (Min (Fixed (N0OrAdd1 possiblyOrNever N0)))
+    stackLength =
+        \stack ->
+            case stack of
+                Emptiable.Empty possiblyOrNever ->
+                    n0
+                        -- adapt the variable minimum
+                        |> N.min0Adapt (\_ -> possiblyOrNever)
+                        -- allow a different min successor type
+                        |> N.minMinus1Never
+                        |> N.maxToInfinity
+
+                Emptiable.Filled (TopBelow ( _, belowTop )) ->
+                    belowTop
+                        |> List.length
+                        |> N.intToAtLeast n0
+                        |> N.add n1
+                        -- downgrade the minimum
+                        |> N.min0Adapt never
+
+using [`isAtLeast1`](#isAtLeast1), [`min0Adapt`](#min0Adapt).
+
+-}
+minMinus1Never :
+    N (In (Fixed (N0OrAdd1 possiblyOrNever Never)) max)
+    -> N (In (Fixed (N0OrAdd1 possiblyOrNever minMinus1_)) max)
+minMinus1Never =
+    \n ->
+        n
+            |> toInt
+            |> LimitedIn
+                (Range
+                    { min = n |> min |> fixedMinus1Map never
+                    , max = n |> max
+                    }
+                )
+
+
 {-| Change the `possiblyOrNever` type
 for the case that its [`N0OrAdd1`](#N0OrAdd1) representation is [`N0`](#N0OrAdd1)
 -}
 fixed0Adapt :
     (possiblyOrNever -> adaptedPossiblyOrNever)
-    -> Fixed (N0OrAdd1 possiblyOrNever endMinus1)
-    -> Fixed (N0OrAdd1 adaptedPossiblyOrNever endMinus1)
+    -> Fixed (N0OrAdd1 possiblyOrNever minus1)
+    -> Fixed (N0OrAdd1 adaptedPossiblyOrNever minus1)
 fixed0Adapt n0PossiblyOrNeverAdapt =
     \(Difference difference) ->
         Difference
@@ -2683,6 +2734,26 @@ fixed0Adapt n0PossiblyOrNeverAdapt =
                     start
                         |> difference.up
                         |> number0Adapt n0PossiblyOrNeverAdapt
+            , down = \_ -> N0 Possible
+            , toInt = difference.toInt
+            }
+
+
+{-| Change the type
+for the case that the [`N0OrAdd1`](#N0OrAdd1) is [`Add1 minus1`](#N0OrAdd1)
+-}
+fixedMinus1Map :
+    (minus1 -> mappedMinus1)
+    -> Fixed (N0OrAdd1 n0PossiblyOrNever minus1)
+    -> Fixed (N0OrAdd1 n0PossiblyOrNever mappedMinus1)
+fixedMinus1Map minus1Map =
+    \(Difference difference) ->
+        Difference
+            { up =
+                \start ->
+                    start
+                        |> difference.up
+                        |> numberMinus1Map minus1Map
             , down = \_ -> N0 Possible
             , toInt = difference.toInt
             }
@@ -2703,6 +2774,23 @@ number0Adapt n0PossiblyOrNeverAdapt =
 
             N0 possiblyOrNever ->
                 N0 (possiblyOrNever |> n0PossiblyOrNeverAdapt)
+
+
+{-| Change the type
+for the case that the [`N0OrAdd1`](#N0OrAdd1) is [`Add1 minus1`](#N0OrAdd1)
+-}
+numberMinus1Map :
+    (minus1 -> mappedMinus1)
+    -> N0OrAdd1 n0PossiblyOrNever minus1
+    -> N0OrAdd1 n0PossiblyOrNever mappedMinus1
+numberMinus1Map minus1Map =
+    \n ->
+        case n of
+            Add1 minus1 ->
+                minus1 |> minus1Map |> Add1
+
+            N0 possiblyOrNever ->
+                N0 possiblyOrNever
 
 
 {-| The [natural number](#N0OrAdd1) `1 +` a given `n`

@@ -1,8 +1,13 @@
-### 30.2.0 plans
+### 30.3.0 plans
 
   - `N.Generator` that auto-generates `N<x>`, `Add<x>` and `n<x>` for x >= 17 add
 
 # change log
+
+### 30.2.0
+
+  - `minMinus1Never` add
+  - `numberMinus1Map`, `fixedMinus1Map` add
 
 ### 30.1.0
 
