@@ -157,6 +157,6 @@ No extra work
 
 - 👀 **[`typesafe-array`][typesafe-array]** shows that
     - `N (In ...)` is very useful as an index
-    - `In`, `Min`, `Exactly` can also describe a length
+    - `In`, `Min`, `Exactly`, ... can also describe a length
 
 [typesafe-array]: https://package.elm-lang.org/packages/lue-bird/elm-typesafe-array/latest/
