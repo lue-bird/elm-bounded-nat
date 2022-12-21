@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="210mm"
+   height="297mm"
+   viewBox="0 0 210 297"
+   version="1.1"
+   id="svg5"
+   inkscape:version="1.1.2 (0a00cf5339, 2022-02-04)"
+   sodipodi:docname="detailed thumbnail.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview7"
+     pagecolor="#505050"
+     bordercolor="#ffffff"
+     borderopacity="1"
+     inkscape:pageshadow="0"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="1"
+     inkscape:document-units="mm"
+     showgrid="false"
+     inkscape:zoom="0.82646577"
+     inkscape:cx="261.95882"
+     inkscape:cy="438.61466"
+     inkscape:window-width="1920"
+     inkscape:window-height="1017"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs2">
+    <rect
+       x="-68.25248"
+       y="561.37013"
+       width="655.67433"
+       height="142.26007"
+       id="rect321722" />
+    <rect
+       x="-156.30025"
+       y="244.98971"
+       width="4.9730531"
+       height="44.069004"
+       id="rect104071" />
+    <rect
+       x="-189.01947"
+       y="239.46521"
+       width="881.02582"
+       height="399.86622"
+       id="rect10385" />
+    <rect
+       x="-191.78673"
+       y="200.45281"
+       width="914.30651"
+       height="426.72004"
+       id="rect4318" />
+    <rect
+       x="-189.01947"
+       y="239.46521"
+       width="881.02582"
+       height="399.86621"
+       id="rect10385-3" />
+  </defs>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <rect
+       style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:17.781;stroke-linecap:square;stroke-dasharray:17.781, 35.5621;stroke-opacity:0.162344;paint-order:fill markers stroke"
+       id="rect846"
+       width="279.10248"
+       height="139.55124"
+       x="-71.133858"
+       y="42.135246"
+       inkscape:export-filename="/home/pascal/Desktop/for-dev/elm-bounded-nat/thumbnail/thumbnail detailed.png"
+       inkscape:export-xdpi="110.514"
+       inkscape:export-ydpi="110.514" />
+    <text
+       xml:space="preserve"
+       transform="scale(0.26458333)"
+       id="text4316"
+       style="font-size:40px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;white-space:pre;shape-inside:url(#rect4318)" />
+    <text
+       xml:space="preserve"
+       transform="matrix(0.38811892,0,0,0.38811892,18.023919,-40.757992)"
+       id="text10383"
+       style="font-size:37.6763px;line-height:1.2;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;white-space:pre;shape-inside:url(#rect10385)"
+       inkscape:export-filename="/home/pascal/Desktop/for-dev/elm-bounded-nat/thumbnail/thumbnail detailed.png"
+       inkscape:export-xdpi="110.514"
+       inkscape:export-ydpi="110.514"><tspan
+         x="-189.01953"
+         y="275.25733"
+         id="tspan335965"><tspan
+           style="font-family:'D2Coding ligature';-inkscape-font-specification:'D2Coding ligature';fill:#ffffff"
+           id="tspan335963">  n9
+</tspan></tspan><tspan
+         x="-189.01953"
+         y="323.8686"
+         id="tspan335971"><tspan
+           style="fill:#ff005b"
+           id="tspan335967">|&gt;</tspan><tspan
+           style="font-family:'D2Coding ligature';-inkscape-font-specification:'D2Coding ligature';fill:#ffffff"
+           id="tspan335969">subtract n6
+</tspan></tspan><tspan
+         x="-189.01953"
+         y="372.47986"
+         id="tspan335977"><tspan
+           style="fill:#ff005b"
+           id="tspan335973">|&gt;</tspan><tspan
+           style="font-family:'D2Coding ligature';-inkscape-font-specification:'D2Coding ligature';fill:#ffffff"
+           id="tspan335975">multiplyBy n2
+</tspan></tspan><tspan
+         x="-189.01953"
+         y="421.09113"
+         id="tspan335983"><tspan
+           style="fill:#ff005b"
+           id="tspan335979">|&gt;</tspan><tspan
+           style="font-family:'D2Coding ligature';-inkscape-font-specification:'D2Coding ligature';fill:#ffffff"
+           id="tspan335981">remainderBy n4</tspan></tspan></text>
+    <text
+       xml:space="preserve"
+       transform="matrix(0.38811892,0,0,0.38811892,149.70284,-39.599579)"
+       id="text10383-6"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:37.6763px;line-height:1.2;font-family:sans-serif;-inkscape-font-specification:sans-serif;letter-spacing:0px;word-spacing:0px;white-space:pre;shape-inside:url(#rect10385-3)"
+       inkscape:export-filename="/home/pascal/Desktop/for-dev/elm-bounded-nat/thumbnail/thumbnail detailed.png"
+       inkscape:export-xdpi="110.514"
+       inkscape:export-ydpi="110.514"><tspan
+         x="-189.01953"
+         y="275.25733"
+         id="tspan336003"><tspan
+           style="font-family:'D2Coding ligature';-inkscape-font-specification:'D2Coding ligature';fill:#00fff0"
+           id="tspan335985">N</tspan><tspan
+           style="font-family:'D2Coding ligature';-inkscape-font-specification:'D2Coding ligature';fill:#3a3a3a"
+           id="tspan335987">(</tspan><tspan
+           style="font-family:'D2Coding ligature';-inkscape-font-specification:'D2Coding ligature';fill:#00fff0"
+           id="tspan335989">In</tspan><tspan
+           style="font-family:'D2Coding ligature';-inkscape-font-specification:'D2Coding ligature';fill:#3a3a3a"
+           id="tspan335991"> Up</tspan><tspan
+           style="font-family:'D2Coding ligature';-inkscape-font-specification:'D2Coding ligature';fill:#00fff0"
+           id="tspan335993">9</tspan><tspan
+           style="font-family:'D2Coding ligature';-inkscape-font-specification:'D2Coding ligature';fill:#3a3a3a"
+           id="tspan335995">_ Up</tspan><tspan
+           style="font-family:'D2Coding ligature';-inkscape-font-specification:'D2Coding ligature';fill:#00fff0"
+           id="tspan335997">9</tspan><tspan
+           style="font-family:'D2Coding ligature';-inkscape-font-specification:'D2Coding ligature';fill:#3a3a3a"
+           id="tspan335999">_)</tspan><tspan
+           style="font-family:'D2Coding ligature';-inkscape-font-specification:'D2Coding ligature';fill:#ffffff"
+           id="tspan336001">
+</tspan></tspan><tspan
+         x="-189.01953"
+         y="323.8686"
+         id="tspan336023"><tspan
+           style="font-family:'D2Coding ligature';-inkscape-font-specification:'D2Coding ligature';fill:#00fff0"
+           id="tspan336005">N</tspan><tspan
+           style="font-family:'D2Coding ligature';-inkscape-font-specification:'D2Coding ligature';fill:#3a3a3a"
+           id="tspan336007">(</tspan><tspan
+           style="font-family:'D2Coding ligature';-inkscape-font-specification:'D2Coding ligature';fill:#00fff0"
+           id="tspan336009">In</tspan><tspan
+           style="font-family:'D2Coding ligature';-inkscape-font-specification:'D2Coding ligature';fill:#3a3a3a"
+           id="tspan336011"> Up</tspan><tspan
+           style="font-family:'D2Coding ligature';-inkscape-font-specification:'D2Coding ligature';fill:#00fff0"
+           id="tspan336013">3</tspan><tspan
+           style="font-family:'D2Coding ligature';-inkscape-font-specification:'D2Coding ligature';fill:#3a3a3a"
+           id="tspan336015">_ Up</tspan><tspan
+           style="font-family:'D2Coding ligature';-inkscape-font-specification:'D2Coding ligature';fill:#00fff0"
+           id="tspan336017">3</tspan><tspan
+           style="font-family:'D2Coding ligature';-inkscape-font-specification:'D2Coding ligature';fill:#3a3a3a"
+           id="tspan336019">_)</tspan><tspan
+           style="fill:#ffffff"
+           id="tspan336021">
+</tspan></tspan><tspan
+         x="-189.01953"
+         y="372.47986"
+         id="tspan336041"><tspan
+           style="font-family:'D2Coding ligature';-inkscape-font-specification:'D2Coding ligature';fill:#00fff0"
+           id="tspan336025">N</tspan><tspan
+           style="font-family:'D2Coding ligature';-inkscape-font-specification:'D2Coding ligature';fill:#3a3a3a"
+           id="tspan336027">(</tspan><tspan
+           style="font-family:'D2Coding ligature';-inkscape-font-specification:'D2Coding ligature';fill:#00fff0"
+           id="tspan336029">Min</tspan><tspan
+           style="font-family:'D2Coding ligature';-inkscape-font-specification:'D2Coding ligature';fill:#3a3a3a"
+           id="tspan336031"> </tspan><tspan
+           style="font-family:'D2Coding ligature';-inkscape-font-specification:'D2Coding ligature';fill:#3a3a3a"
+           id="tspan336033">Up</tspan><tspan
+           style="font-family:'D2Coding ligature';-inkscape-font-specification:'D2Coding ligature';fill:#00fff0"
+           id="tspan336035">3</tspan><tspan
+           style="font-family:'D2Coding ligature';-inkscape-font-specification:'D2Coding ligature';fill:#3a3a3a"
+           id="tspan336037">_)</tspan><tspan
+           style="font-family:'D2Coding ligature';-inkscape-font-specification:'D2Coding ligature';fill:#ffffff"
+           id="tspan336039">
+</tspan></tspan><tspan
+         x="-189.01953"
+         y="421.09113"
+         id="tspan336059"><tspan
+           style="font-family:'D2Coding ligature';-inkscape-font-specification:'D2Coding ligature';fill:#00fff0"
+           id="tspan336043">N</tspan><tspan
+           style="font-family:'D2Coding ligature';-inkscape-font-specification:'D2Coding ligature';fill:#3a3a3a"
+           id="tspan336045">(</tspan><tspan
+           style="font-family:'D2Coding ligature';-inkscape-font-specification:'D2Coding ligature';fill:#00fff0"
+           id="tspan336047">In</tspan><tspan
+           style="font-family:'D2Coding ligature';-inkscape-font-specification:'D2Coding ligature';fill:#3a3a3a"
+           id="tspan336049"> Up</tspan><tspan
+           style="font-family:'D2Coding ligature';-inkscape-font-specification:'D2Coding ligature';fill:#00fff0"
+           id="tspan336051">0</tspan><tspan
+           style="font-family:'D2Coding ligature';-inkscape-font-specification:'D2Coding ligature';fill:#3a3a3a"
+           id="tspan336053">_ Up</tspan><tspan
+           style="font-family:'D2Coding ligature';-inkscape-font-specification:'D2Coding ligature';fill:#00fff0"
+           id="tspan336055">3</tspan><tspan
+           style="font-family:'D2Coding ligature';-inkscape-font-specification:'D2Coding ligature';fill:#3a3a3a"
+           id="tspan336057">_)</tspan></tspan></text>
+    <text
+       xml:space="preserve"
+       transform="scale(0.26458333)"
+       id="text104069"
+       style="line-height:1.25;font-family:sans-serif;font-size:40px;letter-spacing:0px;word-spacing:0px;white-space:pre;shape-inside:url(#rect104071)" />
+    <rect
+       style="fill:#00fff0;fill-opacity:0.266;stroke:none;stroke-width:17.781;stroke-linecap:square;stroke-dasharray:17.781, 35.5621;stroke-opacity:0.162344;paint-order:fill markers stroke"
+       id="rect313359"
+       width="166.15436"
+       height="9.7737856"
+       x="-19.752115"
+       y="161.09489"
+       inkscape:export-filename="/home/pascal/Desktop/for-dev/elm-bounded-nat/thumbnail/thumbnail detailed.png"
+       inkscape:export-xdpi="110.514"
+       inkscape:export-ydpi="110.514" />
+    <rect
+       style="fill:#00fff0;fill-opacity:1;stroke:none;stroke-width:7.25908;stroke-linecap:square;stroke-dasharray:7.25908, 14.5182;stroke-opacity:0.162344;paint-order:fill markers stroke"
+       id="rect313359-7"
+       width="27.692392"
+       height="9.7737856"
+       x="143.17628"
+       y="19.752115"
+       transform="rotate(90)"
+       inkscape:export-filename="/home/pascal/Desktop/for-dev/elm-bounded-nat/thumbnail/thumbnail detailed.png"
+       inkscape:export-xdpi="110.514"
+       inkscape:export-ydpi="110.514" />
+    <rect
+       style="fill:#00fff0;fill-opacity:1;stroke:none;stroke-width:7.25908;stroke-linecap:square;stroke-dasharray:7.25908, 14.5182;stroke-opacity:0.162344;paint-order:fill markers stroke"
+       id="rect313359-7-5"
+       width="27.692392"
+       height="9.7737856"
+       x="143.17628"
+       y="-156.17593"
+       transform="rotate(90)"
+       inkscape:export-filename="/home/pascal/Desktop/for-dev/elm-bounded-nat/thumbnail/thumbnail detailed.png"
+       inkscape:export-xdpi="110.514"
+       inkscape:export-ydpi="110.514" />
+    <text
+       xml:space="preserve"
+       transform="matrix(0.26458333,0,0,0.26458333,5.9216399,-10.615342)"
+       id="text321720"
+       style="font-size:74.6667px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;white-space:pre;shape-inside:url(#rect321722);fill:#00fff0;fill-opacity:1"
+       inkscape:export-filename="/home/pascal/Desktop/for-dev/elm-bounded-nat/thumbnail/thumbnail detailed.png"
+       inkscape:export-xdpi="110.514"
+       inkscape:export-ydpi="110.514"><tspan
+         x="-68.251953"
+         y="634.17113"
+         id="tspan336063"><tspan
+           style="font-family:'D2Coding ligature';-inkscape-font-specification:'D2Coding ligature'"
+           id="tspan336061">bounded natural</tspan></tspan></text>
+  </g>
+</svg>
