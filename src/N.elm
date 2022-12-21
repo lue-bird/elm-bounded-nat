@@ -2536,18 +2536,6 @@ type N0OrAdd1 n0PossiblyOrNever successorMinus1
 
 {-| Transfer the knowledge about whether [`n0`](#n0) is a possible value
 
-    trySubtracting1 :
-        N (In (Fixed (N0OrAdd1 n0PossiblyOrNever minMinus1)) max)
-        -> Emptiable (N (In (Fixed minMinus1) max)) possiblyOrNever
-    trySubtracting1 =
-        \n ->
-            case n |> N.isAtLeast1 of
-                Err possiblyOrNever ->
-                    Emptiable.Empty possiblyOrNever
-
-                Ok atLeast1 ->
-                    atLeast1 |> N.sub n1
-
     stackRepeat :
         element
         -> N (In (Fixed (N0OrAdd1 possiblyOrNever minMinus1_)) max_)
@@ -2585,37 +2573,41 @@ type N0OrAdd1 n0PossiblyOrNever successorMinus1
 
 using [`N.min0Adapt`](#min0Adapt)
 
-Stack and Emptiable are part of [`emptiness-typed`](#https://dark.elm.dmy.fr/packages/lue-bird/elm-emptiness-typed/latest/)
+Stack and Emptiable are part of [`emptiness-typed`](https://dark.elm.dmy.fr/packages/lue-bird/elm-emptiness-typed/latest/)
 
 Cool, right?
 
 -}
 isAtLeast1 :
-    N (In (Fixed (N0OrAdd1 n0PossiblyOrNever minMinus1)) max)
+    N (In (Fixed (N0OrAdd1 n0PossiblyOrNever minMinus1_)) max)
     ->
         Result
             n0PossiblyOrNever
-            (N (In (Fixed (Add1 minMinus1)) max))
+            (N (In (Up1 minX_) max))
 isAtLeast1 =
     \n ->
+        let
+            atLeast1Range () =
+                Range
+                    { min = n1 |> min
+                    , max = n |> max
+                    }
+        in
         case n |> min |> fixedToNumber of
             N0 possiblyOrNever ->
-                possiblyOrNever |> Err
+                case n |> toInt of
+                    0 ->
+                        possiblyOrNever |> Err
 
-            Add1 successor ->
+                    atLeast1 ->
+                        atLeast1
+                            |> LimitedIn (atLeast1Range ())
+                            |> Ok
+
+            Add1 _ ->
                 n
                     |> toInt
-                    |> LimitedIn
-                        (Range
-                            { min =
-                                Difference
-                                    { up = \_ -> successor |> Add1
-                                    , down = \_ -> N0 Possible
-                                    , toInt = n |> min |> differenceToInt
-                                    }
-                            , max = n |> max
-                            }
-                        )
+                    |> LimitedIn (atLeast1Range ())
                     |> Ok
 
 
@@ -2648,7 +2640,7 @@ isAtLeast1 =
 
 using [`isAtLeast1`](#isAtLeast1), [`minMinus1Never`](#minMinus1Never).
 
-Stack and Emptiable are part of [`emptiness-typed`](#https://dark.elm.dmy.fr/packages/lue-bird/elm-emptiness-typed/latest/)
+Stack and Emptiable are part of [`emptiness-typed`](https://dark.elm.dmy.fr/packages/lue-bird/elm-emptiness-typed/latest/)
 
 with `(\_ -> Possible)` it's just a worse version of [`minSubtract`](#minSubtract)
 that might be useful in ultra rare situations
