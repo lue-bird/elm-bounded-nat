@@ -1,8 +1,12 @@
-### 30.3.0 plans
+### 31.1.0 plans
 
   - `N.Generator` that auto-generates `N<x>`, `Add<x>` and `n<x>` for x >= 17 add
 
 # change log
+
+## 31.0.0
+
+  - `isAtLeast1` result min → `Up1 _` and correct
 
 ### 30.2.0
 
