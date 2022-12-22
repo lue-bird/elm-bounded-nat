@@ -9,8 +9,12 @@
   - `Exactly`, `ExactlyValue` → `Exactly a = In a a`
       - so `Exactly (On ...)`, `Exactly (OnValue ...)`
       - more obvious, less types
-  - `Fixed`, `InFixed`, `FixedValue`, `InFixedValue`, `MinFixedValue`, `fixedInfinity`, `fixedToNumber`, `fixed0Adapt`, `fixedMinus1Map` , `fixedToValue`, `fixedFromValue`, `inFixedToValue`, `inFixedFromValue` name
-    → `On`, `InOn`, `OnValue`, `InOnValue`, `MinOnValue`, `onInfinity`, `onToNumber`, `on0Adapt`, `onMinus1Map`, `onToValue`, `onFromValue`, `inOnToValue`, `inOnFromValue`
+  - `MinFixedValue n = InOnValue `, `Min n = In n (On Infinity)`
+    → `Min n = In n (OnValue Infinity)`
+      - so `Min (On ...)`, `Min (OnValue ...)`
+      - less types, `On Infinity` is not necessary
+  - `Fixed`, `InFixed`, `FixedValue`, `InFixedValue`, `fixedInfinity`, `fixedToNumber`, `fixed0Adapt`, `fixedMinus1Map` , `fixedToValue`, `fixedFromValue`, `inFixedToValue`, `inFixedFromValue` name
+    → `On`, `InOn`, `OnValue`, `InOnValue`, `onInfinity`, `onToNumber`, `on0Adapt`, `onMinus1Map`, `onToValue`, `onFromValue`, `inOnToValue`, `inOnFromValue`
       - shorter
   - `minMinus1Never` name → `minAtLeast1Never`
 
