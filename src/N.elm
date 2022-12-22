@@ -18,7 +18,7 @@ module N exposing
     , BelowOrAbove(..), is, isIn
     , greater, smaller
     , toInt, toFloat, toString
-    , OnValue, InOnValue, MinOnValue
+    , OnValue, InOnValue
     , toValue, fromValue
     , minToValue, minFromValue
     , maxToValue, maxFromValue
@@ -140,7 +140,7 @@ More advanced stuff in [section type information ) allowable-state](#allowable-s
 
 # without internal functions
 
-@docs OnValue, InOnValue, MinOnValue
+@docs OnValue, InOnValue
 @docs toValue, fromValue
 @docs minToValue, minFromValue
 @docs maxToValue, maxFromValue
@@ -245,9 +245,9 @@ Consider the "[`Up`](#Up)" thing an implementation detail
     -- 4 ≤ n ≤ 15
     N (In (On (Add4 minFrom4_)) (Up maxTo15_ To N15))
 
-`In (Add4 minFrom4_) (Up maxTo15_ To N15)` says:
+`In (On (Add4 minFrom4_)) (Up maxTo15_ To N15)` says:
 
-  - the minimum-constraint can be `4+ 0`|`4+ 1`|`4+ 2`|...
+  - the argument's minimum is `4+ 0`|`4+ 1`|`4+ 2`|...
     which means it's ≥ 4
   - the argument's maximum `+` some variable `maxTo15` is `15`
     which means it's ≤ 15
@@ -275,7 +275,7 @@ There's also versions of this that don't contain functions internally:
     N (InOnValue N2 N12)
 
     -- = 3
-    N (ExactlyOnValue N3)
+    N (Exactly (OnValue N3))
 
 more type examples at [`In`](#In), [`Min`](#Min)
 
@@ -293,7 +293,7 @@ type N range
 ### argument type in a range
 
     -- 3 ≤ n ≤ 5
-    N (In (On (Add3 minX_)) (Up maxTo5_ N5))
+    N (In (On (Add3 minFrom3_)) (Up maxTo5_ To N5))
 
     -- 0 ≤ n ≤ 100
     percent : N (In min_ (Up maxTo100_ To N100)) -> Percent
@@ -310,7 +310,7 @@ If you want a number where you just care about the minimum, leave `max` as a typ
 
 A number, at least 5:
 
-    N (In (Add5 minFrom_) max_)
+    N (In (On (Add5 minFrom_)) max_)
 
 → `max_` could be a specific maximum or [no maximum at all](#Infinity)
 
@@ -340,7 +340,8 @@ An example where this is useful using [typesafe-array](https://package.elm-lang.
     type alias TreeBinaryFull element =
         Tree (Exactly (On N2)) element
 
-Remember: ↑ and other [`Min`](#Min) `(`[`On`](#On)`...)` / [`Exactly`](#Exactly) / [`InOn`](#InOn) aren't argument types
+Remember: ↑ and other `... (`[`On`](#On)`...)` / [`InOn`](#InOn)
+are result/stored types, not argument types
 
 ---
 
@@ -360,7 +361,7 @@ type In lowestPossibleAsDifference highestPossibleAsDifference
         }
 
 
-{-| Only **stored / result types should use the type `Min`**:
+{-| Only **stored / result types should use `Min`**
 
        ↓ minimum    ↓ or →
     ⨯ [✓ ✓ ✓ ✓ ✓ ✓ ✓...
@@ -394,7 +395,7 @@ when no maximum constraint should be enforced
     N (In min_ max_)
 
     -- number, at least 5
-    N (In (Add5 minFrom5_) max_)
+    N (In (On (Add5 minFrom5_)) max_)
 
 
 ### stored type without maximum constraint
@@ -412,13 +413,16 @@ An example where this is useful using [typesafe-array](https://package.elm-lang.
     type alias TreeMulti element =
         Tree (Min (On N1)) element
 
-Remember: ↑ and other [`Min`](#Min)/[`Exactly`](#Exactly)/[`On`](#On) are result/stored types, not argument types
+Remember: ↑ and other `... (`[`On`](#On)`...)` / [`InOn`](#InOn)
+are result/stored types, not argument types
 
-Can't store functions? → [`MinOnValue`](#MinOnValue)
+You can just use [`Min`](#Min) `(` [`On`](#On) `...)` when you don't have disadvantages storing functions.
+
+If you can't store functions, [`OnValue`](#OnValue)
 
 -}
 type alias Min lowestPossibleAsDifference =
-    In lowestPossibleAsDifference (On Infinity)
+    In lowestPossibleAsDifference (OnValue Infinity)
 
 
 {-| Lower and upper limits [`On`](#On). For stored types only
@@ -430,10 +434,10 @@ type alias InOn lowestPossibleAsNumber highestPossibleAsNumber =
     In (On lowestPossibleAsNumber) (On highestPossibleAsNumber)
 
 
-{-| Allow only a specific [`On`](#On) number
+{-| Allow only a specific given represented number
 
 Useful as a **stored & argument** type
-in combination with [`typesafe-array`](https://package.elm-lang.org/packages/lue-bird/elm-typesafe-array/latest/)s,
+in combination with [`typesafe-array`](https://package.elm-lang.org/packages/lue-bird/elm-typesafe-array/latest/),
 not with [`N`](#N)s
 
     byte : ArraySized (Exactly (On N8)) Bit -> Byte
@@ -447,15 +451,15 @@ not with [`N`](#N)s
 
 → A given [`ArraySized`](https://package.elm-lang.org/packages/lue-bird/elm-typesafe-array/latest/) must have _exactly 3 by 3_ `TicTacToeField`s
 
-Use `Exactly` [`(OnValue ...)`](#OnValue)
-for **storing** in a type
+Use `Exactly (` [`OnValue`](#OnValue) `...)`
+for **storing** in a type that can't handle internal functions
 
 -}
 type alias Exactly asDifference =
     In asDifference asDifference
 
 
-{-| `Up low To high`: an exact number as the difference `high - low`
+{-| `Up low To high`: a specific number represented as the difference `high - low`
 -}
 type Up lowRepresentationAsNumber toTag highRepresentationAsNumber
     = Difference
@@ -509,37 +513,14 @@ type alias InOnValue min max =
 
 {-| "The limit is unknown".
 
-Used in the definition of [`Min`](#Min):
+Used in the definition of [`Min`](#Min)
 
     type alias Min min =
-        In minimum (On Infinity)
-
-and [`MinOnValue`](#MinOnValue)
-
-    type alias MinOnValue min =
-        In (OnValue min) (OnValue Infinity)
-
-which can be simplified to
-
-    type alias MinOnValue min =
-        InOnValue min Infinity
-
-You can just use [`On`](#On) when you don't have disadvantages storing functions.
-See [`OnValue`](#OnValue)
+        In minimum (OnValue Infinity)
 
 -}
 type Infinity
     = Infinity
-
-
-{-| A lower limit as a [`OnValue`](#OnValue). For stored types only
-
-You can just use [`Min`](#Min) `(` [`On`](#On) `...)` when you don't have disadvantages storing functions.
-See [`OnValue`](#OnValue)
-
--}
-type alias MinOnValue min =
-    InOnValue min Infinity
 
 
 {-| The [`N0OrAdd1`](#N0OrAdd1) represented by this [`On`](#On) [difference](#Up)
@@ -606,7 +587,7 @@ onToValue =
             }
 
 
-{-| [`On`](#On) → equatable [`OnValue`](#OnValue)
+{-| equatable [`OnValue`](#OnValue) → [`On`](#On)
 -}
 onFromValue : OnValue n -> On n
 onFromValue =
@@ -740,7 +721,7 @@ maxFromValue =
                 )
 
 
-{-| `Down high To low`: an exact number as the difference `high - low`
+{-| `Down high To low`: a specific number represented as the difference `high - low`
 -}
 type alias Down high toTag low =
     Up low toTag high
@@ -750,7 +731,7 @@ type alias Down high toTag low =
 
     Up low To high
 
-    Down high To high
+    Down high To low
 
 → distance `high - low`
 
@@ -883,7 +864,7 @@ intToAbsolute =
             |> LimitedIn
                 (Range
                     { min = n0 |> min
-                    , max = onInfinity
+                    , max = onInfinity |> onToValue
                     }
                 )
 
@@ -1080,7 +1061,7 @@ intIsIn ( lowerLimit, upperLimit ) =
                         { min =
                             (upperLimit |> max)
                                 |> differenceAdd (n1 |> min)
-                        , max = onInfinity
+                        , max = onInfinity |> onToValue
                         }
                     )
                 |> Above
@@ -1122,7 +1103,7 @@ intIsAtLeast lowerLimit =
                 |> LimitedIn
                     (Range
                         { min = lowerLimit |> min
-                        , max = onInfinity
+                        , max = onInfinity |> onToValue
                         }
                     )
                 |> Ok
@@ -1387,7 +1368,7 @@ multiplyBy multiplicand =
             |> LimitedIn
                 (Range
                     { min = n |> min
-                    , max = onInfinity
+                    , max = onInfinity |> onToValue
                     }
                 )
 
@@ -1473,37 +1454,7 @@ toPower exponent =
             |> LimitedIn
                 (Range
                     { min = n |> min
-                    , max = onInfinity
-                    }
-                )
-
-
-{-| Set the minimum lower
-
-    [ atLeast3, atLeast4 ]
-
-Elm complains:
-
-> But all the previous elements in the list are: `N (Min N3)`
-
-    [ atLeast3
-    , atLeast4 |> N.minTo n3
-    ]
-
--}
-minTo :
-    N (In minNew (Up minNewMaxToMin_ To min))
-    ->
-        (N (In (On min) max)
-         -> N (In minNew max)
-        )
-minTo newMinimum =
-    \n ->
-        (n |> toInt)
-            |> LimitedIn
-                (Range
-                    { min = newMinimum |> min
-                    , max = n |> max
+                    , max = onInfinity |> onToValue
                     }
                 )
 
@@ -1534,12 +1485,12 @@ maxToInfinity =
             |> LimitedIn
                 (Range
                     { min = n |> min
-                    , max = onInfinity
+                    , max = onInfinity |> onToValue
                     }
                 )
 
 
-{-| Make it fit into functions with require a higher maximum
+{-| Make it fit into functions with require a higher maximum.
 
 You should type arguments and stored types as broad as possible
 
@@ -1552,6 +1503,8 @@ But once you implement `onlyAtMost18`, you might use the `n` in `onlyAtMost19`:
     onlyAtMost18 n =
         -- onlyAtMost19 n → error
         onlyAtMost19 (n |> N.maxTo n18)
+
+To increase its maximum by a relative amount, [`maxAdd`](#maxAdd)
 
 -}
 maxTo :
@@ -1571,9 +1524,9 @@ maxTo maximumNew =
                 )
 
 
-{-| Have a specific maximum in mind? → [`N.maxTo`](#maxTo)
+{-| Increase its maximum by a given relative amount.
 
-Want to increase the upper bound by a on amount? → [`maxAdd`](#maxAdd)
+To set its maximum to a specific absolute value, [`N.maxTo`](#maxTo)
 
 -}
 maxAdd :
@@ -1600,9 +1553,41 @@ maxAdd maxRelativeIncrease =
                 )
 
 
-{-| Have a specific minimum in mind? → [`N.minTo`](#minTo)
+{-| Set its minimum lower
 
-Want to decrease the lower bound by a on amount? → [`minSubtract`](#minSubtract)
+    [ atLeast3, atLeast4 ]
+
+Elm complains:
+
+> But all the previous elements in the list are: `N (Min N3)`
+
+    [ atLeast3
+    , atLeast4 |> N.minTo n3
+    ]
+
+To decrease its minimum by a relative amount, [`minSubtract`](#minSubtract)
+
+-}
+minTo :
+    N (In minNew (Up minNewMaxToMin_ To min))
+    ->
+        (N (In (On min) max)
+         -> N (In minNew max)
+        )
+minTo newMinimum =
+    \n ->
+        (n |> toInt)
+            |> LimitedIn
+                (Range
+                    { min = newMinimum |> min
+                    , max = n |> max
+                    }
+                )
+
+
+{-| Decrease its minimum by a given relative amount.
+
+To set its minimum to a specific absolute value, [`minTo`](#minTo)
 
 -}
 minSubtract :
@@ -2110,7 +2095,7 @@ addMin toAdd =
                     { min =
                         (n |> min)
                             |> differenceAdd (toAdd |> min)
-                    , max = onInfinity
+                    , max = onInfinity |> onToValue
                     }
                 )
 
@@ -2245,7 +2230,11 @@ max =
         |> N.differenceToInt
     --> 3
 
-See [`differenceToInt`](#differenceToInt)
+To extract an int directly, [`differenceToInt`](#differenceToInt)
+
+This is a powerful thing since you can safely create numbers if you have a [difference](#Up)
+and adapt its range afterwards with [`maxTo`](#maxTo), [`minTo`](#minTo)
+or [`maxAdd`](#maxAdd), [`minSubtract`](#minSubtract)
 
 -}
 exactly :
