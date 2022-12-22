@@ -1,8 +1,18 @@
-### 31.1.0 plans
+### 32.1.0 plans
 
   - `N.Generator` that auto-generates `N<x>`, `Add<x>` and `n<x>` for x >= 17 add
 
 # change log
+
+## 32.0.0
+
+  - `Exactly`, `ExactlyValue` → `Exactly a = In a a`
+      - so `Exactly (On ...)`, `Exactly (OnValue ...)`
+      - more obvious, less types
+  - `Fixed`, `InFixed`, `FixedValue`, `InFixedValue`, `MinFixedValue`, `fixedInfinity`, `fixedToNumber`, `fixed0Adapt`, `fixedMinus1Map` , `fixedToValue`, `fixedFromValue`, `inFixedToValue`, `inFixedFromValue` name
+    → `On`, `InOn`, `OnValue`, `InOnValue`, `MinOnValue`, `onInfinity`, `onToNumber`, `on0Adapt`, `onMinus1Map`, `onToValue`, `onFromValue`, `inOnToValue`, `inOnFromValue`
+      - shorter
+  - `minMinus1Never` name → `minAtLeast1Never`
 
 ## 31.0.0
 
