@@ -1,7 +1,7 @@
 module N exposing
     ( N
-    , In, Min
-    , Fixed, InFixed, Exactly, Infinity(..)
+    , In, Exactly, Min, Infinity(..)
+    , On, InOn
     , Up, Down, To
     , inRandom, inFuzz, inFuzzUniform
     , N0, N1, N2, N3, N4, N5, N6, N7, N8, N9, N10, N11, N12, N13, N14, N15, N16
@@ -10,33 +10,33 @@ module N exposing
     , n0, n1, n2, n3, n4, n5, n6, n7, n8, n9, n10, n11, n12, n13, n14, n15, n16
     , intToAbsolute, intModBy, intToAtLeast, intToIn
     , intIsAtLeast, intIsIn
-    , isAtLeast, isAtMost
-    , BelowOrAbove(..), is, isIn
-    , greater, smaller
     , add, addMin
     , subtract, subtractMin
     , toPower, remainderBy, multiplyBy, divideBy
     , toAtLeast, toAtLeastMin, toAtMost, toIn
+    , isAtLeast, isAtMost
+    , BelowOrAbove(..), is, isIn
+    , greater, smaller
     , toInt, toFloat, toString
-    , FixedValue, InFixedValue, ExactlyValue, MinFixedValue
+    , OnValue, InOnValue, MinOnValue
     , toValue, fromValue
     , minToValue, minFromValue
     , maxToValue, maxFromValue
     , minTo, minSubtract
     , maxTo, maxToInfinity, maxAdd
     , isAtLeast1
-    , min0Adapt, minMinus1Never
+    , min0Adapt, minAtLeast1Never
     , range, min, max
-    , fixedInfinity, fixedToNumber
+    , onInfinity, onToNumber
     , exactly
     , differenceAdd, differenceSubtract
     , differenceToInt
     , addDifference, subtractDifference
     , N0OrAdd1(..)
     , number0Adapt, numberMinus1Map
-    , fixed0Adapt, fixedMinus1Map
-    , fixedToValue, fixedFromValue
-    , inFixedToValue, inFixedFromValue
+    , on0Adapt, onMinus1Map
+    , onToValue, onFromValue
+    , inOnToValue, inOnFromValue
     )
 
 {-| Natural number within a typed range
@@ -46,8 +46,8 @@ module N exposing
 
 # bounds
 
-@docs In, Min
-@docs Fixed, InFixed, Exactly, Infinity
+@docs In, Exactly, Min, Infinity
+@docs On, InOn
 @docs Up, Down, To
 
 
@@ -107,18 +107,9 @@ In the future, [`elm-generate`](https://github.com/lue-bird/generate-elm) will a
 @docs intToAbsolute, intModBy, intToAtLeast, intToIn
 
 
-### `Int` compare
+## `Int` compare
 
 @docs intIsAtLeast, intIsIn
-
-
-# compare
-
-@docs isAtLeast, isAtMost
-@docs BelowOrAbove, is, isIn
-@docs greater, smaller
-
-More advanced stuff in [section type information ) allowable-state](#allowable-state)
 
 
 # alter
@@ -133,14 +124,23 @@ More advanced stuff in [section type information ) allowable-state](#allowable-s
 @docs toAtLeast, toAtLeastMin, toAtMost, toIn
 
 
-## broaden
+# compare
+
+@docs isAtLeast, isAtMost
+@docs BelowOrAbove, is, isIn
+@docs greater, smaller
+
+More advanced stuff in [section type information ) allowable-state](#allowable-state)
+
+
+# transform
 
 @docs toInt, toFloat, toString
 
 
 # without internal functions
 
-@docs FixedValue, InFixedValue, ExactlyValue, MinFixedValue
+@docs OnValue, InOnValue, MinOnValue
 @docs toValue, fromValue
 @docs minToValue, minFromValue
 @docs maxToValue, maxFromValue
@@ -159,7 +159,7 @@ Consider this an advanced technique for packages that use
 Any questions @lue in slack!
 
 @docs isAtLeast1
-@docs min0Adapt, minMinus1Never
+@docs min0Adapt, minAtLeast1Never
 
 
 # miss an operation?
@@ -172,7 +172,7 @@ Anything that can't be expressed with the available operations? → issue/PR
 Internal parts you can safely access and transform
 
 While the internally stored `Int` can't directly be guaranteed to be in bounds by elm,
-the [minimum](#min), [maximum](#max)
+the [minimum](#min) and [maximum](#max)
 must be built as actual values checked by the compiler.
 No shenanigans like runtime errors for impossible cases
 
@@ -183,7 +183,7 @@ Having those exposed can be useful when building extensions to this library like
   - [`bits`](https://dark.elm.dmy.fr/packages/lue-bird/elm-bits/latest/)
 
 @docs range, min, max
-@docs fixedInfinity, fixedToNumber
+@docs onInfinity, onToNumber
 @docs exactly
 @docs differenceAdd, differenceSubtract
 @docs differenceToInt
@@ -195,13 +195,13 @@ Having those exposed can be useful when building extensions to this library like
 ## [allowable-state](https://dark.elm.dmy.fr/packages/lue-bird/elm-allowable-state/latest/)
 
 @docs number0Adapt, numberMinus1Map
-@docs fixed0Adapt, fixedMinus1Map
+@docs on0Adapt, onMinus1Map
 
 
 ## safe internals without functions
 
-@docs fixedToValue, fixedFromValue
-@docs inFixedToValue, inFixedFromValue
+@docs onToValue, onFromValue
+@docs inOnToValue, inOnFromValue
 
 -}
 
@@ -240,12 +240,12 @@ Consider the "[`Up`](#Up)" thing an implementation detail
     N range_
 
     -- ≥ 4
-    N (In (Fixed (Add4 minMinus4_)) max_)
+    N (In (On (Add4 minFrom4_)) max_)
 
     -- 4 ≤ n ≤ 15
-    N (In (Fixed (Add4 minMinus4_)) (Up maxTo15_ To N15))
+    N (In (On (Add4 minFrom4_)) (Up maxTo15_ To N15))
 
-`In (Add4 minMinus4_) (Up maxTo15_ To N15)` says:
+`In (Add4 minFrom4_) (Up maxTo15_ To N15)` says:
 
   - the minimum-constraint can be `4+ 0`|`4+ 1`|`4+ 2`|...
     which means it's ≥ 4
@@ -258,24 +258,24 @@ Consider the "[`Up`](#Up)" thing an implementation detail
 what to put in declared types like `Model`
 
     -- ≥ 4
-    N (Min (Fixed N4))
+    N (Min (On N4))
 
     -- 2 ≤ n ≤ 12
-    N (InFixed N2 N12)
+    N (InOn N2 N12)
 
     -- = 3
-    N (Exactly N3)
+    N (Exactly (On N3))
 
 There's also versions of this that don't contain functions internally:
 
     -- ≥ 4
-    N (Min (FixedValue N4))
+    N (Min (OnValue N4))
 
     -- 2 ≤ n ≤ 12
-    N (InFixedValue N2 N12)
+    N (InOnValue N2 N12)
 
     -- = 3
-    N (ExactlyValue N3)
+    N (ExactlyOnValue N3)
 
 more type examples at [`In`](#In), [`Min`](#Min)
 
@@ -293,7 +293,7 @@ type N range
 ### argument type in a range
 
     -- 3 ≤ n ≤ 5
-    N (In (Fixed (Add3 minX_)) (Up maxTo5_ N5))
+    N (In (On (Add3 minX_)) (Up maxTo5_ N5))
 
     -- 0 ≤ n ≤ 100
     percent : N (In min_ (Up maxTo100_ To N100)) -> Percent
@@ -310,7 +310,7 @@ If you want a number where you just care about the minimum, leave `max` as a typ
 
 A number, at least 5:
 
-    N (In (Add5 minMinus5_) max_)
+    N (In (Add5 minFrom_) max_)
 
 → `max_` could be a specific maximum or [no maximum at all](#Infinity)
 
@@ -338,9 +338,9 @@ An example where this is useful using [typesafe-array](https://package.elm-lang.
             )
 
     type alias TreeBinaryFull element =
-        Tree (Exactly N2) element
+        Tree (Exactly (On N2)) element
 
-Remember: ↑ and other [`Min`](#Min) `(`[`Fixed`](#Fixed)`...)` / [`Exactly`](#Exactly) / [`InFixed`](#InFixed) aren't argument types
+Remember: ↑ and other [`Min`](#Min) `(`[`On`](#On)`...)` / [`Exactly`](#Exactly) / [`InOn`](#InOn) aren't argument types
 
 ---
 
@@ -349,7 +349,7 @@ It will lead to elm crashing because [difference](#Up)s are stored as functions.
 Instead,
 
   - [compare](#compare) in _your_ code
-  - convert to [`FixedValue`](#FixedValue) for _other_ code
+  - convert to [`OnValue`](#OnValue) for _other_ code
     that relies (or performs better) on structural `==`
 
 -}
@@ -394,7 +394,7 @@ when no maximum constraint should be enforced
     N (In min_ max_)
 
     -- number, at least 5
-    N (In (Add5 minMinus5_) max_)
+    N (In (Add5 minFrom5_) max_)
 
 
 ### stored type without maximum constraint
@@ -410,46 +410,49 @@ An example where this is useful using [typesafe-array](https://package.elm-lang.
             )
 
     type alias TreeMulti element =
-        Tree (Min (Fixed N1)) element
+        Tree (Min (On N1)) element
 
-Remember: ↑ and other [`Min`](#Min)/[`Exactly`](#Exactly)/[`Fixed`](#Fixed) are result/stored types, not argument types
+Remember: ↑ and other [`Min`](#Min)/[`Exactly`](#Exactly)/[`On`](#On) are result/stored types, not argument types
 
-Can't store functions? → [`MinFixedValue`](#MinFixedValue)
+Can't store functions? → [`MinOnValue`](#MinOnValue)
 
 -}
 type alias Min lowestPossibleAsDifference =
-    In lowestPossibleAsDifference (Fixed Infinity)
+    In lowestPossibleAsDifference (On Infinity)
 
 
-{-| Lower and upper limits [`Fixed`](#Fixed). For stored types only
+{-| Lower and upper limits [`On`](#On). For stored types only
 
-Can't store functions? → [`InFixedValue`](#InFixedValue)
+Can't store functions? → [`InOnValue`](#InOnValue)
 
 -}
-type alias InFixed lowestPossibleAsNumber highestPossibleAsNumber =
-    In (Fixed lowestPossibleAsNumber) (Fixed highestPossibleAsNumber)
+type alias InOn lowestPossibleAsNumber highestPossibleAsNumber =
+    In (On lowestPossibleAsNumber) (On highestPossibleAsNumber)
 
 
-{-| Allow only a specific [`Fixed`](#Fixed) number
+{-| Allow only a specific [`On`](#On) number
 
 Useful as a **stored & argument** type
 in combination with [`typesafe-array`](https://package.elm-lang.org/packages/lue-bird/elm-typesafe-array/latest/)s,
 not with [`N`](#N)s
 
-    byte : ArraySized (Exactly N8) Bit -> Byte
+    byte : ArraySized (Exactly (On N8)) Bit -> Byte
 
 → A given [`ArraySized`](https://package.elm-lang.org/packages/lue-bird/elm-typesafe-array/latest/) must have _exactly 8_ `Bit`s
 
     type alias TicTacToeBoard =
         ArraySized
-            (Exactly N3)
-            (ArraySized (Exactly N3) TicTacToField)
+            (Exactly (On N3))
+            (ArraySized (Exactly (On N3)) TicTacToField)
 
 → A given [`ArraySized`](https://package.elm-lang.org/packages/lue-bird/elm-typesafe-array/latest/) must have _exactly 3 by 3_ `TicTacToeField`s
 
+Use `Exactly` [`(OnValue ...)`](#OnValue)
+for **storing** in a type
+
 -}
-type alias Exactly asNumber =
-    InFixed asNumber asNumber
+type alias Exactly asDifference =
+    In asDifference asDifference
 
 
 {-| `Up low To high`: an exact number as the difference `high - low`
@@ -473,15 +476,15 @@ type Up lowRepresentationAsNumber toTag highRepresentationAsNumber
       - [lamdera](https://www.lamdera.com/) → doesn't work
       - accidental `==` call → crash
 
-Calling `==` on a [`FixedValue`](#FixedValue) will yield the correct result instead of crashing
+Calling `==` on a [`OnValue`](#OnValue) will yield the correct result instead of crashing
 
-[`Fixed` is defined as a difference from 0](#Fixed), so this independent type needed to be created
+[`On` is defined as a difference from 0](#On), so this independent type needed to be created
 
-You can just use [`Fixed`](#Fixed) when you don't have disadvantages storing functions
+You can just use [`On`](#On) when you don't have disadvantages storing functions
 
 -}
-type FixedValue representedNumber
-    = FixedValue
+type OnValue representedNumber
+    = OnValue
         -- hidden so that the `Int` can't be messed with
         -- detail:
         --     ((1 / 0) |> round) == ((1 / 0) |> round)
@@ -494,24 +497,14 @@ type FixedValue representedNumber
         }
 
 
-{-| Lower and upper limits as [`FixedValue`](#FixedValue)s. For stored types only
+{-| Lower and upper limits as [`OnValue`](#OnValue)s. For stored types only
 
-You can just use [`InFixed`](#InFixed) when you don't have disadvantages storing functions.
-See [`FixedValue`](#FixedValue)
-
--}
-type alias InFixedValue min max =
-    In (FixedValue min) (FixedValue max)
-
-
-{-| For **storing** in a type. Allow only a specific [`FixedValue`](#FixedValue)
-
-You can just use [`Exactly`](#Exactly) when you don't have disadvantages storing functions.
-See [`FixedValue`](#FixedValue)
+You can just use [`InOn`](#InOn) when you don't have disadvantages storing functions.
+See [`OnValue`](#OnValue)
 
 -}
-type alias ExactlyValue n =
-    InFixedValue n n
+type alias InOnValue min max =
+    In (OnValue min) (OnValue max)
 
 
 {-| "The limit is unknown".
@@ -519,43 +512,43 @@ type alias ExactlyValue n =
 Used in the definition of [`Min`](#Min):
 
     type alias Min min =
-        In minimum (Fixed Infinity)
+        In minimum (On Infinity)
 
-and [`MinFixedValue`](#MinFixedValue)
+and [`MinOnValue`](#MinOnValue)
 
-    type alias MinFixedValue min =
-        In (FixedValue min) (FixedValue Infinity)
+    type alias MinOnValue min =
+        In (OnValue min) (OnValue Infinity)
 
 which can be simplified to
 
-    type alias MinFixedValue min =
-        InFixedValue min Infinity
+    type alias MinOnValue min =
+        InOnValue min Infinity
 
-You can just use [`Fixed`](#Fixed) when you don't have disadvantages storing functions.
-See [`FixedValue`](#FixedValue)
+You can just use [`On`](#On) when you don't have disadvantages storing functions.
+See [`OnValue`](#OnValue)
 
 -}
 type Infinity
     = Infinity
 
 
-{-| A lower limit as a [`FixedValue`](#FixedValue). For stored types only
+{-| A lower limit as a [`OnValue`](#OnValue). For stored types only
 
-You can just use [`Min`](#Min) `(` [`Fixed`](#Fixed) `...)` when you don't have disadvantages storing functions.
-See [`FixedValue`](#FixedValue)
+You can just use [`Min`](#Min) `(` [`On`](#On) `...)` when you don't have disadvantages storing functions.
+See [`OnValue`](#OnValue)
 
 -}
-type alias MinFixedValue min =
-    InFixedValue min Infinity
+type alias MinOnValue min =
+    InOnValue min Infinity
 
 
-{-| The [`N0OrAdd1`](#N0OrAdd1) represented by this [`Fixed`](#Fixed) [difference](#Up)
+{-| The [`N0OrAdd1`](#N0OrAdd1) represented by this [`On`](#On) [difference](#Up)
 
     import Possibly exposing (Possibly(..))
 
     N.intToIn ( n3, n10 ) 5
         |> N.min
-        |> N.fixedToNumber
+        |> N.onToNumber
     --> N.Add1 (N.Add1 (N.Add1 (N.N0 Possible)))
 
 useful
@@ -580,44 +573,44 @@ useful
             = Element index
 
         element :
-            N (Exactly index)
+            N (Exactly (On index))
             -> Mapping (List element) (Element index) (Maybe element)
         element index =
             Typed.tag
-                (Element (index |> N.min |> N.fixedToNumber))
+                (Element (index |> N.min |> N.onToNumber))
                 List.Extra.getAt
 
 Can be altered with [`addDifference`](#addDifference), [`subtractDifference`](#subtractDifference).
 
-To preserve the ability to turn the number into an `Int`, use [`fixedToValue`](#fixedToValue)
+To preserve the ability to turn the number into an `Int`, use [`onToValue`](#onToValue)
 
 -}
-fixedToNumber : Fixed representedNumber -> representedNumber
-fixedToNumber =
-    \fixed ->
+onToNumber : On representedNumber -> representedNumber
+onToNumber =
+    \on ->
         let
-            (FixedValue fixedValueInternal) =
-                fixed |> fixedToValue
+            (OnValue onValueInternal) =
+                on |> onToValue
         in
-        fixedValueInternal.number
+        onValueInternal.number
 
 
-{-| [`Fixed`](#Fixed) → equatable [`FixedValue`](#FixedValue)
+{-| [`On`](#On) → equatable [`OnValue`](#OnValue)
 -}
-fixedToValue : Fixed n -> FixedValue n
-fixedToValue =
-    \fixed ->
-        FixedValue
-            { number = N0 Possible |> addDifference fixed
-            , int = fixed |> differenceToInt
+onToValue : On n -> OnValue n
+onToValue =
+    \on ->
+        OnValue
+            { number = N0 Possible |> addDifference on
+            , int = on |> differenceToInt
             }
 
 
-{-| [`Fixed`](#Fixed) → equatable [`FixedValue`](#FixedValue)
+{-| [`On`](#On) → equatable [`OnValue`](#OnValue)
 -}
-fixedFromValue : FixedValue n -> Fixed n
-fixedFromValue =
-    \(FixedValue value) ->
+onFromValue : OnValue n -> On n
+onFromValue =
+    \(OnValue value) ->
         Difference
             { up = \_ -> value.number
             , down = \_ -> N0 Possible
@@ -625,31 +618,31 @@ fixedFromValue =
             }
 
 
-{-| [`InFixed`](#InFixed) → equatable [`InFixedValue`](#InFixedValue)
+{-| [`InOn`](#InOn) → equatable [`InOnValue`](#InOnValue)
 -}
-inFixedToValue : InFixed min max -> InFixedValue min max
-inFixedToValue =
-    \(Range inFixed) ->
+inOnToValue : InOn min max -> InOnValue min max
+inOnToValue =
+    \(Range inOn) ->
         Range
-            { min = inFixed |> .min |> fixedToValue
-            , max = inFixed |> .max |> fixedToValue
+            { min = inOn |> .min |> onToValue
+            , max = inOn |> .max |> onToValue
             }
 
 
-{-| equatable [`InFixedValue`](#InFixedValue) → [`InFixed`](#InFixed)
+{-| equatable [`InOnValue`](#InOnValue) → [`InOn`](#InOn)
 -}
-inFixedFromValue : InFixedValue min max -> InFixed min max
-inFixedFromValue =
+inOnFromValue : InOnValue min max -> InOn min max
+inOnFromValue =
     \(Range inValue) ->
         Range
-            { min = inValue |> .min |> fixedFromValue
-            , max = inValue |> .max |> fixedFromValue
+            { min = inValue |> .min |> onFromValue
+            , max = inValue |> .max |> onFromValue
             }
 
 
-{-| Number with [`Fixed` range](#InFixed) → number with equatable [`FixedValue` range](#InFixedValue)
+{-| Number with [`On` range](#InOn) → number with equatable [`OnValue` range](#InOnValue)
 -}
-toValue : N (InFixed min max) -> N (InFixedValue min max)
+toValue : N (InOn min max) -> N (InOnValue min max)
 toValue =
     \n ->
         n
@@ -657,10 +650,10 @@ toValue =
             |> maxToValue
 
 
-{-| Number with [`Fixed`](#Fixed) minimum
-→ number with equatable [`FixedValue`](#FixedValue) minimum
+{-| Number with [`On`](#On) minimum
+→ number with equatable [`OnValue`](#OnValue) minimum
 -}
-minToValue : N (In (Fixed min) max) -> N (In (FixedValue min) max)
+minToValue : N (In (On min) max) -> N (In (OnValue min) max)
 minToValue =
     \n ->
         (n |> toInt)
@@ -672,15 +665,15 @@ minToValue =
                  Range
                     { max = rangeInternal.max
                     , min =
-                        rangeInternal.min |> fixedToValue
+                        rangeInternal.min |> onToValue
                     }
                 )
 
 
-{-| Number with [`Fixed`](#Fixed) maximum
-→ number with equatable [`FixedValue`](#FixedValue) maximum
+{-| Number with [`On`](#On) maximum
+→ number with equatable [`OnValue`](#OnValue) maximum
 -}
-maxToValue : N (In min (Fixed max)) -> N (In min (FixedValue max))
+maxToValue : N (In min (On max)) -> N (In min (OnValue max))
 maxToValue =
     \n ->
         (n |> toInt)
@@ -692,15 +685,15 @@ maxToValue =
                  Range
                     { min = rangeInternal.min
                     , max =
-                        rangeInternal.max |> fixedToValue
+                        rangeInternal.max |> onToValue
                     }
                 )
 
 
-{-| Number with equatable [`FixedValue` range](#InFixedValue)
-→ number with [`Fixed` range](#InFixed) to be [altered](#alter), [compared](#compare), ...
+{-| Number with equatable [`OnValue` range](#InOnValue)
+→ number with [`On` range](#InOn) to be [altered](#alter), [compared](#compare), ...
 -}
-fromValue : N (InFixedValue min max) -> N (InFixed min max)
+fromValue : N (InOnValue min max) -> N (InOn min max)
 fromValue =
     \n ->
         n
@@ -708,10 +701,10 @@ fromValue =
             |> maxFromValue
 
 
-{-| Number with equatable [`FixedValue`](#FixedValue) minimum
-→ number with [`Fixed`](#Fixed) minimum
+{-| Number with equatable [`OnValue`](#OnValue) minimum
+→ number with [`On`](#On) minimum
 -}
-minFromValue : N (In (FixedValue min) max) -> N (In (Fixed min) max)
+minFromValue : N (In (OnValue min) max) -> N (In (On min) max)
 minFromValue =
     \n ->
         (n |> toInt)
@@ -723,14 +716,14 @@ minFromValue =
                  Range
                     { max = rangeInternal.max
                     , min =
-                        rangeInternal.min |> fixedFromValue
+                        rangeInternal.min |> onFromValue
                     }
                 )
 
 
-{-| Number with equatable [`FixedValue`](#FixedValue) maximum → number with [`Fixed`](#Fixed) maximum
+{-| Number with equatable [`OnValue`](#OnValue) maximum → number with [`On`](#On) maximum
 -}
-maxFromValue : N (In min (FixedValue max)) -> N (In min (Fixed max))
+maxFromValue : N (In min (OnValue max)) -> N (In min (On max))
 maxFromValue =
     \n ->
         (n |> toInt)
@@ -742,7 +735,7 @@ maxFromValue =
                  Range
                     { min = rangeInternal.min
                     , max =
-                        rangeInternal.max |> fixedFromValue
+                        rangeInternal.max |> onFromValue
                     }
                 )
 
@@ -766,21 +759,27 @@ type To
     = To Never
 
 
-{-| The [difference](#Up) from [`0`](#N0) to a given `n`
+{-| The fixed [difference](#Up) from [`0`](#N0) to a given [number](#N0OrAdd1) `n`
 
-A stored type looks like a [result type](#result-type)
-where every [`Up<n> x`](#Up) is instead [`Fixed N<n>`](#Fixed)
+You'll find this either to require a certain minimum
 
-Do not use `==` on 2 numbers in a [`Fixed` range](#InFixed).
+    entryOnlyForKids : N (In (On (Add6 minFrom6_)) (Up maxTo14_ To N14)) -> ()
+    entryOnlyForKids _ =
+        ()
+
+Or in a stored type, which looks like a [result type](#result-type)
+where every [`Up<n> x`](#Up) is instead [`On N<n>`](#On)
+
+Do not use `==` on 2 numbers in a [`On` range](#InOn).
 It will lead to elm crashing because [difference](#Up)s are stored as functions internally.
 Instead,
 
   - [compare](#compare) in _your_ code
-  - convert to [`FixedValue`](#FixedValue) for _other_ code
+  - convert to [`OnValue`](#OnValue) for _other_ code
     that relies (or performs better) on structural `==`
 
 -}
-type alias Fixed asNumber =
+type alias On asNumber =
     Up N0 To asNumber
 
 
@@ -825,19 +824,19 @@ add toAdd =
                 )
 
 
-{-| [`Fixed`](#Fixed) [difference up](#Up) to [`Infinity`](#Infinity)
+{-| [`On`](#On) [difference up](#Up) to [`Infinity`](#Infinity)
 
-    (N.fixedInfinity |> N.differenceToInt)
+    (N.onInfinity |> N.differenceToInt)
         == ((1 / 0) |> round)
     --> True
 
-    (N.fixedInfinity |> N.fixedToNumber)
+    (N.onInfinity |> N.onToNumber)
         == N.Infinity
     --> True
 
 -}
-fixedInfinity : Fixed Infinity
-fixedInfinity =
+onInfinity : On Infinity
+onInfinity =
     { up = \_ -> Infinity
     , down = \_ -> N0 Possible
     , toInt = (1 / 0) |> round
@@ -884,7 +883,7 @@ intToAbsolute =
             |> LimitedIn
                 (Range
                     { min = n0 |> min
-                    , max = fixedInfinity
+                    , max = onInfinity
                     }
                 )
 
@@ -912,7 +911,7 @@ Already have an [`N`](#N)? → [`remainderBy`](#remainderBy)
 intModBy :
     N
         (In
-            (Fixed (Add1 divisorMinMinus1_))
+            (On (Add1 divisorMinMinus1_))
             (Up divMaxX To (Add1 divisorMaxPlusXMinus1))
         )
     ->
@@ -955,11 +954,9 @@ inRandom :
             lowerLimitMin
             (Up lowerLimitMaxToUpperLimitMin_ To upperLimitMin)
         )
-    , N (In (Fixed upperLimitMin) upperLimitMax)
+    , N (In (On upperLimitMin) upperLimitMax)
     )
-    ->
-        Random.Generator
-            (N (In lowerLimitMin upperLimitMax))
+    -> Random.Generator (N (In lowerLimitMin upperLimitMax))
 inRandom ( lowestPossible, highestPossible ) =
     Random.map (intToIn ( lowestPossible, highestPossible ))
         (Random.int (lowestPossible |> toInt) (highestPossible |> toInt))
@@ -982,7 +979,7 @@ inFuzz :
             lowerLimitMin
             (Up lowerLimitMaxToUpperLimitMin_ To upperLimitMin)
         )
-    , N (In (Fixed upperLimitMin) upperLimitMax)
+    , N (In (On upperLimitMin) upperLimitMax)
     )
     -> Fuzzer (N (In lowerLimitMin upperLimitMax))
 inFuzz ( lowestPossible, highestPossible ) =
@@ -1013,7 +1010,7 @@ inFuzzUniform :
             lowerLimitMin
             (Up lowerLimitMaxToUpperLimitMin_ To upperLimitMin)
         )
-    , N (In (Fixed upperLimitMin) upperLimitMax)
+    , N (In (On upperLimitMin) upperLimitMax)
     )
     -> Fuzzer (N (In lowerLimitMin upperLimitMax))
 inFuzzUniform ( lowestPossible, highestPossible ) =
@@ -1053,7 +1050,7 @@ intIsIn :
         )
     , N
         (In
-            (Fixed upperLimitMin)
+            (On upperLimitMin)
             (Up upperLimitMaxX To upperLimitMaxPlusX)
         )
     )
@@ -1083,7 +1080,7 @@ intIsIn ( lowerLimit, upperLimit ) =
                         { min =
                             (upperLimit |> max)
                                 |> differenceAdd (n1 |> min)
-                        , max = fixedInfinity
+                        , max = onInfinity
                         }
                     )
                 |> Above
@@ -1125,7 +1122,7 @@ intIsAtLeast lowerLimit =
                 |> LimitedIn
                     (Range
                         { min = lowerLimit |> min
-                        , max = fixedInfinity
+                        , max = onInfinity
                         }
                     )
                 |> Ok
@@ -1173,7 +1170,7 @@ intToIn :
         )
     , N
         (In
-            (Fixed upperLimitMin)
+            (On upperLimitMin)
             upperLimitMax
         )
     )
@@ -1255,7 +1252,7 @@ are beyond the current limits)
 -}
 toIn :
     ( N (In lowerLimitMin (Up minNewMaxToMaxNewMin_ To upperLimitMin))
-    , N (In (Fixed upperLimitMin) upperLimitMax)
+    , N (In (On upperLimitMin) upperLimitMax)
     )
     ->
         (N range_
@@ -1336,14 +1333,14 @@ toAtMost upperLimit =
 {-| **Cap** the [`N`](#N) to `>=` a given new lower limit
 
     between5And12 |> N.toAtLeast n10
-    --: N (In (Up10 x_) (Fixed N12))
+    --: N (In (Up10 x_) (On N12))
 
 The type doesn't forbid that the lower limit you're comparing against
 is below the current lower limit
 
     n15
         |> N.toAtLeast n10
-        --: N (In (Up10 x_) (Fixed N15))
+        --: N (In (Up10 x_) (On N15))
         |> N.toInt
     --> 15
 
@@ -1353,8 +1350,8 @@ Don't know both maxima? → [`toAtLeastMin`](#toAtLeastMin)
 toAtLeast :
     N (In minNew (Up minNewMaxToMax_ To max))
     ->
-        (N (In min_ (Fixed max))
-         -> N (In minNew (Fixed max))
+        (N (In min_ (On max))
+         -> N (In minNew (On max))
         )
 toAtLeast lowerLimit =
     \n ->
@@ -1378,7 +1375,7 @@ which means `x * n ≥ x`
 
 -}
 multiplyBy :
-    N (In (Fixed (Add1 multiplicandMinMinus1_)) multiplicandMax_)
+    N (In (On (Add1 multiplicandMinMinus1_)) multiplicandMax_)
     ->
         (N (In min max_)
          -> N (Min min)
@@ -1390,7 +1387,7 @@ multiplyBy multiplicand =
             |> LimitedIn
                 (Range
                     { min = n |> min
-                    , max = fixedInfinity
+                    , max = onInfinity
                     }
                 )
 
@@ -1409,7 +1406,7 @@ multiplyBy multiplicand =
 
 -}
 divideBy :
-    N (In (Fixed (Add1 divisorMinMinus1_)) divisorMax_)
+    N (In (On (Add1 divisorMinMinus1_)) divisorMax_)
     ->
         (N (In min_ max)
          -> N (In (Up0 minX_) max)
@@ -1436,7 +1433,7 @@ We know `x % d ≤ d - 1`
 remainderBy :
     N
         (In
-            (Fixed (Add1 divisorMinMinus1_))
+            (On (Add1 divisorMinMinus1_))
             (Up divMaxX To (Add1 divisorMaxPlusXMinus1))
         )
     ->
@@ -1464,7 +1461,7 @@ remainderBy divisor =
 
 -}
 toPower :
-    N (In (Fixed (Add1 exponentMinMinus1_)) exponentMax_)
+    N (In (On (Add1 exponentMinMinus1_)) exponentMax_)
     ->
         (N (In min max_)
          -> N (Min min)
@@ -1476,7 +1473,7 @@ toPower exponent =
             |> LimitedIn
                 (Range
                     { min = n |> min
-                    , max = fixedInfinity
+                    , max = onInfinity
                     }
                 )
 
@@ -1497,7 +1494,7 @@ Elm complains:
 minTo :
     N (In minNew (Up minNewMaxToMin_ To min))
     ->
-        (N (In (Fixed min) max)
+        (N (In (On min) max)
          -> N (In minNew max)
         )
 minTo newMinimum =
@@ -1537,7 +1534,7 @@ maxToInfinity =
             |> LimitedIn
                 (Range
                     { min = n |> min
-                    , max = fixedInfinity
+                    , max = onInfinity
                     }
                 )
 
@@ -1558,7 +1555,7 @@ But once you implement `onlyAtMost18`, you might use the `n` in `onlyAtMost19`:
 
 -}
 maxTo :
-    N (In (Fixed maxNewMin) maxNew)
+    N (In (On maxNewMin) maxNew)
     ->
         (N (In min (Up maxToMaxNewMin_ To maxNewMin))
          -> N (In min maxNew)
@@ -1576,7 +1573,7 @@ maxTo maximumNew =
 
 {-| Have a specific maximum in mind? → [`N.maxTo`](#maxTo)
 
-Want to increase the upper bound by a fixed amount? → [`maxAdd`](#maxAdd)
+Want to increase the upper bound by a on amount? → [`maxAdd`](#maxAdd)
 
 -}
 maxAdd :
@@ -1605,7 +1602,7 @@ maxAdd maxRelativeIncrease =
 
 {-| Have a specific minimum in mind? → [`N.minTo`](#minTo)
 
-Want to decrease the lower bound by a fixed amount? → [`minSubtract`](#minSubtract)
+Want to decrease the lower bound by a on amount? → [`minSubtract`](#minSubtract)
 
 -}
 minSubtract :
@@ -1699,7 +1696,7 @@ toString =
     toy : { age : N (In min_ (Up17 maxX_)) } -> Toy
 
     book :
-        { age : N (In (Fixed (Add19 minMinus19_)) max_) }
+        { age : N (In (On (Add19 minFrom9_)) max_) }
         -> Book
 
 (The type doesn't forbid that the number you're comparing against
@@ -1889,7 +1886,7 @@ isIn ( lowerLimit, upperLimit ) =
 {-| Is the [`N`](#N) below than or at least as big as a given number?
 
     vote :
-        { age : N (In (Fixed (Add18 minMinus18_)) max_) }
+        { age : N (In (On (Add18 minFrom18_)) max_) }
         -> Vote
 
     tryToVote { age } =
@@ -2088,10 +2085,10 @@ add a number that (only) has [information on how to add](#Up) the minima
 
 Use [`add`](#add) if both maxima are known [difference](#Up)s as well
 
-If the added minimum is [`Fixed`](#Fixed), supply the [`N.minTo`](#minTo) manually
+If the added minimum is [`On`](#On), supply the [`N.minTo`](#minTo) manually
 to re-enable adding both minimum types!
 
-    atLeast5 |> N.addMin (atLeastFixed2 |> N.min n2)
+    atLeast5 |> N.addMin (atLeastOn2 |> N.min n2)
     --: N (Min (Up7 x_))
 
 -}
@@ -2113,7 +2110,7 @@ addMin toAdd =
                     { min =
                         (n |> min)
                             |> differenceAdd (toAdd |> min)
-                    , max = fixedInfinity
+                    , max = onInfinity
                     }
                 )
 
@@ -2122,7 +2119,7 @@ addMin toAdd =
 
     n6
         |> N.subtract n5
-        --: N (In (Fixed N1) (Up1 x_))
+        --: N (In (On N1) (Up1 x_))
         |> N.toValue
     --> n1 |> N.toValue
 
@@ -2136,11 +2133,11 @@ subtract :
             (Down min To differenceMin)
         )
     ->
-        (N (In (Fixed min) (Up maxX To maxPlusX))
+        (N (In (On min) (Up maxX To maxPlusX))
          ->
             N
                 (In
-                    (Fixed differenceMin)
+                    (On differenceMin)
                     (Up maxX To differenceMaxPlusX)
                 )
         )
@@ -2164,13 +2161,13 @@ subtract toSubtract =
 subtract a [specific number](#In)
 
     atLeast7 |> N.subtractMin n2
-    --: N (Min (Fixed N5))
+    --: N (Min (On N5))
 
     atLeast6 |> N.subtractMin between0And5
-    --: N (Min (Fixed N1))
+    --: N (Min (On N1))
 
     between6And12 |> N.subtractMin between1And5
-    --: N (In (Fixed min_) (Up12 maxX_))
+    --: N (In (On min_) (Up12 maxX_))
 
 Use [`N.subtract`](#subtract) if you want to subtract an [`N`](#N) in a range
 
@@ -2182,8 +2179,8 @@ subtractMin :
             (Down min To differenceMin)
         )
     ->
-        (N (In (Fixed min) max)
-         -> N (In (Fixed differenceMin) max)
+        (N (In (On min) max)
+         -> N (In (On differenceMin) max)
         )
 subtractMin subtrahend =
     \n ->
@@ -2538,7 +2535,7 @@ type N0OrAdd1 n0PossiblyOrNever successorMinus1
 
     stackRepeat :
         element
-        -> N (In (Fixed (N0OrAdd1 possiblyOrNever minMinus1_)) max_)
+        -> N (In (On (N0OrAdd1 possiblyOrNever minFrom1_)) max_)
         -> Emptiable (Stacked element) possiblyOrNever
     stackRepeat toRepeat length =
         case length |> N.isAtLeast1 of
@@ -2555,7 +2552,7 @@ type N0OrAdd1 n0PossiblyOrNever successorMinus1
 
     stackLength :
         Emptiable (Stacked element) possiblyOrNever
-        -> N (Min (Fixed (N0OrAdd1 possiblyOrNever N0)))
+        -> N (Min (On (N0OrAdd1 possiblyOrNever N0)))
     stackLength =
         \stack ->
             case stack of
@@ -2579,7 +2576,7 @@ Cool, right?
 
 -}
 isAtLeast1 :
-    N (In (Fixed (N0OrAdd1 n0PossiblyOrNever minMinus1_)) max)
+    N (In (On (N0OrAdd1 n0PossiblyOrNever minFrom1_)) max)
     ->
         Result
             n0PossiblyOrNever
@@ -2593,7 +2590,7 @@ isAtLeast1 =
                     , max = n |> max
                     }
         in
-        case n |> min |> fixedToNumber of
+        case n |> min |> onToNumber of
             N0 possiblyOrNever ->
                 case n |> toInt of
                     0 ->
@@ -2618,7 +2615,7 @@ isAtLeast1 =
 
     stackLength :
         Emptiable (Stacked element) possiblyOrNever
-        -> N (Min (Fixed (N0OrAdd1 possiblyOrNever N0)))
+        -> N (Min (On (N0OrAdd1 possiblyOrNever N0)))
     stackLength =
         \stack ->
             case stack of
@@ -2627,7 +2624,7 @@ isAtLeast1 =
                         -- adapt the variable minimum
                         |> N.min0Adapt (\_ -> possiblyOrNever)
                         -- allow a different min successor type
-                        |> N.minMinus1Never
+                        |> N.minAtLeast1Never
                         |> N.maxToInfinity
 
                 Emptiable.Filled (TopBelow ( _, belowTop )) ->
@@ -2638,7 +2635,7 @@ isAtLeast1 =
                         -- downgrade the minimum
                         |> N.min0Adapt never
 
-using [`isAtLeast1`](#isAtLeast1), [`minMinus1Never`](#minMinus1Never).
+using [`isAtLeast1`](#isAtLeast1), [`minAtLeast1Never`](#minAtLeast1Never).
 
 Stack and Emptiable are part of [`emptiness-typed`](https://dark.elm.dmy.fr/packages/lue-bird/elm-emptiness-typed/latest/)
 
@@ -2646,23 +2643,23 @@ with `(\_ -> Possible)` it's just a worse version of [`minSubtract`](#minSubtrac
 that might be useful in ultra rare situations
 
     minSubtract1IfPossible :
-        N (In (Fixed (N0OrAdd1 possiblyOrNever minMinus1)) max)
-        -> N (In (Fixed (N0OrAdd1 Possibly minMinus1)) max)
+        N (In (On (N0OrAdd1 possiblyOrNever minFrom1)) max)
+        -> N (In (On (N0OrAdd1 Possibly minFrom1)) max)
     minSubtract1IfPossible =
         N.min0Adapt (\_ -> Possibly)
 
 -}
 min0Adapt :
     (possiblyOrNever -> adaptedPossiblyOrNever)
-    -> N (In (Fixed (N0OrAdd1 possiblyOrNever minMinus1)) max)
-    -> N (In (Fixed (N0OrAdd1 adaptedPossiblyOrNever minMinus1)) max)
+    -> N (In (On (N0OrAdd1 possiblyOrNever minFrom1)) max)
+    -> N (In (On (N0OrAdd1 adaptedPossiblyOrNever minFrom1)) max)
 min0Adapt n0PossiblyOrNeverAdapt =
     \n ->
         n
             |> toInt
             |> LimitedIn
                 (Range
-                    { min = n |> min |> fixed0Adapt n0PossiblyOrNeverAdapt
+                    { min = n |> min |> on0Adapt n0PossiblyOrNeverAdapt
                     , max = n |> max
                     }
                 )
@@ -2673,7 +2670,7 @@ to allow adapting any variable
 
     stackLength :
         Emptiable (Stacked element) possiblyOrNever
-        -> N (Min (Fixed (N0OrAdd1 possiblyOrNever N0)))
+        -> N (Min (On (N0OrAdd1 possiblyOrNever N0)))
     stackLength =
         \stack ->
             case stack of
@@ -2682,7 +2679,7 @@ to allow adapting any variable
                         -- adapt the variable minimum
                         |> N.min0Adapt (\_ -> possiblyOrNever)
                         -- allow a different min successor type
-                        |> N.minMinus1Never
+                        |> N.minAtLeast1Never
                         |> N.maxToInfinity
 
                 Emptiable.Filled (TopBelow ( _, belowTop )) ->
@@ -2696,16 +2693,16 @@ to allow adapting any variable
 using [`isAtLeast1`](#isAtLeast1), [`min0Adapt`](#min0Adapt).
 
 -}
-minMinus1Never :
-    N (In (Fixed (N0OrAdd1 possiblyOrNever Never)) max)
-    -> N (In (Fixed (N0OrAdd1 possiblyOrNever minMinus1_)) max)
-minMinus1Never =
+minAtLeast1Never :
+    N (In (On (N0OrAdd1 possiblyOrNever Never)) max)
+    -> N (In (On (N0OrAdd1 possiblyOrNever minFrom1_)) max)
+minAtLeast1Never =
     \n ->
         n
             |> toInt
             |> LimitedIn
                 (Range
-                    { min = n |> min |> fixedMinus1Map never
+                    { min = n |> min |> onMinus1Map never
                     , max = n |> max
                     }
                 )
@@ -2714,11 +2711,11 @@ minMinus1Never =
 {-| Change the `possiblyOrNever` type
 for the case that its [`N0OrAdd1`](#N0OrAdd1) representation is [`N0`](#N0OrAdd1)
 -}
-fixed0Adapt :
+on0Adapt :
     (possiblyOrNever -> adaptedPossiblyOrNever)
-    -> Fixed (N0OrAdd1 possiblyOrNever minus1)
-    -> Fixed (N0OrAdd1 adaptedPossiblyOrNever minus1)
-fixed0Adapt n0PossiblyOrNeverAdapt =
+    -> On (N0OrAdd1 possiblyOrNever minus1)
+    -> On (N0OrAdd1 adaptedPossiblyOrNever minus1)
+on0Adapt n0PossiblyOrNeverAdapt =
     \(Difference difference) ->
         Difference
             { up =
@@ -2734,11 +2731,11 @@ fixed0Adapt n0PossiblyOrNeverAdapt =
 {-| Change the type
 for the case that the [`N0OrAdd1`](#N0OrAdd1) is [`Add1 minus1`](#N0OrAdd1)
 -}
-fixedMinus1Map :
+onMinus1Map :
     (minus1 -> mappedMinus1)
-    -> Fixed (N0OrAdd1 n0PossiblyOrNever minus1)
-    -> Fixed (N0OrAdd1 n0PossiblyOrNever mappedMinus1)
-fixedMinus1Map minus1Map =
+    -> On (N0OrAdd1 n0PossiblyOrNever minus1)
+    -> On (N0OrAdd1 n0PossiblyOrNever mappedMinus1)
+onMinus1Map minus1Map =
     \(Difference difference) ->
         Difference
             { up =

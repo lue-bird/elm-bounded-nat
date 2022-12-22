@@ -183,8 +183,8 @@ limitType :
     Generation.TypeAnnotation
     -> Generation.TypeAnnotation
     -> Generation.TypeAnnotation
-limitType fixed increase =
-    typed "Limit" [ fixed, increase ]
+limitType on increase =
+    typed "Limit" [ on, increase ]
 
 
 typeUpN : Int -> String -> Generation.TypeAnnotation

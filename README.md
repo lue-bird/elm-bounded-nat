@@ -68,8 +68,7 @@ You might be able to do anything with this `Int` value, but you lost useful info
 
 ```elm
 toDigit :
-  Char
-  -> Maybe (N (In (Up0 minX_) (Up9 maxX_)))
+    Char -> Maybe (N (In (Up0 minX_) (Up9 maxX_)))
 ```
 
 The type of an [`N`](N#N) value will reflect how much you and the compiler know

@@ -12,11 +12,11 @@ suite =
         , maximumConstrainedTest
         , test "infinity == infinity"
             (\() ->
-                (N.fixedInfinity |> N.differenceToInt |> toFloat)
+                (N.onInfinity |> N.differenceToInt |> toFloat)
                     |> Expect.within (Expect.Absolute 0.1)
-                        (N.fixedInfinity |> N.differenceToInt |> toFloat)
+                        (N.onInfinity |> N.differenceToInt |> toFloat)
             )
-        , test "FixedValue == FixedValue"
+        , test "OnValue == OnValue"
             (\() ->
                 (n9 |> N.toValue)
                     |> Expect.equal
