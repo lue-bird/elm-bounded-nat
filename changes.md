@@ -4,6 +4,10 @@
 
 # change log
 
+#### 32.0.1
+
+  - notes about using `min...Value` for `Min` add
+
 ## 32.0.0
 
   - `Exactly`, `ExactlyValue` → `Exactly a = In a a`
