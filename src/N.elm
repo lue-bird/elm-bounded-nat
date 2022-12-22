@@ -622,6 +622,9 @@ inOnFromValue =
 
 
 {-| Number with [`On` range](#InOn) → number with equatable [`OnValue` range](#InOnValue)
+
+If you want a `Min (OnValue ...)` [`N`](#N), you instead only need [`minToValue`](#minToValue)
+
 -}
 toValue : N (InOn min max) -> N (InOnValue min max)
 toValue =
@@ -633,6 +636,9 @@ toValue =
 
 {-| Number with [`On`](#On) minimum
 → number with equatable [`OnValue`](#OnValue) minimum
+
+You'll usually use this to convert to a `Min (OnValue ...)` [`N`](#N)
+
 -}
 minToValue : N (In (On min) max) -> N (In (OnValue min) max)
 minToValue =
@@ -673,6 +679,9 @@ maxToValue =
 
 {-| Number with equatable [`OnValue` range](#InOnValue)
 → number with [`On` range](#InOn) to be [altered](#alter), [compared](#compare), ...
+
+If you want a `Min (On ...)` [`N`](#N), you instead only need [`minFromValue`](#minFromValue)
+
 -}
 fromValue : N (InOnValue min max) -> N (InOn min max)
 fromValue =
@@ -684,6 +693,9 @@ fromValue =
 
 {-| Number with equatable [`OnValue`](#OnValue) minimum
 → number with [`On`](#On) minimum
+
+You'll usually use this to convert to a `Min (On ...)` [`N`](#N)
+
 -}
 minFromValue : N (In (OnValue min) max) -> N (In (On min) max)
 minFromValue =
