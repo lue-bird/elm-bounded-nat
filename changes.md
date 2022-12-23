@@ -1,12 +1,23 @@
-### 32.1.0 plans
+### 33.1.0 plans
 
   - `N.Generator` that auto-generates `N<x>`, `Add<x>` and `n<x>` for x >= 17 add
 
 # change log
 
-#### 32.0.1
+#### 33.0.0
 
-  - notes about using `min...Value` for `Min` add
+  - `differenceToInt`, `exactly` remove
+  - `OnValue`, `InOnValue` remove
+  - `InOn min max` remove
+      - in favor of `In (On min) (On max)`
+  - -fromValue name → toOn, -toValue name → toNumber
+  - `onInfinity` remove
+  - `numberMinus1Map`, `onMinus1Map` name → `numberFrom1Map`, `onFrom1Map`
+  - `toAtLeast`, `toAtMost` remove
+      - in favor of `toIn`
+  - `minRange`, `inRange`, `exactlyRange` add
+  - `rangeSubtract`, `rangeMinToOn`, `rangeMinToNumber`, `rangeMinSubtract`, `rangeMinAtLeast1Never`, `rangeMin0Adapt`, `rangeMin`, `rangeMaxToOn`, `rangeMaxToNumber`, `rangeMaxAdd`, `rangeMax`, `rangeIsAtLeast1`, `rangeInToOn`, `rangeInToNumber`, `rangeAdd` add
+  - `toOn`, `onFrom1Map`, `numberFrom1Map` add
 
 ## 32.0.0
 
