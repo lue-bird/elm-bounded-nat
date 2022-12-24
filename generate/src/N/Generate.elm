@@ -1,8 +1,8 @@
 module Z.Generate exposing (main)
 
-{-| Helps you generate the source code of the module `Ns`.
+{-| Helps you generate the source code of the module `Ns`
 
-Run `elm reactor` in this directory to preview & download.
+Run `elm reactor` in this directory to preview & download
 
 Thanks to [`the-sett/elm-syntax-dsl`](https://package.elm-lang.org/packages/the-sett/elm-syntax-dsl/latest/)!
 
@@ -16,8 +16,10 @@ import Element.Font as UiFont
 import Element.Input as UiInput
 import Elm.CodeGen as Generation exposing (applyBinOp, code, construct, fqVal, importStmt, markdown, piper, tuple, typeVar, typed, val)
 import Elm.CodeGen.Extra exposing (..)
+import Elm.Pretty exposing (pretty, prettyTypeAnnotation)
 import File.Download
 import Html exposing (Html)
+import Pretty
 import Task
 import Time
 import Ui.Extra as Ui exposing (edges)
@@ -172,8 +174,8 @@ nType n =
 minAsDifferenceAndMaxType : Int -> Generation.TypeAnnotation
 minAsDifferenceAndMaxType n =
     typed "In"
-        [ increaseType n "minX"
-        , increaseType n "maxX"
+        [ typeUpN n "minX_"
+        , typeUpN n "maxX_"
         ]
 
 
@@ -181,17 +183,14 @@ limitType :
     Generation.TypeAnnotation
     -> Generation.TypeAnnotation
     -> Generation.TypeAnnotation
-limitType fixed increase =
-    typed "Limit" [ fixed, increase ]
+limitType on increase =
+    typed "Limit" [ on, increase ]
 
 
-increaseType : Int -> String -> Generation.TypeAnnotation
-increaseType n var =
-    typed "Up"
-        [ typeVar var
-        , toType
-        , addXType n (typeVar var)
-        ]
+typeUpN : Int -> String -> Generation.TypeAnnotation
+typeUpN n var =
+    typed ([ "Up", n |> String.fromInt ] |> String.concat)
+        [ typeVar var ]
 
 
 toType : Generation.TypeAnnotation
@@ -199,29 +198,29 @@ toType =
     typed "To" []
 
 
-nXType : Int -> Generation.TypeAnnotation
-nXType x =
+typeNN : Int -> Generation.TypeAnnotation
+typeNN n =
     typed
-        ([ "Z", x |> String.fromInt ] |> String.concat)
+        ([ "N", n |> String.fromInt ] |> String.concat)
         []
 
 
-addX : Int -> String
-addX x =
-    [ "Add", x |> String.fromInt ] |> String.concat
+addN : Int -> String
+addN n =
+    [ "Add", n |> String.fromInt ] |> String.concat
 
 
-addXType : Int -> Generation.TypeAnnotation -> Generation.TypeAnnotation
-addXType x more =
-    case x of
+typeAddN : Int -> Generation.TypeAnnotation -> Generation.TypeAnnotation
+typeAddN n base =
+    case n of
         0 ->
-            more
+            base
 
         1 ->
-            n0ableType more possiblyType
+            n0OrAdd1Type base typePossibly
 
         n2AtLeast ->
-            typed (addX n2AtLeast) [ more ]
+            typed (addN n2AtLeast) [ base ]
 
 
 add : Int -> Generation.Expression
@@ -229,21 +228,21 @@ add powerInInt =
     construct "add" [ val (nX powerInInt) ]
 
 
-n0ableType :
+n0OrAdd1Type :
     Generation.TypeAnnotation
     -> Generation.TypeAnnotation
     -> Generation.TypeAnnotation
-n0ableType minus1 possiblyOrNever =
-    typed "N0able" [ minus1, possiblyOrNever ]
+n0OrAdd1Type minus1 possiblyOrNever =
+    typed "N0OrAdd1" [ possiblyOrNever, minus1 ]
 
 
-neverType : Generation.TypeAnnotation
-neverType =
+typeNever : Generation.TypeAnnotation
+typeNever =
     typed "Never" []
 
 
-possiblyType : Generation.TypeAnnotation
-possiblyType =
+typePossibly : Generation.TypeAnnotation
+typePossibly =
     typed "Possibly" []
 
 
@@ -251,223 +250,295 @@ possiblyType =
 -- tags
 
 
-type NsTag
+type NTag
     = TypeExact
     | TypeAdd
-    | NDiffValue
+    | TypeUp
+    | Exact
 
 
 
 --
 
 
-n0To16Module : Module NsTag
-n0To16Module =
-    let
-        lastN : Int
-        lastN =
-            16
-    in
-    { name = [ "N0To16" ]
-    , roleInPackage =
-        PackageExposedModule
-            { moduleComment =
-                \declarations ->
-                    [ markdown "Default implementation for the members of the `bounded-nat` package"
-                    ]
-            }
-    , imports = []
-    , declarations =
-        let
-            exactDoc : Int -> Doc kind_
-            exactDoc n =
-                [ markdown
-                    ([ "Type for the [exact natural number](#N0able) `"
-                     , String.fromInt n
-                     , "`"
-                     ]
-                        |> String.concat
-                    )
-                ]
-        in
-        [ List.range 2 lastN
-            |> List.map
-                (\x ->
-                    packageExposedFunDecl NDiffValue
-                        [ markdown
-                            ([ "The specific natural number `", x |> String.fromInt, "`" ]
-                                |> String.concat
-                            )
-                        ]
-                        (nType (minAsDifferenceAndMaxType x))
-                        (nX x)
-                        []
-                        (applyBinOp
-                            (val (nX (x - 1)))
-                            piper
-                            (add 1)
-                        )
-                )
-        , List.range 1 lastN
-            |> List.map
-                (\n ->
-                    packageExposedAliasDecl TypeAdd
-                        [ markdown
-                            ([ "The [natural number](#N0able) `"
-                             , n |> String.fromInt
-                             , " +` another given [natural number](#N0able) `n`"
-                             ]
-                                |> String.concat
-                            )
-                        ]
-                        (addX n)
-                        [ "n" ]
-                        (List.repeat n ()
-                            |> List.foldl
-                                (\() soFar ->
-                                    n0ableType soFar neverType
-                                )
-                                (typeVar "n")
-                        )
-                )
-        , List.range 0 lastN
-            |> List.map
-                (\n ->
-                    packageExposedAliasDecl TypeExact
-                        (exactDoc n)
-                        ([ "Z", n |> String.fromInt ] |> String.concat)
-                        []
-                        (List.repeat n ()
-                            |> List.foldl
-                                (\() soFar ->
-                                    n0ableType soFar neverType
-                                )
-                                (n0ableType neverType possiblyType)
-                        )
-                )
-        ]
-            |> List.concat
-    }
+type Location
+    = Local
+    | Dependency
 
 
-nBinaryModule : Int -> Module NsTag
-nBinaryModule n =
-    { name = [ "Z", "Binary" ]
-    , roleInPackage =
-        PackageExposedModule
-            { moduleComment =
-                \declarations ->
-                    [ markdown "When you need big numbers or multiple medium sized ones."
-                    ]
-            }
-    , imports =
-        [ importStmt [ "Z" ]
-            noAlias
-            (exposingExplicit
-                (aliasExpose [ "Z", "In", "To", "Up", "N0", "Add1", "Add2", "Add4", "Add8", "Add16" ]
-                    ++ funExpose [ "n1", "n2", "n4", "n8", "n16", "add" ]
-                )
-            )
-        ]
-    , declarations =
-        [ packageExposedFunDecl NDiffValue
-            [ markdown
-                ([ "The specific natural number `", n |> String.fromInt, "`" ]
+onDependencyBoundedNat : Location -> String
+onDependencyBoundedNat =
+    onDependency "lue-bird/bounded-nat"
+
+
+onDependency : String -> (Location -> String)
+onDependency dependencyName =
+    \location ->
+        case location of
+            Local ->
+                ""
+
+            Dependency ->
+                [ "https://dark.elm.dmy.fr/packages/", dependencyName, "/latest/" ]
                     |> String.concat
-                )
-            ]
-            (nType (minAsDifferenceAndMaxType n))
-            (nX n)
-            []
-            (case
-                n
-                    |> intToPowersOf 2
-                    |> List.concatMap
-                        (\part ->
-                            List.repeat part.amount part.power
-                        )
-                    |> List.reverse
-             of
-                [] ->
-                    Generation.string "the number to generate for must be ≥ 1"
 
-                greatestPower :: smallerPowers ->
-                    let
-                        folding =
-                            case smallerPowers of
-                                [] ->
-                                    { initial = greatestPower - 1
-                                    , list = List.repeat 1 (greatestPower - 1)
-                                    }
 
-                                secondGreatestPower :: evenSmallerPowers ->
-                                    { initial = greatestPower
-                                    , list = secondGreatestPower :: evenSmallerPowers
-                                    }
-                    in
-                    folding.list
-                        |> List.map (\power -> 2 ^ power)
-                        |> List.foldl
-                            (\n10ToPower soFar ->
-                                applyBinOp
-                                    soFar
-                                    piper
-                                    (add n10ToPower)
-                            )
-                            (val (nX (2 ^ folding.initial)))
-            )
-        , packageExposedAliasDecl TypeAdd
+typeNNDeclaration :
+    LinearOrBinary
+    -> Location
+    -> (Int -> Declaration NTag)
+typeNNDeclaration linearOrBinary nLocation =
+    \n ->
+        packageExposedAliasDecl TypeExact
             [ markdown
-                ([ "Type for the natural number `"
-                 , n |> String.fromInt
-                 , " +` some natural number `n`"
-                 ]
-                    |> String.concat
-                )
-            ]
-            (addX n)
-            [ "n" ]
-            ((case
-                n
-                    |> intToPowersOf 2
-                    |> List.concatMap
-                        (\part ->
-                            List.repeat part.amount part.power
-                        )
-              of
-                [ powerMultipleItself ] ->
-                    List.repeat 2
-                        (powerMultipleItself - 1)
-
-                powers ->
-                    powers
-             )
-                |> List.map (\power -> 2 ^ power)
-                |> List.foldl
-                    (\power soFar ->
-                        addXType power soFar
-                    )
-                    (typeVar "n")
-            )
-        , packageExposedAliasDecl TypeExact
-            [ markdown
-                ([ "Type for the exact natural number `"
+                ([ "The [natural number]("
+                 , nLocation |> onDependencyBoundedNat
+                 , "N#N0OrAdd1) `"
                  , String.fromInt n
                  , "`"
                  ]
                     |> String.concat
                 )
             ]
-            ([ "Z", n |> String.fromInt ] |> String.concat)
+            ([ "N", n |> String.fromInt ] |> String.concat)
             []
-            (addXType n
-                (n0ableType neverType possiblyType)
+            (typeNNImplementation linearOrBinary n)
+
+
+typeNNImplementation : LinearOrBinary -> (Int -> Generation.TypeAnnotation)
+typeNNImplementation linearOrBinary =
+    \n ->
+        case linearOrBinary of
+            Linear ->
+                List.repeat n ()
+                    |> List.foldl
+                        (\() soFar ->
+                            n0OrAdd1Type soFar typeNever
+                        )
+                        (n0OrAdd1Type typeNever typePossibly)
+
+            Binary ->
+                (case
+                    n
+                        |> intToPowersOf 2
+                        |> List.concatMap
+                            (\part ->
+                                List.repeat part.amount part.power
+                            )
+                 of
+                    [ powerMultipleItself ] ->
+                        List.repeat 2
+                            (powerMultipleItself - 1)
+
+                    powers ->
+                        powers
+                )
+                    |> List.map (\power -> 2 ^ power)
+                    |> List.foldl
+                        (\power soFar ->
+                            typeAddN power soFar
+                        )
+                        (n0OrAdd1Type typeNever typePossibly)
+
+
+typeAddNDeclaration :
+    LinearOrBinary
+    -> Location
+    -> (Int -> Declaration NTag)
+typeAddNDeclaration linearOrBinary nLocation =
+    \n ->
+        packageExposedAliasDecl TypeAdd
+            [ markdown
+                ([ "The [natural number](N"
+                 , nLocation |> onDependencyBoundedNat
+                 , "#N0OrAdd1) `"
+                 , n |> String.fromInt
+                 , " +` a given `n`"
+                 ]
+                    |> String.concat
+                )
+            ]
+            (addN n)
+            [ "n" ]
+            (typeAddNImplementation linearOrBinary n "n")
+
+
+typeAddNImplementation : LinearOrBinary -> (Int -> String -> Generation.TypeAnnotation)
+typeAddNImplementation linearOrBinary =
+    \n var ->
+        case linearOrBinary of
+            Linear ->
+                List.repeat n ()
+                    |> List.foldl
+                        (\() soFar ->
+                            n0OrAdd1Type soFar typeNever
+                        )
+                        (typeVar var)
+
+            Binary ->
+                (case
+                    n
+                        |> intToPowersOf 2
+                        |> List.concatMap
+                            (\part ->
+                                List.repeat part.amount part.power
+                            )
+                 of
+                    [ powerMultipleItself ] ->
+                        List.repeat 2
+                            (powerMultipleItself - 1)
+
+                    powers ->
+                        powers
+                )
+                    |> List.map (\power -> 2 ^ power)
+                    |> List.foldl
+                        (\power soFar ->
+                            typeAddN power soFar
+                        )
+                        (typeVar var)
+
+
+type LinearOrBinary
+    = Linear
+    | Binary
+
+
+typeUpXDeclaration :
+    LinearOrBinary
+    -> (Int -> Declaration NTag)
+typeUpXDeclaration linearOrBinary =
+    \x ->
+        packageExposedAliasDecl TypeUp
+            [ markdown
+                ([ "`"
+                 , x |> String.fromInt
+                 , "` as the difference `"
+                 , typed "Up"
+                    [ typeVar "x"
+                    , toType
+                    , typeAddN x (typeVar "x")
+                    ]
+                    |> prettyTypeAnnotation
+                    |> Pretty.pretty 1000
+                 , "`"
+                 ]
+                    |> String.concat
+                )
+            ]
+            ([ "Up", x |> String.fromInt ] |> String.concat)
+            [ "x" ]
+            (typed "Up"
+                [ typeVar "x"
+                , toType
+                , typeAddNImplementation linearOrBinary x "x"
+                ]
             )
+
+
+nNDeclaration :
+    LinearOrBinary
+    -> Location
+    -> (Int -> Declaration NTag)
+nNDeclaration linearOrBinary nLocation =
+    \n ->
+        packageExposedFunDecl Exact
+            [ markdown
+                ([ "The [`N`](N"
+                 , nLocation |> onDependencyBoundedNat
+                 , "#N) `"
+                 , n |> String.fromInt
+                 , "`"
+                 ]
+                    |> String.concat
+                )
+            ]
+            (nType (minAsDifferenceAndMaxType n))
+            (nX n)
+            []
+            (nNImplementation linearOrBinary n)
+
+
+nNImplementation : LinearOrBinary -> (Int -> Generation.Expression)
+nNImplementation linearOrBinary =
+    \n ->
+        case linearOrBinary of
+            Linear ->
+                applyBinOp
+                    (val (nX (n - 1)))
+                    piper
+                    (add 1)
+
+            Binary ->
+                case
+                    n
+                        |> intToPowersOf 2
+                        |> List.concatMap
+                            (\part ->
+                                List.repeat part.amount part.power
+                            )
+                        |> List.reverse
+                of
+                    [] ->
+                        Generation.string "the number to generate for must be ≥ 1"
+
+                    greatestPower :: smallerPowers ->
+                        let
+                            folding =
+                                case smallerPowers of
+                                    [] ->
+                                        { initial = greatestPower - 1
+                                        , list = List.repeat 1 (greatestPower - 1)
+                                        }
+
+                                    secondGreatestPower :: evenSmallerPowers ->
+                                        { initial = greatestPower
+                                        , list = secondGreatestPower :: evenSmallerPowers
+                                        }
+                        in
+                        folding.list
+                            |> List.map (\power -> 2 ^ power)
+                            |> List.foldl
+                                (\n10ToPower soFar ->
+                                    applyBinOp
+                                        soFar
+                                        piper
+                                        (add n10ToPower)
+                                )
+                                (val (nX (2 ^ folding.initial)))
+
+
+n0To16Module : Module NTag
+n0To16Module =
+    let
+        lastN : Int
+        lastN =
+            16
+    in
+    { name = [ [ "N0To", lastN |> String.fromInt ] |> String.concat ]
+    , roleInPackage =
+        PackageExposedModule
+            { moduleComment =
+                \declarations ->
+                    [ markdown "Default implementation for the members of the `module N` in the package `lue-bird/elm-bounded-nat`"
+                    ]
+            }
+    , imports = []
+    , declarations =
+        [ List.range 1 lastN
+            |> List.map (typeAddNDeclaration Linear Local)
+        , List.range 0 lastN
+            |> List.map (typeNNDeclaration Linear Local)
+        , List.range 0 lastN
+            |> List.map (typeUpXDeclaration Linear)
+        , List.range 2 lastN
+            |> List.map (nNDeclaration Linear Local)
         ]
+            |> List.concat
     }
 
 
-nLinearModule : Int -> Module NsTag
+nLinearModule : Int -> Module NTag
 nLinearModule n =
     { name = [ "Z", "Linear" ]
     , roleInPackage =
@@ -481,94 +552,50 @@ nLinearModule n =
         [ importStmt [ "Z" ]
             noAlias
             (exposingExplicit
-                (aliasExpose [ "Z", "In", "To", "Up", "N0able" ]
+                (aliasExpose [ "N", "In", "To", "Up", "N0OrAdd1" ]
                     ++ funExpose [ "n1", "n2", "n4", "n8", "n16", "add" ]
                 )
             )
+        , importStmt [ "Possibly" ]
+            noAlias
+            (exposingExplicit (aliasExpose [ "Possibly" ]))
         ]
     , declarations =
-        [ packageExposedAliasDecl TypeAdd
-            [ markdown
-                ([ "Type for the natural number `"
-                 , n |> String.fromInt
-                 , " +` some natural number `n`"
-                 ]
-                    |> String.concat
-                )
-            ]
-            (addX n)
-            [ "n" ]
-            (List.repeat n ()
-                |> List.foldl
-                    (\() soFar ->
-                        n0ableType soFar neverType
-                    )
-                    (typeVar "n")
-            )
-        , packageExposedAliasDecl TypeExact
-            [ markdown
-                ([ "Type for the [exact natural number](#N0able) `"
-                 , String.fromInt n
-                 , "`"
-                 ]
-                    |> String.concat
-                )
-            ]
-            ([ "Z", n |> String.fromInt ] |> String.concat)
-            []
-            (List.repeat n ()
-                |> List.foldl
-                    (\() soFar ->
-                        n0ableType soFar neverType
-                    )
-                    (n0ableType neverType possiblyType)
-            )
-        , packageExposedFunDecl NDiffValue
-            [ markdown
-                ([ "The specific natural number `", n |> String.fromInt, "`" ]
-                    |> String.concat
-                )
-            ]
-            (nType (minAsDifferenceAndMaxType n))
-            (nX n)
-            []
-            (case
-                n
-                    |> intToPowersOf 2
-                    |> List.concatMap
-                        (\part ->
-                            List.repeat part.amount part.power
-                        )
-                    |> List.reverse
-             of
-                [] ->
-                    Generation.string "the number to generate for must be ≥ 1"
+        [ n |> typeAddNDeclaration Linear Dependency
+        , n |> typeNNDeclaration Linear Dependency
+        , n |> typeUpXDeclaration Linear
+        , n |> nNDeclaration Binary Dependency
+        ]
+    }
 
-                greatestPower :: smallerPowers ->
-                    let
-                        folding =
-                            case smallerPowers of
-                                [] ->
-                                    { initial = greatestPower - 1
-                                    , list = List.repeat 1 (greatestPower - 1)
-                                    }
 
-                                secondGreatestPower :: evenSmallerPowers ->
-                                    { initial = greatestPower
-                                    , list = secondGreatestPower :: evenSmallerPowers
-                                    }
-                    in
-                    folding.list
-                        |> List.map (\power -> 2 ^ power)
-                        |> List.foldl
-                            (\n10ToPower soFar ->
-                                applyBinOp
-                                    soFar
-                                    piper
-                                    (add n10ToPower)
-                            )
-                            (val (nX (2 ^ folding.initial)))
+nBinaryModule : Int -> Module NTag
+nBinaryModule n =
+    { name = [ "N", "Binary" ]
+    , roleInPackage =
+        PackageExposedModule
+            { moduleComment =
+                \declarations ->
+                    [ markdown "When you need big numbers or multiple medium sized ones"
+                    ]
+            }
+    , imports =
+        [ importStmt [ "N" ]
+            noAlias
+            (exposingExplicit
+                (aliasExpose [ "N", "In", "To", "Up", "N0", "Add1", "Add2", "Add4", "Add8", "Add16" ]
+                    ++ funExpose [ "n1", "n2", "n4", "n8", "n16", "add" ]
+                )
             )
+        , importStmt [ "Possibly" ]
+            noAlias
+            (exposingExplicit (aliasExpose [ "Possibly" ]))
+        ]
+    , declarations =
+        [ n |> typeAddNDeclaration Binary Dependency
+        , n |> typeNNDeclaration Binary Dependency
+        , n |> typeUpXDeclaration Binary
+        , n |> nNDeclaration Binary Dependency
         ]
     }
 
@@ -580,7 +607,10 @@ nLinearModule n =
 intToPowersOf : Int -> (Int -> List { power : Int, amount : Int })
 intToPowersOf power =
     intToAllPowersOf power
-        >> List.indexedMap (\multiple amount -> { power = multiple, amount = amount })
+        >> List.indexedMap
+            (\multiple amount ->
+                { power = multiple, amount = amount }
+            )
         >> List.filter (\part -> part.amount /= 0)
 
 
@@ -591,9 +621,8 @@ intToAllPowersOf power =
             []
 
         else
-            (::)
-                (int |> remainderBy power)
-                ((int // power) |> intToAllPowersOf power)
+            (int |> remainderBy power)
+                :: ((int // power) |> intToAllPowersOf power)
 
 
 

@@ -1,18 +1,179 @@
-### 24.1.0 plans
+### 33.1.0 plans
 
-  - `fuzzIn ( min, max ) : ... -> Fuzzer (N (In ...))` add
-      - currently waiting for `elm-test` major version 2
-        to avoid a major version bump as a result
   - `N.Generator` that auto-generates `N<x>`, `Add<x>` and `n<x>` for x >= 17 add
 
-### rejected
+# change log
 
-  - `N` name → `ℕ`, `Add<x>` name → `ℕ<x>𐊛`
-      - 👎 must be copied
-      - 👎 is confusing
-      - 👍 is readable
+#### 33.0.0
 
-# changelog
+  - `differenceToInt`, `exactly` remove
+  - `OnValue`, `InOnValue` remove
+  - `InOn min max` remove
+      - in favor of `In (On min) (On max)`
+  - -fromValue name → toOn, -toValue name → toNumber
+  - `onInfinity` remove
+  - `numberMinus1Map`, `onMinus1Map` name → `numberFrom1Map`, `onFrom1Map`
+  - `toAtLeast`, `toAtMost` remove
+      - in favor of `toIn`
+  - `minRange`, `inRange`, `exactlyRange` add
+  - `rangeSubtract`, `rangeMinToOn`, `rangeMinToNumber`, `rangeMinSubtract`, `rangeMinAtLeast1Never`, `rangeMin0Adapt`, `rangeMin`, `rangeMaxToOn`, `rangeMaxToNumber`, `rangeMaxAdd`, `rangeMax`, `rangeIsAtLeast1`, `rangeInToOn`, `rangeInToNumber`, `rangeAdd` add
+  - `toOn`, `onFrom1Map`, `numberFrom1Map` add
+
+## 32.0.0
+
+  - `Exactly`, `ExactlyValue` → `Exactly a = In a a`
+      - so `Exactly (On ...)`, `Exactly (OnValue ...)`
+      - more obvious, less types
+  - `MinFixedValue n = InOnValue `, `Min n = In n (On Infinity)`
+    → `Min n = In n (OnValue Infinity)`
+      - so `Min (On ...)`, `Min (OnValue ...)`
+      - less types, `On Infinity` is not necessary
+  - `Fixed`, `InFixed`, `FixedValue`, `InFixedValue`, `fixedInfinity`, `fixedToNumber`, `fixed0Adapt`, `fixedMinus1Map` , `fixedToValue`, `fixedFromValue`, `inFixedToValue`, `inFixedFromValue` name
+    → `On`, `InOn`, `OnValue`, `InOnValue`, `onInfinity`, `onToNumber`, `on0Adapt`, `onMinus1Map`, `onToValue`, `onFromValue`, `inOnToValue`, `inOnFromValue`
+      - shorter
+  - `minMinus1Never` name → `minAtLeast1Never`
+
+## 31.0.0
+
+  - `isAtLeast1` result min → `Up1 _` and correct
+
+### 30.2.0
+
+  - `minMinus1Never` add
+  - `numberMinus1Map`, `fixedMinus1Map` add
+
+### 30.1.0
+
+  - `isAtLeast1` add
+  - `min0Adapt` add
+  - `number0Adapt`, `fixed0Adapt` add
+
+## 30.0.0
+
+  - ```elm
+    { infinity : () }
+    ```
+    redefine as
+    ```elm
+    exposing (Infinity(..))
+    type Infinity
+        = Infinity
+    ```
+  - `Infinity`, `InfinityValue` remove
+      - in favor of `Fixed Infinity`, `FixedValue Infinity`
+  - `order` remove
+  - `MinValue` name → `MinFixedValue`
+  - `differenceInfinity` name → `fixedInfinity`
+  - `absoluteInt`, `modByInt`, `atLeastInt`, `inInt`, `isAtLeastInt`, `isInInt` name → `intToAbsolute`, `intModBy`, `intToAtLeast`, `intIn`, `intIsAtLeast`, `intIsIn`
+  - `in_`, `atLeast`, `atLeastMin`, `atMost` name → `toIn`, `toAtLeast`, `toAtLeastMin`, `toAtMost`
+      - subject first
+  - `minDown`, `maxUp` name → `minSubtract`, `maxAdd`
+      - consistent with `add`/`subtract` and `differenceAdd`/`differenceSubtract`
+  - `fixedToNumber` add
+
+### 29.1.0
+
+  - `order` add
+
+## 29.0.0
+
+  - `minAtLeast` name → `atLeastMin`
+  - `abs` name → `absoluteInt`
+      - consistent with `inInt`, `atLeastInt`, ...
+  - `Value`, `InValue` name → `FixedValue`, `InFixedValue`
+      - consistent with `ExactlyValue`, `MinValue`, `InfinityValue`
+  - `intAtLeast`, `intIn`, `intIsAtLeast`, `intIsIn`
+    name → `atLeastInt`, `inInt`, `isAtLeastInt`, `isInInt`
+  - `randomIn` name → `inRandom`
+      - consistent with `inFuzz`, `inFuzzUniform`
+  - `inFuzz ( lo, hi )`, `inFuzzUniform ( lo, hi )` add
+  - `modulusByInt` add
+
+## 28.0.0
+
+  - `N.atMost` remove
+      - type was impossible to set safely
+  - `N.minAtMost` → `atMost` with arguments without max infinity allowed
+
+## 27.0.0
+
+  - `N.atMost` type correct
+    ```elm
+    N (In (Fixed takenMin) takenMax)
+    -> N (In (Up minToTakenMin_ To takenMin) max_)
+    -> N (In (Fixed takenMin) takenMax)
+    ```
+    →
+    ```elm
+    N (In (Up upperLimitMinToMax_ To upperLimitMin) upperLimitMax)
+    -> N (In min (Fixed max))
+    -> N (In min upperLimitMax)
+    ```
+  - `N.minAtMost` add
+  - `N.intIn` upper limit maximum allowed to be more broad
+
+## 26.0.0
+
+  - `emptiness-typed`, `linear-direction` uses remove
+      - `until` is already in `module ArraySized`
+      - `smallest`, `greatest` remove
+          - in favor of `Stack.fold Up N.smaller/N.greater`
+  - `type N0able successorMinus1 n0PossiblyOrNever`
+    →
+    `N0OrAdd1 n0PossiblyOrNever successorMinus1`
+      - more readable and understandable
+  - `no-record-type-alias-constructor-function` dependency remove
+      - `type alias In ... = RecordWithoutConstructorFunction { ... }`
+        →
+        `type In ... = Range { ... }`
+  - `min`, `max` name → `minTo`, `maxTo`
+      - make obvious it sets absolute
+  - `maxNo` name → `maxToInfinity`
+      - to make obvious it sets absolute like `maxTo` but up to `Infinity`
+  - `minimumAsDifference`, `maximumAsDifference` name → `min`, `max`
+      - to be more consistent with `minTo`, `maxTo`, `maxToInfinity`, `minDown`, `maxUp`, `maxToValue`, `maxFromValue`, ...
+  - `valueToFixed`, `inValueToFixed` name → `fixedFromValue`, `inFixedFromValue`
+  - `div`, `mul`, `sub` name → `divideBy`, `multiplyBy`, `subtract`
+      - not aggressively common things should get descriptive names!
+  - `minAdd`, `minSub` name → `addMin`, `subtractMin`
+  - `upDifference`, `downDifference`, `differenceUp`, `differenceDown` name
+    → `addDifference`, `subtractDifference`, `differenceAdd`, `differenceSubtract`
+  - `Up0→16` add
+      - to improve result write- and readability
+  - `maxFromValue`, `maxToValue`, `minFromValue`, `minToValue` add
+  - ```elm
+    type alias Exactly n =
+        In (Fixed n) (Fixed n)
+    ```
+    →
+    ```elm
+    InFixed n n
+    ```
+
+### 25.3.0
+
+  - `smaller`, `greater` add
+
+### 25.2.0
+
+  - `toString` add
+  - `smallest`, `greatest` add
+
+### 25.1.0
+
+  - fixed `Value` types, conversions add
+      - not including functions
+  - `InFixed` add
+
+## 25.0.0
+
+  - `Difference` made opaque
+      - so that `toInt` can't be messed with
+  - `fixed` remove
+  - `MaxNo = Fixed { maximumUnknown : () }`
+    → `Infinity = Fixed { infinity : () }`
+  - `differenceToInt` add
+  - `specific` add
 
 ## 24.0.0
 

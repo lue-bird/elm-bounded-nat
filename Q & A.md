@@ -11,15 +11,12 @@ See the rule [`single-use-type-vars-end-with-underscore`](https://package.elm-la
 
 If you have questions, don't hesitate to ask (e.g. in slack (@lue lue.the.bird@gmail.com) or by starting a discussion in github)!
 
-### why all the `min`- versions?
+### why all the `...Min`- versions?
 
-Can't we define `MaxNo` so that it unifies with the other `Up low To (Add<x> low)` types?
+Can't we define `Infinity` so that it unifies with all other `Up` types?
 
     type alias Infinity =
         Add1 Infinity
-    
-    type alias MaxNo =
-        UpFixed Infinity
 
 but: elm doesn't like recursive aliases and rightfully so here
 because such a value is `Never` constructable.

@@ -219,7 +219,7 @@ forbiddenWords =
     , [ "TODO", "todo", "Todo", "to-do", "ToDo" ]
     , [ "- []" ]
     , [ "ToCheck", "to-check" ]
-    , [ "ToFix", "TOFIX" ]
+    , [ "TOFIX" ]
     , [ "FIXME", "fixme", "FixMe", "Fixme" ]
     ]
         |> List.concat
