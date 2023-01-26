@@ -24,13 +24,14 @@ module N exposing
     , maxTo, maxToInfinity, maxAdd
     , isAtLeast1
     , min0Adapt, minAtLeast1Never
+    , addStart
     , range, min, max
     , differenceAdd, differenceSubtract
     , addDifference, subtractDifference
     , N0OrAdd1(..)
     , inRange, minRange, exactlyRange
     , rangeMin, rangeMax
-    , rangeAdd, rangeMaxAdd, rangeMinSubtract, rangeSubtract
+    , rangeAdd, rangeMaxAdd, rangeAddStart, rangeMinSubtract, rangeSubtract
     , number0Adapt, numberFrom1Map
     , on0Adapt, onFrom1Map
     , rangeIsAtLeast1, rangeMin0Adapt, rangeMinAtLeast1Never
@@ -169,6 +170,7 @@ Having those exposed can be useful when building extensions to this library like
   - [`morph`](https://github.com/lue-bird/elm-morph)
   - [`bits`](https://dark.elm.dmy.fr/packages/lue-bird/elm-bits/latest/)
 
+@docs addStart
 @docs range, min, max
 @docs differenceAdd, differenceSubtract
 @docs addDifference, subtractDifference
@@ -180,7 +182,7 @@ Having those exposed can be useful when building extensions to this library like
 
 @docs inRange, minRange, exactlyRange
 @docs rangeMin, rangeMax
-@docs rangeAdd, rangeMaxAdd, rangeMinSubtract, rangeSubtract
+@docs rangeAdd, rangeMaxAdd, rangeAddStart, rangeMinSubtract, rangeSubtract
 
 
 ## [allowable-state](https://dark.elm.dmy.fr/packages/lue-bird/elm-allowable-state/latest/)
@@ -538,7 +540,7 @@ differenceAdd differenceMiddleToHigh =
             }
 
 
-{-| Chain the [difference](#Up) [`Down`](#Down) to a lower [natural number](#N0OrAdd1)
+{-| Chain the [difference](#Up) [`Down`](#Down) to a lower [number](#N0OrAdd1)
 -}
 differenceSubtract :
     Down high To middle
@@ -2318,10 +2320,6 @@ range =
     \n -> n |> toRecord |> .range
 
 
-
---
-
-
 {-| The smallest allowed number promised by the range type
 as its representation as a [difference](#Up)
 -}
@@ -2510,6 +2508,116 @@ n16 =
 
 
 --
+
+
+{-| [Add](#add) another [`N`](#N),
+but instead of increasing the high ends of the range's bounds' [differences](#Up),
+we decrease the low starts of the range's bounds' [differences](#Up)
+
+    n3
+        --: N (In (Up3 (Add2 minX_)) (Up3 (Add2 maxX_)))
+        |> N.addStart n2
+    --: N (In (Up5 minX_) (Up5 maxX_))
+
+Huh... One rare use-case is avoiding an extra type parameter:
+
+With extra type parameter:
+
+    {-| Gives each index a label. Access using `partIn`
+    -}
+    type alias Group record lastIndex count =
+        { record : record
+        , parts : ArraySized String (Exactly (On count))
+        , lastIndex : N (In (On N0) lastIndex)
+        }
+
+    addPart :
+        String
+        ->
+            (Group
+                (N (In (On N0) (Up x To lastIndexPlusX)) -> record)
+                (Up x To lastIndexPlusX)
+                count
+             -> Group record (Up x To (Add1 lastIndexPlusX)) (Add1 count)
+            )
+    addPart partName groupSoFar =
+        { record = groupSoFar.record groupSoFar.lastIndex
+        , parts = groupSoFar.parts |> ArraySized.push partName
+        , lastIndex = groupSoFar.lastIndex |> N.add n1
+        }
+
+    partIn :
+        Group record i_ (Add1 lastIndex)
+        -> (record -> N (In (On N0) (Up x_ To lastIndex)))
+        -> String
+    partIn group field =
+        group.parts |> ArraySized.element ( Up, group.record |> field )
+
+If we change `Group record lastIndex count` to keep only one of both, we have a problem:
+All indexes in the `record` are dependent on the same maximum which now is [`On`](#On).
+That means that lower indexes aren't accepted by `partIn` anymore. The fix:
+
+    addPart :
+        String
+        ->
+            (GroupBeingBuilt
+                (N (In (On N0) (Up (Add1 xFrom1) To lastIndex)) -> record)
+                (Up (Add1 xFrom1) To lastIndex)
+                count
+             -> GroupBeingBuilt record (Up xFrom1 To lastIndex) (Add1 count)
+            )
+    addPart partName groupSoFar =
+        { record = groupSoFar.record groupSoFar.lastIndex
+        , parts = groupSoFar.parts |> ArraySized.push partName
+        , lastIndex = groupSoFar.lastIndex |> N.minTo n0 |> N.addStart n1 |> N.minTo n0
+        }
+
+    type alias GroupComplete record count =
+        Group record (On count) count
+
+The really nice thing is that as we finish, the start of [minimum difference](#min) is `N0`,
+which makes this an [`On`](#On)
+
+-}
+addStart :
+    N (In (Down minX To minXDecreased) (Down maxX To maxXDecreased))
+    ->
+        (N (In (Up minX To minPlusX) (Up maxX To maxPlusX))
+         -> N (In (Up minXDecreased To minPlusX) (Up maxXDecreased To maxPlusX))
+        )
+addStart increase =
+    \n ->
+        NUnsafe
+            { range = n |> range |> rangeAddStart (increase |> range)
+            , int = (n |> toInt) + (increase |> toInt)
+            }
+
+
+{-| [Add](#rangeAdd) another [range](#In),
+but instead of increasing the high ends of the range's bounds' [differences](#Up),
+we decrease the low starts of the range's bounds' [differences](#Up)
+
+    n3
+        |> N.range
+        --: In (Up3 (Add2 minX_)) (Up3 (Add2 maxX_))
+        |> N.rangeAddStart (n2 |> N.range)
+    --: In (Up5 minX_) (Up5 maxX_)
+
+See [`addStart`](#addStart) for details and examples
+
+-}
+rangeAddStart :
+    In (Down minX To minXDecreased) (Down maxX To maxXDecreased)
+    ->
+        (In (Up minX To minPlusX) (Up maxX To maxPlusX)
+         -> In (Up minXDecreased To minPlusX) (Up maxXDecreased To maxPlusX)
+        )
+rangeAddStart increase =
+    \range_ ->
+        RangeUnsafe
+            { min = increase |> rangeMin |> differenceAdd (range_ |> rangeMin)
+            , max = increase |> rangeMax |> differenceAdd (range_ |> rangeMax)
+            }
 
 
 {-| Base type of [`N0`](#N0), [`Add1 n`](#Add1) following [`allowable-state`](https://dark.elm.dmy.fr/packages/lue-bird/elm-allowable-state/latest/):
