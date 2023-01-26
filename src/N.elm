@@ -20,18 +20,17 @@ module N exposing
     , inToNumber, inToOn
     , minToNumber, minToOn
     , maxToNumber, maxToOn
-    , minTo, minSubtract
-    , maxTo, maxToInfinity, maxAdd
+    , minTo, minSubtract, minEndsSubtract
+    , maxTo, maxToInfinity, maxAdd, maxEndsSubtract
     , isAtLeast1
     , min0Adapt, minAtLeast1Never
-    , addStart
     , range, min, max
     , differenceAdd, differenceSubtract
     , addDifference, subtractDifference
     , N0OrAdd1(..)
     , inRange, minRange, exactlyRange
     , rangeMin, rangeMax
-    , rangeAdd, rangeMaxAdd, rangeAddStart, rangeMinSubtract, rangeSubtract
+    , rangeAdd, rangeSubtract, rangeMinSubtract, rangeMaxAdd, rangeMinEndsSubtract, rangeMaxEndsSubtract
     , number0Adapt, numberFrom1Map
     , on0Adapt, onFrom1Map
     , rangeIsAtLeast1, rangeMin0Adapt, rangeMinAtLeast1Never
@@ -136,8 +135,8 @@ More advanced stuff in [section type information ) allowable-state](#allowable-s
 
 # type information
 
-@docs minTo, minSubtract
-@docs maxTo, maxToInfinity, maxAdd
+@docs minTo, minSubtract, minEndsSubtract
+@docs maxTo, maxToInfinity, maxAdd, maxEndsSubtract
 
 
 ## allowable-state
@@ -170,7 +169,6 @@ Having those exposed can be useful when building extensions to this library like
   - [`morph`](https://github.com/lue-bird/elm-morph)
   - [`bits`](https://dark.elm.dmy.fr/packages/lue-bird/elm-bits/latest/)
 
-@docs addStart
 @docs range, min, max
 @docs differenceAdd, differenceSubtract
 @docs addDifference, subtractDifference
@@ -182,7 +180,7 @@ Having those exposed can be useful when building extensions to this library like
 
 @docs inRange, minRange, exactlyRange
 @docs rangeMin, rangeMax
-@docs rangeAdd, rangeMaxAdd, rangeAddStart, rangeMinSubtract, rangeSubtract
+@docs rangeAdd, rangeSubtract, rangeMinSubtract, rangeMaxAdd, rangeMinEndsSubtract, rangeMaxEndsSubtract
 
 
 ## [allowable-state](https://dark.elm.dmy.fr/packages/lue-bird/elm-allowable-state/latest/)
@@ -2510,12 +2508,34 @@ n16 =
 --
 
 
-{-| [Add](#add) another [`N`](#N),
-but instead of increasing the high ends of the range's bounds' [differences](#Up),
-we decrease the low starts of the range's bounds' [differences](#Up)
+{-| Decrease the start and end of its [`min`](#min) [difference](#Up)
 
     n3
-        --: N (In (Up3 (Add2 minX_)) (Up3 (Add2 maxX_)))
+        --: N (In (Up3 (Add2 minX_)) (Up3 maxX_))
+        |> N.minEndsSubtract n2
+    --: N (In (Up5 minX_) (Up5 maxX_))
+
+[`maxEndsSubtract`](#maxEndsSubtract) has an example of where this can be useful.
+
+-}
+minEndsSubtract :
+    N (In (Down minX To minXDecreased) (Down minPlusX To minPlusXDecreased))
+    ->
+        (N (In (Up minX To minPlusX) max)
+         -> N (In (Up minXDecreased To minPlusXDecreased) max)
+        )
+minEndsSubtract decrease =
+    \n ->
+        NUnsafe
+            { range = n |> range |> rangeMinEndsSubtract (decrease |> range)
+            , int = n |> toInt
+            }
+
+
+{-| Decrease the start and end of its [`max`](#max) [difference](#Up)
+
+    n3
+        --: N (In (Up3 minX_) (Up3 (Add2 maxX_)))
         |> N.addStart n2
     --: N (In (Up5 minX_) (Up5 maxX_))
 
@@ -2569,7 +2589,7 @@ That means that lower indexes aren't accepted by `partIn` anymore. The fix:
     addPart partName groupSoFar =
         { record = groupSoFar.record groupSoFar.lastIndex
         , parts = groupSoFar.parts |> ArraySized.push partName
-        , lastIndex = groupSoFar.lastIndex |> N.minTo n0 |> N.addStart n1 |> N.minTo n0
+        , lastIndex = groupSoFar.lastIndex |> N.add n1 |> N.maxEndsSubtract n1 |> N.minTo n0
         }
 
     type alias GroupComplete record count =
@@ -2579,44 +2599,87 @@ The really nice thing is that as we finish, the start of [minimum difference](#m
 which makes this an [`On`](#On)
 
 -}
-addStart :
-    N (In (Down minX To minXDecreased) (Down maxX To maxXDecreased))
+maxEndsSubtract :
+    N (In (Down maxPlusX To maxPlusXDecreased) (Down maxX To maxXDecreased))
     ->
-        (N (In (Up minX To minPlusX) (Up maxX To maxPlusX))
-         -> N (In (Up minXDecreased To minPlusX) (Up maxXDecreased To maxPlusX))
+        (N (In min (Up maxX To maxPlusX))
+         -> N (In min (Up maxXDecreased To maxPlusXDecreased))
         )
-addStart increase =
+maxEndsSubtract decrease =
     \n ->
         NUnsafe
-            { range = n |> range |> rangeAddStart (increase |> range)
-            , int = (n |> toInt) + (increase |> toInt)
+            { range = n |> range |> rangeMaxEndsSubtract (decrease |> range)
+            , int = n |> toInt
             }
 
 
-{-| [Add](#rangeAdd) another [range](#In),
-but instead of increasing the high ends of the range's bounds' [differences](#Up),
-we decrease the low starts of the range's bounds' [differences](#Up)
+{-| Decrease the start and end of its [`rangeMin`](#rangeMin) [difference](#Up)
 
     n3
         |> N.range
-        --: In (Up3 (Add2 minX_)) (Up3 (Add2 maxX_))
-        |> N.rangeAddStart (n2 |> N.range)
+        --: In (Up3 (Add2 minX_)) (Up3 maxX_)
+        |> N.rangeMinEndsSubtract (n2 |> N.range)
     --: In (Up5 minX_) (Up5 maxX_)
 
-See [`addStart`](#addStart) for details and examples
+See [`maxEndsSubtract`](#maxEndsSubtract) for details and examples
 
 -}
-rangeAddStart :
-    In (Down minX To minXDecreased) (Down maxX To maxXDecreased)
+rangeMinEndsSubtract :
+    In (Down minX To minXDecreased) (Down minPlusX To minPlusXDecreased)
     ->
-        (In (Up minX To minPlusX) (Up maxX To maxPlusX)
-         -> In (Up minXDecreased To minPlusX) (Up maxXDecreased To maxPlusX)
+        (In (Up minX To minPlusX) max
+         -> In (Up minXDecreased To minPlusXDecreased) max
         )
-rangeAddStart increase =
+rangeMinEndsSubtract decrease =
     \range_ ->
         RangeUnsafe
-            { min = increase |> rangeMin |> differenceAdd (range_ |> rangeMin)
-            , max = increase |> rangeMax |> differenceAdd (range_ |> rangeMax)
+            { min =
+                let
+                    minXToMinPlusXDecreased : Up minX To minPlusXDecreased
+                    minXToMinPlusXDecreased =
+                        range_
+                            |> rangeMin
+                            |> differenceSubtract (decrease |> rangeMax)
+                in
+                decrease
+                    |> rangeMin
+                    |> differenceAdd minXToMinPlusXDecreased
+            , max = range_ |> rangeMax
+            }
+
+
+{-| Decrease the start and end of its [`rangeMax`](#rangeMax) [difference](#Up)
+
+    n3
+        |> N.range
+        --: In (Up3 minX_) (Up3 (Add2 maxX_))
+        |> N.rangeMaxEndsSubtract (n2 |> N.range)
+    --: In (Up5 minX_) (Up5 maxX_)
+
+See [`maxEndsSubtract`](#maxEndsSubtract) for details and examples
+
+-}
+rangeMaxEndsSubtract :
+    In (Down maxPlusX To maxPlusXDecreased) (Down maxX To maxXDecreased)
+    ->
+        (In min (Up maxX To maxPlusX)
+         -> In min (Up maxXDecreased To maxPlusXDecreased)
+        )
+rangeMaxEndsSubtract decrease =
+    \range_ ->
+        RangeUnsafe
+            { min = range_ |> rangeMin
+            , max =
+                let
+                    maxXToMaxPlusXDecreased : Up maxX To maxPlusXDecreased
+                    maxXToMaxPlusXDecreased =
+                        range_
+                            |> rangeMax
+                            |> differenceSubtract (decrease |> rangeMin)
+                in
+                decrease
+                    |> rangeMax
+                    |> differenceAdd maxXToMaxPlusXDecreased
             }
 
 

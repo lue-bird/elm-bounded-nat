@@ -4,7 +4,11 @@
 
 # change log
 
-#### 33.0.0
+### 33.1.0
+
+  - `minEndsSubtract`, `maxEndsSubtract`, `rangeMinEndsSubtract`, `rangeMaxEndsSubtract` add
+
+## 33.0.0
 
   - `differenceToInt`, `exactly` remove
   - `OnValue`, `InOnValue` remove
