@@ -213,7 +213,7 @@ import Random
     N (Min (Up4 x_))
 
     -- 2 ≤ n ≤ 12
-    N (In (Up2 minX_)) (Up12 maxX_))
+    N (In (Up2 minX_) (Up12 maxX_))
 
     -- n3 :
     N (In (Up3 minX_) (Up3 maxX_))
@@ -227,7 +227,7 @@ Consider the "[`Up`](#Up)" thing an implementation detail
         |> N.multiplyBy n5
         --: N (Min (Up9 minX_))
         |> N.remainderBy n4
-        --: N (In (Up0 minX_) (Up2 maxX_))
+        --: N (In (Up0 minX_) (Up3 maxX_))
         |> N.inToNumber
     --: N (In N0 N3)
     --> n1 |> N.minTo n0 |> N.maxTo n3 |> N.inToNumber
@@ -2792,7 +2792,7 @@ numberFrom1Map from1Map =
                 Stack.topBelow
                     toRepeat
                     (List.repeat
-                        (lengthAtLeast1 |> N.sub n1 |> N.toInt)
+                        (lengthAtLeast1 |> N.subtract n1 |> N.toInt)
                         toRepeat
                     )
 
