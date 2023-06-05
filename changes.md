@@ -4,6 +4,10 @@
 
 # change log
 
+#### 33.1.1
+
+  - documentation correct
+
 ### 33.1.0
 
   - `minEndsSubtract`, `maxEndsSubtract`, `rangeMinEndsSubtract`, `rangeMaxEndsSubtract` add
