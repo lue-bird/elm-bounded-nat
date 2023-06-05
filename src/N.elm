@@ -20,7 +20,7 @@ module N exposing
     , inToNumber, inToOn
     , minToNumber, minToOn
     , maxToNumber, maxToOn
-    , minTo, minSubtract, minEndsSubtract
+    , minTo, minSubtract, minEndsSubtract, minTo0
     , maxTo, maxToInfinity, maxAdd, maxEndsSubtract
     , isAtLeast1
     , min0Adapt, minAtLeast1Never
@@ -28,7 +28,7 @@ module N exposing
     , differenceAdd, differenceSubtract
     , addDifference, subtractDifference
     , N0OrAdd1(..)
-    , inRange, minRange, exactlyRange
+    , inRange, minRange, maxRange, exactlyRange
     , rangeMin, rangeMax
     , rangeAdd, rangeSubtract, rangeMinSubtract, rangeMaxAdd, rangeMinEndsSubtract, rangeMaxEndsSubtract
     , number0Adapt, numberFrom1Map
@@ -135,7 +135,7 @@ More advanced stuff in [section type information ) allowable-state](#allowable-s
 
 # type information
 
-@docs minTo, minSubtract, minEndsSubtract
+@docs minTo, minSubtract, minEndsSubtract, minTo0
 @docs maxTo, maxToInfinity, maxAdd, maxEndsSubtract
 
 
@@ -178,7 +178,7 @@ Having those exposed can be useful when building extensions to this library like
 
 ## ranges
 
-@docs inRange, minRange, exactlyRange
+@docs inRange, minRange, maxRange, exactlyRange
 @docs rangeMin, rangeMax
 @docs rangeAdd, rangeSubtract, rangeMinSubtract, rangeMaxAdd, rangeMinEndsSubtract, rangeMaxEndsSubtract
 
@@ -649,6 +649,16 @@ rangeMinSubtract minRelativeDecrease =
                     |> differenceSubtract minRelativeDecrease
             , max = range_ |> rangeMax
             }
+
+
+{-| Create a range with minimum set to 0 and a given maximum
+-}
+maxRange : max -> In (Up0 newMinX_) max
+maxRange newRangeMax =
+    RangeUnsafe
+        { min = n0 |> min
+        , max = newRangeMax
+        }
 
 
 {-| Add a given [difference](#Up) to its maximum
@@ -2528,6 +2538,18 @@ minEndsSubtract decrease =
     \n ->
         NUnsafe
             { range = n |> range |> rangeMinEndsSubtract (decrease |> range)
+            , int = n |> toInt
+            }
+
+
+{-| Set the minimum as 0, without relying on the minimum being [fixed](#On)
+like the more general [`minTo`](#minTo)
+-}
+minTo0 : N (In min_ max) -> N (In (Up0 minX_) max)
+minTo0 =
+    \n ->
+        NUnsafe
+            { range = maxRange (n |> max)
             , int = n |> toInt
             }
 
