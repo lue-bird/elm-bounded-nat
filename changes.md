@@ -42,7 +42,7 @@ To me this alone is sadly worth the extra convenience cost;
 for many this might not be the case.
 
 `ProvenAndDiscarded` provides an interface
-that meets barely compromises on safety
+that barely compromises on safety
 despite using phantom types,
 so that wouldn't have been a problem.
 
