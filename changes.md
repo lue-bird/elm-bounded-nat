@@ -4,6 +4,48 @@
 
 # change log
 
+## 34.0.0
+
+This branch is an attempt to replace the difference type `Up`
+with a phantom type version for better performance and to avoid
+about 15 helpers that convert to the number versions.
+
+Suggested by @minibill (thanks!)
+
+What makes this mostly a failure in my book?
+
+```elm
+isAtLeast1 :
+    N (In (On (N0OrAdd1 n0PossiblyOrNever minFrom1_)) max)
+    -> Result n0PossiblyOrNever (N (In (Up1 minX_) max))
+```
+This beautiful helper which has grown dear to my heart can't be implemented.
+It allows safe implementations of passing non-empty-ability between
+the `ArraySized`, `N`, ... world and the `Stack`, `Emptiable`, `KeysSet`, ... world
+
+For example
+```elm
+repeat :
+    element
+    -> N (In (On (N0OrAdd1 n0PossiblyOrNever minFrom1_)) max_)
+    -> Emptiable (Stacked element) n0PossiblyOrNever
+repeat toRepeat howOften =
+    case howOften |> N.isAtLeast1 of
+        Err possiblyOrNever ->
+            Emptiable.Empty possiblyOrNever
+        Ok howOftenAtLeast1 ->
+            Stack.topBelow toRepeat
+                (List.repeat ((howOftenAtLeast1 |> N.toInt) - 1) toRepeat)
+```
+
+To me this alone is sadly worth the extra convenience cost;
+for many this might not be the case.
+
+`ProvenAndDiscarded` provides an interface
+that meets barely compromises on safety
+despite using phantom types,
+so that wouldn't have been a problem.
+
 ### 33.2.0
 
   - `minTo0`, `maxRange` add
