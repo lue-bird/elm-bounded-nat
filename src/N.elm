@@ -1,7 +1,7 @@
 module N exposing
     ( N
-    , In, Min, Infinity(..), Exactly
-    , On, Up(..), To(..), Down
+    , In, Min, Infinity, Exactly
+    , On, Up, To(..), Down
     , inRandom, inFuzz, inFuzzUniform
     , N0, N1, N2, N3, N4, N5, N6, N7, N8, N9, N10, N11, N12, N13, N14, N15, N16
     , Add1, Add2, Add3, Add4, Add5, Add6, Add7, Add8, Add9, Add10, Add11, Add12, Add13, Add14, Add15, Add16
@@ -17,16 +17,12 @@ module N exposing
     , BelowOrAbove(..), is, isIn
     , greater, smaller
     , toInt, toFloat, toString
-    , inToNumber, inToOn
-    , minToNumber, minToOn
-    , maxToNumber, maxToOn
     , minTo, minSubtract, minEndsSubtract, minTo0
     , maxTo, maxToInfinity, maxAdd, maxEndsSubtract
     , isAtLeast1
     , min0Adapt, minAtLeast1Never
     , range, min, max
     , differenceAdd, differenceSubtract
-    , addDifference, subtractDifference
     , N0OrAdd1(..)
     , inRange, minRange, maxRange, exactlyRange
     , rangeMin, rangeMax
@@ -35,9 +31,6 @@ module N exposing
     , on0Adapt, onFrom1Map
     , rangeIsAtLeast1, rangeMin0Adapt, rangeMinAtLeast1Never
     , onToNumber, toOn
-    , rangeInToNumber, rangeInToOn
-    , rangeMinToNumber, rangeMinToOn
-    , rangeMaxToNumber, rangeMaxToOn
     )
 
 {-| Natural number within a typed range
@@ -118,7 +111,7 @@ exact [⏭ skip to last](#n16)
 @docs BelowOrAbove, is, isIn
 @docs greater, smaller
 
-More advanced stuff in [section type information ) allowable-state](#allowable-state)
+More advanced stuff in [section type information](#type-information) allowable-state](#allowable-state)
 
 
 # transform
@@ -201,6 +194,7 @@ Having those exposed can be useful when building extensions to this library like
 
 import Fuzz exposing (Fuzzer)
 import Possibly exposing (Possibly(..))
+import ProvenAndDiscarded exposing (ProvenAndDiscarded)
 import Random
 
 
@@ -458,10 +452,11 @@ type alias Exactly representation =
 
 {-| `Up low To high`: a specific number represented as the difference `high - low`
 -}
-type Up lowNumber toTag highNumber
-    = Difference
+type alias Up lowNumber toTag highNumber =
+    ProvenAndDiscarded
         { up : lowNumber -> highNumber
         , down : highNumber -> lowNumber
+        , toTag : toTag
         }
 
 
@@ -473,45 +468,12 @@ Used in the definition of [`Min`](#Min)
         In minimum Infinity
 
 -}
-type Infinity
-    = Infinity
+type alias Infinity =
+    On { infinity : () }
 
 
 
 -- difference
-
-
-{-| Increase a [number](#N0OrAdd1) by a given [difference](#Up)
-
-    successor : n -> Add1 n
-    successor =
-        -- FYI: equivalent to Add1
-        N.addDifference (n1 |> N.min)
-
-    n10 |> N.min |> successor
-    --> n11 |> min
-
--}
-addDifference : Up low To high -> (low -> high)
-addDifference =
-    \(Difference differenceOperation) ->
-        differenceOperation.up
-
-
-{-| Decrease the [natural number](#N0OrAdd1) by a given [difference](#Down)
-
-    predecessor : Add1 predecessor -> predecessor
-    predecessor =
-        N.subtractDifference (n1 |> N.min)
-
-    n10 |> N.min |> predecessor
-    --> n9 |> min
-
--}
-subtractDifference : Down high To low -> (high -> low)
-subtractDifference =
-    \(Difference differenceOperation) ->
-        differenceOperation.down
 
 
 {-| Chain the [difference](#Up) [`Up`](#Up) to a higher [natural number](#N0OrAdd1)
@@ -524,18 +486,23 @@ differenceAdd :
         )
 differenceAdd differenceMiddleToHigh =
     \diffLowToMiddle ->
-        Difference
-            { up =
-                \difference ->
-                    difference
-                        |> addDifference diffLowToMiddle
-                        |> addDifference differenceMiddleToHigh
-            , down =
-                \difference ->
-                    difference
-                        |> subtractDifference differenceMiddleToHigh
-                        |> subtractDifference diffLowToMiddle
-            }
+        diffLowToMiddle
+            |> ProvenAndDiscarded.and differenceMiddleToHigh
+            |> ProvenAndDiscarded.map
+                (\( lowToMiddle, middleToHigh ) ->
+                    { up =
+                        \difference ->
+                            difference
+                                |> .up lowToMiddle
+                                |> .up middleToHigh
+                    , toTag = To
+                    , down =
+                        \difference ->
+                            difference
+                                |> .down middleToHigh
+                                |> .down lowToMiddle
+                    }
+                )
 
 
 {-| Chain the [difference](#Up) [`Down`](#Down) to a lower [number](#N0OrAdd1)
@@ -548,18 +515,23 @@ differenceSubtract :
         )
 differenceSubtract differenceMiddleToHigh =
     \diffLowToHigh ->
-        Difference
-            { up =
-                \difference ->
-                    difference
-                        |> addDifference diffLowToHigh
-                        |> subtractDifference differenceMiddleToHigh
-            , down =
-                \difference ->
-                    difference
-                        |> addDifference differenceMiddleToHigh
-                        |> subtractDifference diffLowToHigh
-            }
+        diffLowToHigh
+            |> ProvenAndDiscarded.and differenceMiddleToHigh
+            |> ProvenAndDiscarded.map
+                (\( lowToHigh, middleToHigh ) ->
+                    { up =
+                        \difference ->
+                            difference
+                                |> .up lowToHigh
+                                |> .down middleToHigh
+                    , toTag = To
+                    , down =
+                        \difference ->
+                            difference
+                                |> .up middleToHigh
+                                |> .down lowToHigh
+                    }
+                )
 
 
 {-| Create a [range](#In) with a given representation = minimum = maximum
@@ -589,7 +561,7 @@ minRange =
     \lowestPossible ->
         RangeUnsafe
             { min = lowestPossible
-            , max = Infinity
+            , max = toOn { infinity = () }
             }
 
 
@@ -766,89 +738,35 @@ rangeMinAtLeast1Never =
 -}
 rangeIsAtLeast1 :
     N (In (On (N0OrAdd1 n0PossiblyOrNever minFrom1_)) max)
-    -> Result n0PossiblyOrNever (In (Up1 minX_) max)
+    -> ProvenAndDiscarded (Result n0PossiblyOrNever (In (Up1 minX_) max))
 rangeIsAtLeast1 =
     \n ->
-        case n |> min |> onToNumber of
-            N0 possiblyOrNever ->
-                case n |> isAtLeast n1 of
-                    Err _ ->
-                        possiblyOrNever |> Err
+        n
+            |> min
+            |> onToNumber
+            |> ProvenAndDiscarded.map
+                (\minNumber ->
+                    case minNumber of
+                        N0 possiblyOrNever ->
+                            case n |> isAtLeast n1 of
+                                Err _ ->
+                                    possiblyOrNever |> Err
 
-                    Ok atLeast1 ->
-                        atLeast1 |> range |> Ok
+                                Ok atLeast1 ->
+                                    atLeast1 |> range |> Ok
 
-            Add1 _ ->
-                -- unsatisfying :(
-                RangeUnsafe
-                    { min = n1 |> min
-                    , max = n |> max
-                    }
-                    |> Ok
-
-
-{-| [`In`](#In) [`(On ...) (On ...)`](#On) → equatable [`In`](#In)
--}
-rangeInToNumber : In (On min) (On max) -> In min max
-rangeInToNumber =
-    \range_ ->
-        range_ |> rangeMinToNumber |> rangeMaxToNumber
-
-
-{-| Make [range](#In)'s [`On`](#On) minimum equatable
--}
-rangeMinToNumber : In (On min) max -> In min max
-rangeMinToNumber =
-    \range_ ->
-        RangeUnsafe
-            { min = range_ |> rangeMin |> onToNumber
-            , max = range_ |> rangeMax
-            }
-
-
-{-| Make [range](#In)'s [`On`](#On) maximum equatable
--}
-rangeMaxToNumber : In min (On max) -> In min max
-rangeMaxToNumber =
-    \range_ ->
-        RangeUnsafe
-            { min = range_ |> rangeMin
-            , max = range_ |> rangeMax |> onToNumber
-            }
-
-
-{-| equatable [`In`](#In) → [`In`](#In) [`(On ...) (On ...)`](#On)
--}
-rangeInToOn : In min max -> In (On min) (On max)
-rangeInToOn =
-    \range_ ->
-        range_ |> rangeMinToOn |> rangeMaxToOn
-
-
-{-| Make [range](#In)'s equatable minimum [`On`](#On)
--}
-rangeMinToOn : In min max -> In (On min) max
-rangeMinToOn =
-    \range_ ->
-        RangeUnsafe
-            { min = range_ |> rangeMin |> toOn
-            , max = range_ |> rangeMax
-            }
+                        Add1 _ ->
+                            -- unsatisfying :(
+                            RangeUnsafe
+                                { min = n1 |> min
+                                , max = n |> max
+                                }
+                                |> Ok
+                )
 
 
 
 -- range compare
-
-
-{-| Make [range](#In)'s equatable maximum [`On`](#On)
--}
-rangeMaxToOn : In min max -> In min (On max)
-rangeMaxToOn =
-    \range_ ->
-        RangeUnsafe
-            { min = range_ |> rangeMin
-            , max = range_ |> rangeMax |> toOn
-            }
 
 
 {-| The [`N0OrAdd1`](#N0OrAdd1) represented by this [`On`](#On) [difference](#Up)
@@ -894,10 +812,10 @@ Can be altered with [`addDifference`](#addDifference), [`subtractDifference`](#s
 To preserve the ability to turn the number into an `Int`, use [`onToNumber`](#onToNumber)
 
 -}
-onToNumber : On representedNumber -> representedNumber
+onToNumber : On representedNumber -> ProvenAndDiscarded representedNumber
 onToNumber =
     \on_ ->
-        N0 Possible |> addDifference on_
+        on_ |> ProvenAndDiscarded.map (\diff -> diff.up (N0 Possible))
 
 
 {-| equatable number → [`On`](#On)
@@ -905,90 +823,10 @@ onToNumber =
 toOn : asNumber -> On asNumber
 toOn =
     \number ->
-        Difference
+        ProvenAndDiscarded.from
             { up = \_ -> number
+            , toTag = To
             , down = \_ -> N0 Possible
-            }
-
-
-
--- range On
-
-
-{-| Number with [`On`](#On) [range](#In) → number with equatable [range](#In)
-
-If you want an equatable `Min ...` [`N`](#N), you instead only need [`minToNumber`](#minToNumber)
-
--}
-inToNumber : N (In (On min) (On max)) -> N (In min max)
-inToNumber =
-    \n ->
-        n |> minToNumber |> maxToNumber
-
-
-{-| [`N`](#N) with [`On`](#On) minimum
-→ [`N`](#N) with equatable minimum number
-
-You'll usually use this to convert to an equatable `Min ...` [`N`](#N)
-
--}
-minToNumber : N (In (On min) max) -> N (In min max)
-minToNumber =
-    \n ->
-        NUnsafe
-            { int = n |> toInt
-            , range = n |> range |> rangeMinToNumber
-            }
-
-
-{-| [`N`](#N) with [`On`](#On) maximum
-→ [`N`](#N) with equatable maximum number
--}
-maxToNumber : N (In min (On max)) -> N (In min max)
-maxToNumber =
-    \n ->
-        NUnsafe
-            { int = n |> toInt
-            , range = n |> range |> rangeMaxToNumber
-            }
-
-
-{-| [`N`](#N) with equatable number [range](#In)
-→ [`N`](#N) with [`On`](#On) [range](#In) to be [altered](#alter), [compared](#compare), ...
-
-If you want a `Min (On ...)` [`N`](#N), you instead only need [`minToOn`](#minToOn)
-
--}
-inToOn : N (In min max) -> N (In (On min) (On max))
-inToOn =
-    \n ->
-        n |> minToOn |> maxToOn
-
-
-{-| [`N`](#N) with equatable minimum number
-→ [`N`](#N) with [`On`](#On) minimum
-
-You'll usually use this to convert to a `Min (On ...)` [`N`](#N)
-
--}
-minToOn : N (In min max) -> N (In (On min) max)
-minToOn =
-    \n ->
-        NUnsafe
-            { int = n |> toInt
-            , range = n |> range |> rangeMinToOn
-            }
-
-
-{-| [`N`](#N) with an equatable maximum number
-→ [`N`](#N) with [`On`](#On) maximum
--}
-maxToOn : N (In min max) -> N (In min (On max))
-maxToOn =
-    \n ->
-        NUnsafe
-            { int = n |> toInt
-            , range = n |> range |> rangeMaxToOn
             }
 
 
@@ -1012,7 +850,7 @@ type alias Down high toTag low =
 
 -}
 type To
-    = To Never
+    = To
 
 
 {-| The fixed [difference](#Up) from [`0`](#N0) to a given [number](#N0OrAdd1) `n`
@@ -1026,27 +864,7 @@ You'll find this either to require a certain minimum
 Or in a stored type, which looks like a [result type](#result-type)
 where every [`Up<n> x`](#Up) is instead [`On N<n>`](#On)
 
-Do not use `==` on 2 numbers in a [`On`](#On) [range](#In).
-It will lead to elm crashing because [difference](#Up)s are stored as functions internally.
-
-Instead, [compare](#compare) in _your_ code
-or convert to a value for _other_ code:
-
-Not storing functions etc. in app state, events, ... enables
-
-  - serializability, for example
-      - json import/export on the debugger → doesn't work
-  - calling `==`, for example
-      - on hot module reloading,
-        old code might end up remaining in the model
-      - [lamdera](https://www.lamdera.com/) → doesn't work
-      - accidental `==` call → crash
-
-Calling `==` on a value will yield the correct result instead of crashing
-
-[`On` is defined as a difference from 0](#On), so this independent type needed to be created
-
-You can just use [`On`](#On) when you don't have disadvantages storing functions
+[`On` is defined as a difference from 0](#Up0), so this independent type needed to be created
 
 -}
 type alias On asNumber =
@@ -2364,8 +2182,9 @@ range0 =
 
 up0 : Up0 x_
 up0 =
-    Difference
+    ProvenAndDiscarded.from
         { up = identity
+        , toTag = To
         , down = identity
         }
 
@@ -2388,8 +2207,9 @@ range1 =
 
 up1 : Up1 x_
 up1 =
-    Difference
+    ProvenAndDiscarded.from
         { up = Add1
+        , toTag = To
         , down = numberSubtract1
         }
 
@@ -2735,15 +2555,17 @@ on0Adapt :
     -> On (N0OrAdd1 possiblyOrNever from1)
     -> On (N0OrAdd1 adaptedPossiblyOrNever from1)
 on0Adapt n0PossiblyOrNeverAdapt =
-    \(Difference difference) ->
-        Difference
+    ProvenAndDiscarded.map
+        (\difference ->
             { up =
                 \start ->
                     start
                         |> difference.up
                         |> number0Adapt n0PossiblyOrNeverAdapt
+            , toTag = To
             , down = \_ -> N0 Possible
             }
+        )
 
 
 {-| Change the type
@@ -2754,15 +2576,17 @@ onFrom1Map :
     -> On (N0OrAdd1 n0PossiblyOrNever from1)
     -> On (N0OrAdd1 n0PossiblyOrNever mappedFrom1)
 onFrom1Map from1Map =
-    \(Difference difference) ->
-        Difference
+    ProvenAndDiscarded.map
+        (\difference ->
             { up =
                 \start ->
                     start
                         |> difference.up
                         |> numberFrom1Map from1Map
+            , toTag = To
             , down = \_ -> N0 Possible
             }
+        )
 
 
 {-| Change the `possiblyOrNever` type
@@ -2845,16 +2669,21 @@ Cool, right?
 -}
 isAtLeast1 :
     N (In (On (N0OrAdd1 n0PossiblyOrNever minFrom1_)) max)
-    -> Result n0PossiblyOrNever (N (In (Up1 minX_) max))
+    -> ProvenAndDiscarded (Result n0PossiblyOrNever (N (In (Up1 minX_) max)))
 isAtLeast1 =
     \n ->
-        case n |> rangeIsAtLeast1 of
-            Err possiblyOrNever ->
-                Err possiblyOrNever
+        n
+            |> rangeIsAtLeast1
+            |> ProvenAndDiscarded.map
+                (\nIsAtLeast1 ->
+                    case nIsAtLeast1 of
+                        Err possiblyOrNever ->
+                            Err possiblyOrNever
 
-            Ok atLeast1Range ->
-                NUnsafe { int = n |> toInt, range = atLeast1Range }
-                    |> Ok
+                        Ok atLeast1Range ->
+                            NUnsafe { int = n |> toInt, range = atLeast1Range }
+                                |> Ok
+                )
 
 
 {-| Change the `possiblyOrNever` type for the case that its [`min`](#min) is 0

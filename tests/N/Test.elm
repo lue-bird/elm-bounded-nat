@@ -10,10 +10,10 @@ suite =
     describe "N"
         [ maximumUnconstrainedTest
         , maximumConstrainedTest
-        , test "OnValue == OnValue"
+        , test "== doesn't crash"
             (\() ->
-                (n9 |> N.inToNumber)
-                    |> Expect.equal (n9 |> N.inToNumber)
+                n9
+                    |> Expect.equal n9
             )
         ]
 
