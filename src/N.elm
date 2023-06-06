@@ -119,13 +119,6 @@ More advanced stuff in [section type information](#type-information) allowable-s
 @docs toInt, toFloat, toString
 
 
-# without internal functions
-
-@docs inToNumber, inToOn
-@docs minToNumber, minToOn
-@docs maxToNumber, maxToOn
-
-
 # type information
 
 @docs minTo, minSubtract, minEndsSubtract, minTo0
@@ -164,7 +157,6 @@ Having those exposed can be useful when building extensions to this library like
 
 @docs range, min, max
 @docs differenceAdd, differenceSubtract
-@docs addDifference, subtractDifference
 
 @docs N0OrAdd1
 
@@ -186,9 +178,6 @@ Having those exposed can be useful when building extensions to this library like
 ## safe internals without functions
 
 @docs onToNumber, toOn
-@docs rangeInToNumber, rangeInToOn
-@docs rangeMinToNumber, rangeMinToOn
-@docs rangeMaxToNumber, rangeMaxToOn
 
 -}
 
@@ -255,14 +244,6 @@ what to put in declared types like `Model`
 
     -- 2 ≤ n ≤ 12
     N (In (On N2) (On N12))
-
-There's also versions of this that don't contain functions internally:
-
-    -- ≥ 4
-    N (Min N4)
-
-    -- 2 ≤ n ≤ 12
-    N (In N2 N12)
 
 more type examples at [`In`](#In), [`Min`](#Min)
 
@@ -331,16 +312,6 @@ An example where this is useful using [typesafe-array](https://package.elm-lang.
 Remember: ↑ and other `... (`[`On`](#On)`...)`
 are result/stored types, not argument types
 
----
-
-Do not use `==` on 2 values storing a range.
-It will lead to elm crashing because [difference](#Up)s are stored as functions.
-Instead,
-
-  - [compare](#compare) in _your_ code
-  - convert to [a value](#without-internal-functions) for _other_ code
-    that relies (or performs better) on structural `==`
-
 -}
 type In minimumAsDifference maximumAsDifference
     = RangeUnsafe
@@ -404,10 +375,6 @@ An example where this is useful using [typesafe-array](https://package.elm-lang.
 Remember: ↑ and other `... (`[`On`](#On)`...)`
 are result/stored types, not argument types
 
-You can just use [`Min`](#Min) `(` [`On`](#On) `...)` when you don't have disadvantages storing functions.
-
-[Can't store functions?](#without-internal-functions)
-
 -}
 type alias Min lowestPossibleAsDifference =
     In lowestPossibleAsDifference Infinity
@@ -418,11 +385,6 @@ type alias Min lowestPossibleAsDifference =
 result type:
 
     Exactly (On N3)
-
-Use `Exactly  ...` without [`On`](#On)
-for **storing** in a type [without internal functions](#without-internal-functions)
-
-    Exactly N3
 
 This is pretty useless in combination with [`N`](#N)
 
@@ -806,8 +768,6 @@ useful
             Typed.tag
                 (Element (index |> N.min |> N.onToNumber))
                 List.Extra.getAt
-
-Can be altered with [`addDifference`](#addDifference), [`subtractDifference`](#subtractDifference).
 
 To preserve the ability to turn the number into an `Int`, use [`onToNumber`](#onToNumber)
 
