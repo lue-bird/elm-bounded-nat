@@ -12,7 +12,7 @@ module N exposing
     , add, addMin
     , subtract, subtractMin
     , toPower, remainderBy, multiplyBy, divideBy
-    , toAtLeastMin, toIn
+    , toAtLeastMin, toIn, toInOrAtLeast
     , isAtLeast, isAtMost
     , BelowOrAbove(..), is, isIn
     , greater, smaller
@@ -30,7 +30,7 @@ module N exposing
     , N0OrAdd1(..)
     , inRange, minRange, maxRange, exactlyRange
     , rangeMin, rangeMax
-    , rangeAdd, rangeSubtract, rangeMinSubtract, rangeMaxAdd, rangeMinEndsSubtract, rangeMaxEndsSubtract
+    , rangeAdd, rangeSubtract, rangeMinSubtract, rangeMaxAdd, rangeMinEndsSubtract, rangeMaxEndsSubtract, rangeMinTo, rangeMaxTo
     , number0Adapt, numberFrom1Map
     , on0Adapt, onFrom1Map
     , rangeIsAtLeast1, rangeMin0Adapt, rangeMinAtLeast1Never
@@ -109,7 +109,7 @@ exact [⏭ skip to last](#n16)
 
 ## clamp
 
-@docs toAtLeastMin, toIn
+@docs toAtLeastMin, toIn, toInOrAtLeast
 
 
 # compare
@@ -180,7 +180,7 @@ Having those exposed can be useful when building extensions to this library like
 
 @docs inRange, minRange, maxRange, exactlyRange
 @docs rangeMin, rangeMax
-@docs rangeAdd, rangeSubtract, rangeMinSubtract, rangeMaxAdd, rangeMinEndsSubtract, rangeMaxEndsSubtract
+@docs rangeAdd, rangeSubtract, rangeMinSubtract, rangeMaxAdd, rangeMinEndsSubtract, rangeMaxEndsSubtract, rangeMinTo, rangeMaxTo
 
 
 ## [allowable-state](https://dark.elm.dmy.fr/packages/lue-bird/elm-allowable-state/latest/)
@@ -603,6 +603,19 @@ maxRange newRangeMax =
         }
 
 
+{-| Set its minimum to a given (lower) one
+-}
+rangeMinTo :
+    In newMin (Up newMinMaxToMin_ To min)
+    ->
+        (In (On min) max
+         -> In newMin max
+        )
+rangeMinTo newMinimum =
+    \range_ ->
+        inRange ( newMinimum, range_ )
+
+
 {-| Create a [range](#In)
 from the lowest possible representation of a given lower [range](#In)
 to the highest possible representation of a given higher [range](#In)
@@ -617,6 +630,19 @@ inRange ( lowerLimit, upperLimit ) =
         { min = lowerLimit |> rangeMin
         , max = upperLimit |> rangeMax
         }
+
+
+{-| Set its maximum to a given (higher) one
+-}
+rangeMaxTo :
+    In (On newMaxMin) maxNew
+    ->
+        (In min (Up maxToNewMaxMin_ To newMaxMin)
+         -> In min maxNew
+        )
+rangeMaxTo newMaximum =
+    \range_ ->
+        inRange ( range_, newMaximum )
 
 
 
@@ -1441,6 +1467,62 @@ toIn ( lowerLimit, upperLimit ) =
         n |> toInt |> intToIn ( lowerLimit, upperLimit )
 
 
+{-| Cap the [`N`](#N) to `<=` a given new upper limit –
+but _always_ keep it `>=` a given new lower limit.
+
+    n5AtLeast |> N.toInOrAtLeast ( n5, n10 )
+    --: N (In (Up5 x_) (On N10))
+
+    n11 |> N.minTo n5 |> N.toInOrAtLeast ( n5, n10 )
+    --: N (In (Up5 x_) (On N10))
+    --→ n10
+
+
+    -- ↓ edge cases if you don't set the new minimum as the current one
+
+
+    n7 |> N.toInOrAtLeast ( n6 |> N.minTo n5, n1 |> N.maxTo n10 )
+    --: N (In (Up5 x_) (On N10))
+    --→ n7
+
+    n5 |> N.toInOrAtLeast ( n6 |> N.minTo n5, n1 |> N.maxTo n10 )
+    --: N (In (Up5 x_) (On N10))
+    --→ n6
+
+In general, you always want to prefer [`toIn`](#toIn)
+and only use this version for type gymnastics
+
+The type doesn't forbid that the upper limit you're comparing against
+is above the current upper limit
+
+    n10To14 |> N.toInOrAtLeast ( n10, n15 ) |> N.toInt
+    --: N (In (Up10 x_) (On N15))
+
+Not that you should do it, but if you don't set the minimum to the current minimum,
+[`toInOrAtLeast`](#toInOrAtLeast) behaves just like your regular [`toIn`](#toIn):
+
+-}
+toInOrAtLeast :
+    ( N (In min (Up newMaxMinToMin_ To newMax))
+    , N (In newMaxMin_ (On newMax))
+    )
+    ->
+        (N (In min max_)
+         -> N (In min (On newMax))
+        )
+toInOrAtLeast ( newMin, newMax ) =
+    \n ->
+        NUnsafe
+            { int =
+                (n |> toInt)
+                    |> Basics.min (newMax |> toInt)
+                    |> Basics.max (newMin |> toInt)
+            , range =
+                exactlyRange (newMax |> max)
+                    |> rangeMinTo (newMin |> range)
+            }
+
+
 
 --
 
@@ -1596,15 +1678,18 @@ maxToInfinity =
             }
 
 
-{-| Make it fit into functions with require a higher maximum.
+{-| Set its maximum to a given (lower) one.
 
-You should type arguments and stored types as broad as possible
+This can help "resetting" an argument's maximum
+to make it fit into functions that require a higher maximum.
+
+Since you should type arguments and stored types as broad as possible
 
     onlyAtMost18 : N (In min_ (Up maxTo18_ To N18)) -> ...
 
     onlyAtMost18 between3And8 -- works
 
-But once you implement `onlyAtMost18`, you might use the `n` in `onlyAtMost19`:
+once you implement `onlyAtMost18`, you might use the `n` in `onlyAtMost19`:
 
     onlyAtMost18 n =
         -- onlyAtMost19 n → error
@@ -1614,17 +1699,17 @@ To increase its maximum by a relative amount, [`maxAdd`](#maxAdd)
 
 -}
 maxTo :
-    N (In (On maxNewMin) maxNew)
+    N (In (On newMaxMin) newMax)
     ->
-        (N (In min (Up maxToMaxNewMin_ To maxNewMin))
-         -> N (In min maxNew)
+        (N (In min (Up maxToNewMaxMin_ To newMaxMin))
+         -> N (In min newMax)
         )
-maxTo maximumNew =
+maxTo newMaximum =
     \n ->
         NUnsafe
             { int = n |> toInt
             , range =
-                inRange ( n |> range, maximumNew |> range )
+                inRange ( n |> range, newMaximum |> range )
             }
 
 
@@ -1652,7 +1737,7 @@ maxAdd maxRelativeIncrease =
             }
 
 
-{-| Set its minimum lower
+{-| Set its minimum to a given (lower) one
 
     [ atLeast3, atLeast4 ]
 
