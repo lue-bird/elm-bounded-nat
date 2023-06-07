@@ -593,6 +593,16 @@ minRange =
             }
 
 
+{-| Create a range with minimum set to 0 and a given maximum
+-}
+maxRange : max -> In (Up0 newMinX_) max
+maxRange newRangeMax =
+    RangeUnsafe
+        { min = n0 |> min
+        , max = newRangeMax
+        }
+
+
 {-| Create a [range](#In)
 from the lowest possible representation of a given lower [range](#In)
 to the highest possible representation of a given higher [range](#In)
@@ -649,16 +659,6 @@ rangeMinSubtract minRelativeDecrease =
                     |> differenceSubtract minRelativeDecrease
             , max = range_ |> rangeMax
             }
-
-
-{-| Create a range with minimum set to 0 and a given maximum
--}
-maxRange : max -> In (Up0 newMinX_) max
-maxRange newRangeMax =
-    RangeUnsafe
-        { min = n0 |> min
-        , max = newRangeMax
-        }
 
 
 {-| Add a given [difference](#Up) to its maximum
@@ -2548,10 +2548,7 @@ like the more general [`minTo`](#minTo)
 minTo0 : N (In min_ max) -> N (In (Up0 minX_) max)
 minTo0 =
     \n ->
-        NUnsafe
-            { range = maxRange (n |> max)
-            , int = n |> toInt
-            }
+        n |> minToOn |> minTo n0
 
 
 {-| Decrease the start and end of its [`max`](#max) [difference](#Up)
