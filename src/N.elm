@@ -488,8 +488,8 @@ type Infinity
         -- FYI: equivalent to Add1
         N.addDifference (n1 |> N.min)
 
-    n10 |> N.min |> successor
-    --> n11 |> min
+    n10 |> N.min |> N.onToNumber |> successor
+    --> n11 |> N.min |> N.onToNumber
 
 -}
 addDifference : Up low To high -> (low -> high)
@@ -504,8 +504,8 @@ addDifference =
     predecessor =
         N.subtractDifference (n1 |> N.min)
 
-    n10 |> N.min |> predecessor
-    --> n9 |> min
+    n10 |> N.min |> N.onToNumber |> predecessor
+    --> n9 |> N.min |> N.onToNumber
 
 -}
 subtractDifference : Down high To low -> (high -> low)
@@ -2395,13 +2395,13 @@ and its [`max`](#max)
 
     import Possibly exposing (Possibly(..))
 
-    N.intIn ( n3, n5 ) 4
+    N.intToIn ( n3, n5 ) 4
         --: N (In (Up3 minX_) (Up5 maxX_))
         |> N.minTo n2
         --: N (In (Up2 minX_) (Up5 maxX_))
         |> N.range
         --: In (Up2 minX_) (Up5 maxX_)
-        |> N.rangeInToOn
+        |> N.rangeInToNumber
         --: In N2 N5
         |> N.rangeMin
     --: N2
