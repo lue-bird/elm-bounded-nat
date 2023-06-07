@@ -4,6 +4,11 @@
 
 # change log
 
+### 33.3.0
+
+  - `rangeMinTo`, `rangeMaxTo` add
+  - `toInOrAtLeast`
+
 ### 33.2.0
 
   - `minTo0`, `maxRange` add
