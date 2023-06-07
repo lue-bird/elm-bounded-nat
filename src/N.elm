@@ -1590,14 +1590,14 @@ That means `x / d ≤ x`
 divideBy :
     N (In (On (Add1 divisorMinFrom1_)) divisorMax_)
     ->
-        (N (In (On min_) max)
+        (N (In min_ max)
          -> N (In (Up0 minX_) max)
         )
 divideBy divisor =
     \n ->
         (n |> toInt)
             // (divisor |> toInt)
-            |> intToIn ( n0, n )
+            |> intToIn ( n0, n |> minTo0 )
 
 
 {-| The remainder after dividing by an [`N`](#N) `d ≥ 1`.
@@ -2369,7 +2369,7 @@ subtract a [specific number](#In)
     --: N (Min (On N1))
 
     between6And12 |> N.subtractMin between1And5
-    --: N (In (On min_) (Up12 maxX_))
+    --: N (In (On N1) (Up12 maxX_))
 
 Use [`N.subtract`](#subtract) if you want to subtract an [`N`](#N) in a range
 
