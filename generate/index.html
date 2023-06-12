@@ -6355,9 +6355,9 @@ var $author$project$N$Generate$nNDeclaration = F2(
 						$elm$core$String$concat(
 							_List_fromArray(
 								[
-									'The [`N`](N',
+									'The [`N`](',
 									$author$project$N$Generate$onDependencyBoundedNat(nLocation),
-									'#N) `',
+									'N#N) `',
 									$elm$core$String$fromInt(n),
 									'`'
 								])))
@@ -6526,9 +6526,9 @@ var $author$project$N$Generate$typeAddNDeclaration = F2(
 						$elm$core$String$concat(
 							_List_fromArray(
 								[
-									'The [natural number](N',
+									'The [natural number](',
 									$author$project$N$Generate$onDependencyBoundedNat(nLocation),
-									'#N0OrAdd1) `',
+									'N#N0OrAdd1) `',
 									$elm$core$String$fromInt(n),
 									' +` a given `n`'
 								])))
@@ -19718,7 +19718,7 @@ var $author$project$N$Generate$nBinaryModule = function (n) {
 				moduleComment: function (declarations) {
 					return _List_fromArray(
 						[
-							$the_sett$elm_syntax_dsl$Elm$CodeGen$markdown('When you need big numbers or multiple medium sized ones')
+							$the_sett$elm_syntax_dsl$Elm$CodeGen$markdown('When you need big numbers or a lot of medium sized ones')
 						]);
 				}
 			})
@@ -19765,7 +19765,7 @@ var $author$project$N$Generate$nLinearModule = function (n) {
 				moduleComment: function (declarations) {
 					return _List_fromArray(
 						[
-							$the_sett$elm_syntax_dsl$Elm$CodeGen$markdown('When you need many small-ish numbers or a few medium sized ones.')
+							$the_sett$elm_syntax_dsl$Elm$CodeGen$markdown('When you need many small-ish numbers or a couple medium sized ones.')
 						]);
 				}
 			})
