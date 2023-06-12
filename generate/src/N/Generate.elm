@@ -349,9 +349,9 @@ typeAddNDeclaration linearOrBinary nLocation =
     \n ->
         packageExposedAliasDecl TypeAdd
             [ markdown
-                ([ "The [natural number](N"
+                ([ "The [natural number]("
                  , nLocation |> onDependencyBoundedNat
-                 , "#N0OrAdd1) `"
+                 , "N#N0OrAdd1) `"
                  , n |> String.fromInt
                  , " +` a given `n`"
                  ]
@@ -444,9 +444,9 @@ nNDeclaration linearOrBinary nLocation =
     \n ->
         packageExposedFunDecl Exact
             [ markdown
-                ([ "The [`N`](N"
+                ([ "The [`N`]("
                  , nLocation |> onDependencyBoundedNat
-                 , "#N) `"
+                 , "N#N) `"
                  , n |> String.fromInt
                  , "`"
                  ]
@@ -545,7 +545,7 @@ nLinearModule n =
         PackageExposedModule
             { moduleComment =
                 \declarations ->
-                    [ markdown "When you need many small-ish numbers or a few medium sized ones."
+                    [ markdown "When you need many small-ish numbers or a couple medium sized ones."
                     ]
             }
     , imports =
@@ -576,7 +576,7 @@ nBinaryModule n =
         PackageExposedModule
             { moduleComment =
                 \declarations ->
-                    [ markdown "When you need big numbers or multiple medium sized ones"
+                    [ markdown "When you need big numbers or a lot of medium sized ones"
                     ]
             }
     , imports =
