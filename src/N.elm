@@ -10,7 +10,7 @@ module N exposing
     , intToAbsolute, intModBy, intToAtLeast, intToIn
     , intIsAtLeast, intIsIn
     , add, addMin
-    , subtract, subtractMin
+    , subtract, subtractMin, subtractMax
     , toPower, remainderBy, multiplyBy, divideBy
     , toAtLeastMin, toIn, toInOrAtLeast
     , isAtLeast, isAtMost
@@ -30,7 +30,7 @@ module N exposing
     , N0OrAdd1(..)
     , inRange, minRange, maxRange, exactlyRange
     , rangeMin, rangeMax
-    , rangeAdd, rangeSubtract, rangeMinSubtract, rangeMaxAdd, rangeMinEndsSubtract, rangeMaxEndsSubtract, rangeMinTo, rangeMaxTo
+    , rangeAdd, rangeSubtract, rangeMinSubtract, rangeMaxSubtract, rangeMaxAdd, rangeMinEndsSubtract, rangeMaxEndsSubtract, rangeMinTo, rangeMaxTo
     , number0Adapt, numberFrom1Map
     , on0Adapt, onFrom1Map
     , rangeIsAtLeast1, rangeMin0Adapt, rangeMinAtLeast1Never
@@ -103,7 +103,7 @@ exact [⏭ skip to last](#n16)
 # alter
 
 @docs add, addMin
-@docs subtract, subtractMin
+@docs subtract, subtractMin, subtractMax
 @docs toPower, remainderBy, multiplyBy, divideBy
 
 
@@ -180,7 +180,7 @@ Having those exposed can be useful when building extensions to this library like
 
 @docs inRange, minRange, maxRange, exactlyRange
 @docs rangeMin, rangeMax
-@docs rangeAdd, rangeSubtract, rangeMinSubtract, rangeMaxAdd, rangeMinEndsSubtract, rangeMaxEndsSubtract, rangeMinTo, rangeMaxTo
+@docs rangeAdd, rangeSubtract, rangeMinSubtract, rangeMaxSubtract, rangeMaxAdd, rangeMinEndsSubtract, rangeMaxEndsSubtract, rangeMinTo, rangeMaxTo
 
 
 ## [allowable-state](https://dark.elm.dmy.fr/packages/lue-bird/elm-allowable-state/latest/)
@@ -685,6 +685,20 @@ rangeMinSubtract minRelativeDecrease =
                     |> differenceSubtract minRelativeDecrease
             , max = range_ |> rangeMax
             }
+
+
+{-| Subtract its maximum by a given [difference](#Up)
+and set the minimum to 0
+-}
+rangeMaxSubtract :
+    Down maxPlusX To maxDecreasedPlusX
+    ->
+        (In min_ (Up x To maxPlusX)
+         -> In (Up0 minX_) (Up x To maxDecreasedPlusX)
+        )
+rangeMaxSubtract maxRelativeDecrease =
+    \range_ ->
+        maxRange (range_ |> rangeMax |> differenceSubtract maxRelativeDecrease)
 
 
 {-| Add a given [difference](#Up) to its maximum
@@ -2334,6 +2348,8 @@ addMin toAdd =
 
 One of the [`N`](#N)s has no maximum constraint? → [`N.subtractMin`](#subtractMin)
 
+The subtracted [`N`](#N) can get greater than the current minimum? → [`N.subtractMax`](#subtractMax)
+
 -}
 subtract :
     N
@@ -2372,6 +2388,7 @@ subtract a [specific number](#In)
     --: N (In (On N1) (Up12 maxX_))
 
 Use [`N.subtract`](#subtract) if you want to subtract an [`N`](#N) in a range
+or [`N.subtractMax`](#subtractMax) if the subtracted [`N`](#N) can get greater than the current minimum.
 
 -}
 subtractMin :
@@ -2386,6 +2403,28 @@ subtractMin subtrahend =
             { int = (n |> toInt) - (subtrahend |> toInt)
             , range =
                 n |> range |> rangeMinSubtract (subtrahend |> max)
+            }
+
+
+{-| From an [`N`](#N),
+subtract a number that can get greater than the current minimum
+
+    n5 |> N.subtractMax in3To7
+    --: N (In (Up0 minX_) (On N2))
+
+Use [`N.subtract`](#subtract) if you want to subtract an [`N`](#N) in a range
+or [`N.subtractMin`](#subtractMin) if one of the [`N`](#N)s has no maximum constraint
+
+-}
+subtractMax :
+    N (In (Down max To differenceMax) subtrahendMax_)
+    -> (N (In min_ (On max)) -> N (In (Up0 minX_) (On differenceMax)))
+subtractMax toSubtract =
+    \n ->
+        NUnsafe
+            { int = Basics.max 0 ((n |> toInt) - (toSubtract |> toInt))
+            , range =
+                n |> range |> rangeMaxSubtract (toSubtract |> min)
             }
 
 
