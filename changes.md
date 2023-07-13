@@ -1,8 +1,13 @@
-### 34.1.0 plans
+### 34.2.0 plans
 
   - `N.Generator` that auto-generates `N<x>`, `Add<x>` and `n<x>` for x >= 17 add
 
 # change log
+
+### 34.1.0
+
+  - `subtractMax` add
+  - `rangeMaxSubtract` add
 
 ## 34.0.0
 
