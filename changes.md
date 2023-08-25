@@ -1,8 +1,12 @@
-### 34.2.0 plans
+### 35.1.0 plans
 
   - `N.Generator` that auto-generates `N<x>`, `Add<x>` and `n<x>` for x >= 17 add
 
 # change log
+
+### 35.0.0
+
+  - `is` now doesn't require that the maximum of the minimum of the compared N is `To Add1`
 
 ### 34.1.0
 
