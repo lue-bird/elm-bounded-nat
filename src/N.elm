@@ -1892,7 +1892,7 @@ Luckily that's not a problem, since the values won't be produced anyway.)
 is :
     N
         (In
-            (Up minX To (Add1 vsMinFrom1PlusX))
+            (Up minX To vsMinPlusX)
             (Up maxX To (Add1 vsMaxFrom1PlusX))
         )
     ->
@@ -1901,11 +1901,11 @@ is :
             Result
                 (BelowOrAbove
                     (N (In min (Up maxX To vsMaxFrom1PlusX)))
-                    (N (In (Up minX To (Add2 vsMinFrom1PlusX)) max))
+                    (N (In (Up minX To (Add1 vsMinPlusX)) max))
                 )
                 (N
                     (In
-                        (Up minX To (Add1 vsMinFrom1PlusX))
+                        (Up minX To vsMinPlusX)
                         (Up maxX To (Add1 vsMaxFrom1PlusX))
                     )
                 )
